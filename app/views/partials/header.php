@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($pageTitle) ? htmlspecialchars($pageTitle) . ' — ' : '' ?>FastPlay</title>
     <meta name="description" content="FastPlay — Fútbol amateur organizado para todos, en cualquier lugar.">
+    <?php if (isset($_SESSION['csrf_token'])): ?>
+    <meta name="csrf-token" content="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+    <?php endif; ?>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -122,6 +125,9 @@
     </style>
 </head>
 <body class="bg-[#060d09] text-white min-h-screen flex flex-col antialiased">
+<script>const APP_URL = '<?= APP_URL ?>';</script>
+<script src="<?= APP_URL ?>/public/js/app.js"></script>
+<script src="<?= APP_URL ?>/public/js/forms.js"></script>
 <?php
 // Flash message helper
 $flash = $_SESSION['flash'] ?? null;

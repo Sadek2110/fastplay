@@ -74,6 +74,32 @@ abstract class Model
         return (int) $st->fetchColumn();
     }
 
+    public function paginate(int $page = 1, int $perPage = 20, string $orderBy = 'id DESC', array $conditions = []): array
+    {
+        $page = max(1, $page);
+        $offset = ($page - 1) * $perPage;
+
+        [$where, $vals] = empty($conditions) ? ['', []] : $this->buildWhere($conditions);
+        $whereClause = empty($where) ? '' : "WHERE {$where}";
+
+        $st = $this->db->prepare("SELECT COUNT(*) FROM {$this->table} {$whereClause}");
+        $st->execute($vals);
+        $total = (int) $st->fetchColumn();
+
+        $st = $this->db->prepare(
+            "SELECT * FROM {$this->table} {$whereClause} ORDER BY {$orderBy} LIMIT {$perPage} OFFSET {$offset}"
+        );
+        $st->execute($vals);
+
+        return [
+            'data'        => $st->fetchAll(),
+            'current'     => $page,
+            'per_page'    => $perPage,
+            'total'       => $total,
+            'total_pages' => (int) ceil($total / $perPage),
+        ];
+    }
+
     private function buildWhere(array $conditions): array
     {
         $clauses = [];

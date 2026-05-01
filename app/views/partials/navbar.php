@@ -54,10 +54,12 @@ function isActive(string $route, string $path): string {
                         Mi perfil
                     </a>
                     <hr class="border-white/10 my-1">
-                    <a href="<?= APP_URL ?>/logout" class="flex items-center gap-2 px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"/></svg>
-                        Cerrar sesión
-                    </a>
+                    <form method="POST" action="<?= APP_URL ?>/logout" class="inline w-full">
+                        <button type="submit" class="flex items-center gap-2 px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors w-full">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"/></svg>
+                            Cerrar sesión
+                        </button>
+                    </form>
                 </div>
             </div>
             <?php else: ?>
@@ -86,7 +88,9 @@ function isActive(string $route, string $path): string {
         <?php if (!empty($_SESSION['user_id'])): ?>
         <a href="<?= APP_URL ?>/chat"      class="nav-link py-2 border-b border-white/5">Chat</a>
         <a href="<?= APP_URL ?>/dashboard" class="nav-link py-2 border-b border-white/5">Dashboard</a>
-        <a href="<?= APP_URL ?>/logout"    class="text-red-400 py-2 text-sm font-medium">Cerrar sesión</a>
+        <form method="POST" action="<?= APP_URL ?>/logout" class="w-full">
+            <button type="submit" class="text-red-400 py-2 text-sm font-medium hover:text-red-300 transition-colors w-full text-left">Cerrar sesión</button>
+        </form>
         <?php else: ?>
         <a href="<?= APP_URL ?>/login"    class="nav-link py-2">Entrar</a>
         <a href="<?= APP_URL ?>/register" class="btn-primary text-center mt-2">Registrarse gratis</a>

@@ -2,393 +2,489 @@
 <?php require_once APP_PATH . '/views/partials/header.php'; ?>
 <?php require_once APP_PATH . '/views/partials/navbar.php'; ?>
 
-<!-- ═══════════════════════════════════ HERO ═══════════════════════════════════ -->
-<section class="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
+<style>
+.scroll-section {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40%;
+    opacity: 0;
+    transition: opacity 0.1s ease-out; /* Controlled mainly by JS now */
+    pointer-events: none;
+    z-index: 20;
+}
+.scroll-section.active {
+    pointer-events: auto;
+}
+@keyframes scrollDown {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(200%); }
+}
+</style>
 
-    <!-- Background grid -->
-    <div class="absolute inset-0 bg-grid-dark bg-grid opacity-100 pointer-events-none"></div>
+<!-- Main container for the scroll height -->
+<div id="main-scroll-container" style="height: 400vh; position: relative;">
+    
+    <!-- Sticky container that holds the video and UI overlays -->
+    <div class="sticky top-0 w-full h-screen overflow-hidden bg-black">
+        
+        <!-- Glowing background behind the ball -->
+        <div class="absolute right-[10%] top-1/2 -translate-y-1/2 w-[40vw] h-[40vw] bg-green-600/20 rounded-full blur-[120px] pointer-events-none z-0"></div>
 
-    <!-- Radial green glow center -->
-    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] pointer-events-none"
-         style="background:radial-gradient(ellipse,rgba(22,163,74,.12) 0%,transparent 70%);"></div>
+        <!-- Canvas Background for Image Sequence -->
+        <canvas id="bg-canvas" class="absolute right-[5%] top-1/2 -translate-y-1/2 w-[55vw] h-[80vh] opacity-100 z-10" style="-webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 75%); mask-image: radial-gradient(ellipse at center, black 40%, transparent 75%);"></canvas>
+        
+        <!-- Particles Canvas -->
+        <canvas id="particles-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-10"></canvas>
+        
+        <!-- Removed gradients to keep the background clean -->
 
-    <!-- Floating badge left -->
-    <div class="absolute left-10 top-1/3 hidden xl:block glass rounded-2xl p-5 fade-up">
-        <div class="text-2xl mb-2">🏆</div>
-        <div class="text-white font-bold text-sm">Liga Pro</div>
-        <div class="text-green-400 text-xs font-medium">Temporada activa</div>
-    </div>
-
-    <!-- Floating badge right -->
-    <div class="absolute right-10 top-2/5 hidden xl:block glass rounded-2xl p-5 fade-up-2">
-        <div class="text-2xl mb-2">📍</div>
-        <div class="text-white font-bold text-sm">48 ciudades</div>
-        <div class="text-gray-400 text-xs">campos disponibles</div>
-    </div>
-    <div class="absolute right-10 bottom-1/3 hidden xl:block glass rounded-2xl p-5 fade-up-3">
-        <div class="text-2xl mb-2">⚡</div>
-        <div class="text-white font-bold text-sm">12 K+ jugadores</div>
-        <div class="text-gray-400 text-xs">ya en la plataforma</div>
-    </div>
-
-    <div class="relative z-10 max-w-5xl mx-auto px-6 text-center">
-
-        <!-- Live badge -->
-        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-green-500/30 bg-green-500/10 text-green-400 text-sm font-semibold mb-10 fade-up">
-            <span class="w-2 h-2 bg-green-400 rounded-full pulse-dot"></span>
-            Liga Pro Temporada 2026 — ¡Inscripciones abiertas!
-        </div>
-
-        <!-- Headline -->
-        <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-none tracking-tight mb-7 fade-up-1">
-            ¿Te apetece<br>
-            <span class="gradient-text">jugar un partido?</span>
-        </h1>
-
-        <!-- Subtitle -->
-        <p class="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto mb-12 leading-relaxed fade-up-2">
-            FastPlay conecta jugadores, organiza partidos en campos reales y lleva el fútbol amateur al siguiente nivel.
-            <strong class="text-gray-200">En cualquier lugar. Para todos.</strong>
-        </p>
-
-        <!-- CTAs -->
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20 fade-up-3">
-            <?php if (!empty($_SESSION['user_id'])): ?>
-                <a href="<?= APP_URL ?>/dashboard" class="btn-primary text-lg px-10 py-4 glow-green">
-                    Mi dashboard <span class="group-hover:translate-x-1 transition-transform">→</span>
-                </a>
-                <a href="<?= APP_URL ?>/matches" class="btn-ghost text-lg px-10 py-4">
-                    Ver partidos
-                </a>
-            <?php else: ?>
-                <a href="<?= APP_URL ?>/register" class="btn-primary text-lg px-10 py-4 glow-green">
-                    Empieza gratis →
-                </a>
-                <a href="<?= APP_URL ?>/leagues" class="btn-ghost text-lg px-10 py-4">
-                    Ver ligas activas
-                </a>
-            <?php endif; ?>
-        </div>
-
-        <!-- Stats row -->
-        <div class="inline-flex items-center gap-8 md:gap-14 glass rounded-2xl px-10 py-5 fade-up-4">
-            <div class="text-center">
-                <div class="text-3xl font-black text-white">12K+</div>
-                <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mt-0.5">Jugadores</div>
-            </div>
-            <div class="w-px h-10 bg-white/10"></div>
-            <div class="text-center">
-                <div class="text-3xl font-black text-white">3.4K</div>
-                <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mt-0.5">Partidos</div>
-            </div>
-            <div class="w-px h-10 bg-white/10"></div>
-            <div class="text-center">
-                <div class="text-3xl font-black text-white">48</div>
-                <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mt-0.5">Ciudades</div>
-            </div>
-            <div class="w-px h-10 bg-white/10 hidden sm:block"></div>
-            <div class="text-center hidden sm:block">
-                <div class="text-3xl font-black text-green-400">100%</div>
-                <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mt-0.5">Gratis*</div>
-            </div>
-        </div>
-        <p class="text-gray-600 text-xs mt-3 fade-up-5">*Registro y Liga Amistosa siempre gratuitos</p>
-    </div>
-
-    <!-- Bottom gradient fade -->
-    <div class="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
-         style="background:linear-gradient(to top,#060d09,transparent);"></div>
-</section>
-
-<!-- ═══════════════════════════════ FEATURES BENTO ════════════════════════════ -->
-<section class="py-28 px-6 max-w-7xl mx-auto">
-    <div class="text-center mb-16">
-        <p class="text-green-400 font-semibold text-sm uppercase tracking-widest mb-3">Por qué FastPlay</p>
-        <h2 class="text-4xl md:text-5xl font-black tracking-tight">Todo lo que necesitas<br>para <span class="gradient-text">jugar</span></h2>
-    </div>
-
-    <!-- Bento grid -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-fr">
-
-        <!-- Feature grande — Equipos -->
-        <div class="md:col-span-2 glass-green rounded-3xl p-8 flex flex-col justify-between min-h-[260px] group hover:border-green-500/40 transition-all duration-300">
-            <div>
-                <div class="text-5xl mb-5">⚽</div>
-                <h3 class="text-2xl font-black mb-3">Crea y gestiona tu equipo</h3>
-                <p class="text-gray-400 leading-relaxed">
-                    Arma tu plantilla, define la alineación y reta a otros equipos. Los capitanes pactan partidos directamente por chat interno.
-                </p>
-            </div>
-            <div class="mt-6 flex items-center gap-3">
-                <span class="text-xs px-3 py-1 rounded-full bg-green-500/15 text-green-400 font-medium border border-green-500/20">Desde 4,99 €</span>
-                <span class="text-xs px-3 py-1 rounded-full bg-white/5 text-gray-400 font-medium">Tasa única</span>
-            </div>
-        </div>
-
-        <!-- Feature — Campos -->
-        <div class="glass rounded-3xl p-8 flex flex-col justify-between min-h-[260px] hover:bg-white/[.07] transition-all duration-300">
-            <div>
-                <div class="text-5xl mb-5">🏟️</div>
-                <h3 class="text-xl font-black mb-3">Campos reales certificados</h3>
-                <p class="text-gray-400 text-sm leading-relaxed">
-                    Reserva con un clic. Calendario integrado, bloqueo automático y notificaciones 2h antes.
-                </p>
-            </div>
-            <div class="mt-6">
-                <div class="flex items-center gap-2 text-xs text-gray-500">
-                    <span class="w-1.5 h-1.5 bg-green-400 rounded-full"></span>
-                    Google Maps integrado
+        <!-- Content that stays fixed but animates based on scroll -->
+        <div class="relative w-full h-full max-w-[1400px] mx-auto px-8 pointer-events-none z-20">
+            
+            <!-- ================= PHASE 1: Hero (Left) ================= -->
+            <div class="scroll-section" id="section-0" style="left: 0; margin-left: 2rem;">
+                <div class="glass rounded-3xl p-10 bg-black/50 shadow-2xl backdrop-blur-xl border-white/10 pointer-events-auto">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-green-500/30 bg-green-500/20 text-green-400 text-sm font-semibold mb-8">
+                        <span class="w-2 h-2 bg-green-400 rounded-full pulse-dot"></span>
+                        Liga Pro Temporada 2026 — ¡Inscripciones abiertas!
+                    </div>
+                    <h1 class="text-6xl lg:text-7xl font-black leading-none tracking-tight mb-6 text-white drop-shadow-lg">
+                        ¿Te apetece<br>
+                        <span class="gradient-text">jugar?</span>
+                    </h1>
+                    <p class="text-xl text-gray-200 max-w-lg mb-10 leading-relaxed drop-shadow-md">
+                        FastPlay conecta jugadores, organiza partidos en campos reales y lleva el fútbol amateur al siguiente nivel. 
+                        <strong class="text-white">En cualquier lugar. Para todos.</strong>
+                    </p>
+                    <div class="flex flex-col sm:flex-row items-start gap-4">
+                        <?php if (!empty($_SESSION['user_id'])): ?>
+                            <a href="<?= APP_URL ?>/dashboard" class="btn-primary text-lg px-8 py-3.5 glow-green shadow-lg">
+                                Mi dashboard →
+                            </a>
+                        <?php else: ?>
+                            <a href="<?= APP_URL ?>/register" class="btn-primary text-lg px-8 py-3.5 glow-green shadow-lg">
+                                Empieza gratis →
+                            </a>
+                            <a href="<?= APP_URL ?>/leagues" class="btn-ghost text-lg px-8 py-3.5 shadow-lg bg-black/40 hover:bg-black/60">
+                                Ver ligas
+                            </a>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Feature — Liga Pro -->
-        <div class="glass rounded-3xl p-8 flex flex-col justify-between min-h-[200px] hover:bg-white/[.07] transition-all duration-300 relative overflow-hidden">
-            <div class="absolute top-4 right-4 px-2.5 py-0.5 rounded-full text-xs font-black"
-                 style="background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#000;">PRO</div>
-            <div>
-                <div class="text-4xl mb-4">🏆</div>
-                <h3 class="text-xl font-black mb-2">Liga Pro</h3>
-                <p class="text-gray-400 text-sm leading-relaxed">Árbitro oficial, estadísticas completas y <strong class="text-yellow-400">premios reales</strong> al campeón.</p>
-            </div>
-        </div>
+            <!-- ================= PHASE 2: Stats & Matches (Left) ================= -->
+            <div class="scroll-section" id="section-1" style="left: 0; margin-left: 2rem;">
+                <div class="glass rounded-3xl p-10 bg-black/50 shadow-2xl backdrop-blur-xl border-white/10 flex flex-col items-start text-left pointer-events-auto">
+                    <h2 class="text-4xl lg:text-5xl font-black mb-8">La comunidad <span class="gradient-text">crece</span></h2>
+                    
+                    <!-- Stats Grid -->
+                    <div class="grid grid-cols-2 gap-4 mb-10 pointer-events-auto">
+                        <div class="glass rounded-2xl p-5 text-center w-40">
+                            <div class="text-4xl font-black text-white">12K+</div>
+                            <div class="text-xs text-gray-500 font-medium uppercase mt-1">Jugadores</div>
+                        </div>
+                        <div class="glass rounded-2xl p-5 text-center w-40">
+                            <div class="text-4xl font-black text-white">3.4K</div>
+                            <div class="text-xs text-gray-500 font-medium uppercase mt-1">Partidos</div>
+                        </div>
+                        <div class="glass rounded-2xl p-5 text-center w-40">
+                            <div class="text-4xl font-black text-white">48</div>
+                            <div class="text-xs text-gray-500 font-medium uppercase mt-1">Ciudades</div>
+                        </div>
+                        <div class="glass rounded-2xl p-5 text-center w-40 bg-green-500/5 border-green-500/20">
+                            <div class="text-4xl font-black text-green-400">100%</div>
+                            <div class="text-xs text-green-500 font-medium uppercase mt-1">Gratis*</div>
+                        </div>
+                    </div>
 
-        <!-- Feature — Estadísticas -->
-        <div class="glass rounded-3xl p-8 flex flex-col justify-between min-h-[200px] hover:bg-white/[.07] transition-all duration-300">
-            <div>
-                <div class="text-4xl mb-4">📊</div>
-                <h3 class="text-xl font-black mb-2">Tu historial completo</h3>
-                <p class="text-gray-400 text-sm leading-relaxed">Goles, asistencias, tarjetas y rendimiento. Tu perfil siempre actualizado.</p>
-            </div>
-        </div>
-
-        <!-- Feature grande — Matchmaking -->
-        <div class="glass rounded-3xl p-8 flex flex-col justify-between min-h-[200px] hover:bg-white/[.07] transition-all duration-300">
-            <div>
-                <div class="text-4xl mb-4">🎯</div>
-                <h3 class="text-xl font-black mb-2">Matchmaking inteligente</h3>
-                <p class="text-gray-400 text-sm leading-relaxed">Emparejamiento automático por nivel, posición y localidad. Siempre encuentras rival.</p>
-            </div>
-        </div>
-
-        <!-- Feature — Chat -->
-        <div class="glass rounded-3xl p-8 flex flex-col justify-between min-h-[200px] hover:bg-white/[.07] transition-all duration-300">
-            <div>
-                <div class="text-4xl mb-4">💬</div>
-                <h3 class="text-xl font-black mb-2">Chat interno</h3>
-                <p class="text-gray-400 text-sm leading-relaxed">Coordina con tu equipo, negocia partidos con otros capitanes. Historial completo.</p>
-            </div>
-        </div>
-
-        <!-- Feature — Gamificación -->
-        <div class="md:col-span-2 glass rounded-3xl p-8 flex flex-col md:flex-row items-center gap-8 hover:bg-white/[.07] transition-all duration-300">
-            <div class="flex-1">
-                <div class="text-4xl mb-4">🎖️</div>
-                <h3 class="text-2xl font-black mb-3">Gamificación y reputación</h3>
-                <p class="text-gray-400 leading-relaxed">
-                    Rankings individuales, medallas por rendimiento, rachas semanales y reputación de fair play. Cada partido cuenta.
-                </p>
-            </div>
-            <div class="flex flex-col gap-3 min-w-[160px]">
-                <div class="flex items-center gap-3 glass rounded-xl px-4 py-2.5">
-                    <span>🥇</span><span class="text-sm font-semibold">Máximo goleador</span>
-                </div>
-                <div class="flex items-center gap-3 glass rounded-xl px-4 py-2.5">
-                    <span>🤝</span><span class="text-sm font-semibold">Fair Play</span>
-                </div>
-                <div class="flex items-center gap-3 glass rounded-xl px-4 py-2.5">
-                    <span>🔥</span><span class="text-sm font-semibold">Racha activa</span>
+                    <?php if (!empty($upcomingMatches)): ?>
+                        <div class="w-full max-w-sm pointer-events-auto text-left">
+                            <p class="text-green-400 font-semibold text-xs uppercase tracking-widest mb-3">En Vivo: Próximos Partidos</p>
+                            <div class="space-y-3">
+                                <?php foreach (array_slice($upcomingMatches, 0, 2) as $m): ?>
+                                <a href="<?= APP_URL ?>/matches/<?= $m['id'] ?>" class="glass rounded-xl p-4 flex flex-col hover:bg-white/5 transition block">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-[10px] px-2 py-0.5 rounded bg-green-500/10 text-green-400 border border-green-500/20">Confirmado</span>
+                                        <span class="text-[10px] text-gray-400"><?= date('d/m H:i', strtotime($m['match_date'])) ?></span>
+                                    </div>
+                                    <div class="flex justify-between items-center gap-2">
+                                        <span class="font-bold text-sm truncate w-[40%]"><?= htmlspecialchars($m['home_team_name']) ?></span>
+                                        <span class="text-xs font-black text-gray-500">VS</span>
+                                        <span class="font-bold text-sm truncate w-[40%] text-right"><?= htmlspecialchars($m['away_team_name']) ?></span>
+                                    </div>
+                                </a>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
+
+            <!-- ================= PHASE 3: Features (Left) ================= -->
+            <div class="scroll-section" id="section-2" style="left: 0; margin-left: 2rem;">
+                <div class="glass rounded-3xl p-10 bg-black/50 shadow-2xl backdrop-blur-xl border-white/10 pointer-events-auto">
+                    <h2 class="text-4xl lg:text-5xl font-black mb-8 drop-shadow-md">Todo lo que <span class="gradient-text">necesitas</span></h2>
+                    <div class="space-y-4 max-w-md">
+                    
+                    <div class="glass-green rounded-2xl p-6 flex gap-4 items-start group hover:bg-green-500/10 transition">
+                        <div class="text-4xl">⚽</div>
+                        <div>
+                            <h3 class="text-lg font-black mb-1">Crea y gestiona tu equipo</h3>
+                            <p class="text-gray-400 text-sm">Arma tu plantilla, define la alineación y reta a otros equipos en el chat.</p>
+                        </div>
+                    </div>
+
+                    <div class="glass rounded-2xl p-6 flex gap-4 items-start hover:bg-white/5 transition">
+                        <div class="text-4xl">🏟️</div>
+                        <div>
+                            <h3 class="text-lg font-black mb-1">Campos reales certificados</h3>
+                            <p class="text-gray-400 text-sm">Reserva con un clic. Calendario integrado y notificaciones.</p>
+                        </div>
+                    </div>
+
+                    <div class="glass rounded-2xl p-6 flex gap-4 items-start hover:bg-white/5 transition relative overflow-hidden">
+                        <div class="absolute top-3 right-3 px-2 py-0.5 rounded text-[10px] font-black bg-gradient-to-r from-yellow-400 to-amber-500 text-black">PRO</div>
+                        <div class="text-4xl">🏆</div>
+                        <div>
+                            <h3 class="text-lg font-black mb-1">Liga Pro</h3>
+                            <p class="text-gray-400 text-sm">Árbitro oficial, estadísticas completas y premios reales.</p>
+                        </div>
+                    </div>
+
+                    <div class="glass rounded-2xl p-6 flex gap-4 items-start hover:bg-white/5 transition">
+                        <div class="text-4xl">🎯</div>
+                        <div>
+                            <h3 class="text-lg font-black mb-1">Matchmaking inteligente</h3>
+                            <p class="text-gray-400 text-sm">Emparejamiento automático por nivel, posición y localidad.</p>
+                        </div>
+                    </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= PHASE 4: Leagues (Left) ================= -->
+            <div class="scroll-section" id="section-3" style="left: 0; margin-left: 2rem;">
+                <div class="glass rounded-3xl p-10 bg-black/50 shadow-2xl backdrop-blur-xl border-white/10 flex flex-col items-start text-left pointer-events-auto">
+                    <p class="text-green-400 font-semibold text-sm uppercase tracking-widest mb-2">Compite</p>
+                    <h2 class="text-4xl lg:text-5xl font-black mb-8 drop-shadow-md">Ligas <span class="gradient-text">activas</span></h2>
+                    
+                    <div class="space-y-4 max-w-sm w-full">
+                        <?php if (!empty($activeLeagues)): ?>
+                            <?php foreach (array_slice($activeLeagues, 0, 4) as $l): ?>
+                            <a href="<?= APP_URL ?>/leagues/<?= $l['id'] ?>" class="glass rounded-2xl p-5 flex flex-col text-left hover:bg-white/5 hover:border-green-500/30 transition duration-300 <?= $l['type'] === 'pro' ? 'border-yellow-500/20' : '' ?>">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="font-black text-lg"><?= htmlspecialchars($l['name']) ?></h3>
+                                    <?php if ($l['type'] === 'pro'): ?>
+                                        <span class="text-[10px] px-2 py-1 rounded bg-yellow-500/20 text-yellow-400 font-bold">LIGA PRO</span>
+                                    <?php else: ?>
+                                        <span class="text-[10px] px-2 py-1 rounded bg-white/10 text-gray-300">Amistosa</span>
+                                    <?php endif; ?>
+                                </div>
+                                <p class="text-xs text-gray-400 mb-3">📍 <?= htmlspecialchars($l['city']) ?></p>
+                                <div class="text-[10px] text-gray-500 flex items-center gap-2">
+                                    <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                                    <?= date('d/m/Y', strtotime($l['start_date'])) ?> — <?= date('d/m/Y', strtotime($l['end_date'])) ?>
+                                </div>
+                            </a>
+                            <?php endforeach; ?>
+                            
+                            <a href="<?= APP_URL ?>/leagues" class="btn-ghost w-full justify-center mt-2 py-3 text-sm">Ver todas las ligas →</a>
+                        <?php else: ?>
+                            <div class="glass rounded-2xl p-8 text-center">
+                                <span class="text-3xl mb-3 block">⏳</span>
+                                <p class="text-gray-400">Próximamente nuevas ligas.</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= PHASE 5: Pricing / CTA ================= -->
+            <div class="scroll-section flex flex-col gap-6" id="section-4" style="left: 0; margin-left: 2rem;">
+                
+                <!-- Free Plan -->
+                <div class="glass rounded-3xl p-8 w-full pointer-events-auto bg-black/50 shadow-2xl backdrop-blur-xl border-white/10 hover:bg-black/70 transition">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="text-4xl">🤝</div>
+                        <div>
+                            <h3 class="text-xl font-black">Liga Amistosa</h3>
+                            <p class="text-gray-400 text-xs">Para jugar sin compromisos</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-8">
+                        <span class="text-5xl font-black">Gratis</span>
+                    </div>
+                    
+                    <ul class="space-y-3 mb-10">
+                        <li class="flex items-center gap-3 text-sm text-gray-300"><span class="text-green-400">✓</span> Perfil de jugador completo</li>
+                        <li class="flex items-center gap-3 text-sm text-gray-300"><span class="text-green-400">✓</span> Búsqueda de equipos</li>
+                        <li class="flex items-center gap-3 text-sm text-gray-300"><span class="text-green-400">✓</span> Partidos sin árbitro</li>
+                        <li class="flex items-center gap-3 text-sm text-gray-300"><span class="text-green-400">✓</span> Acceso a campos</li>
+                    </ul>
+                    <a href="<?= APP_URL ?>/register" class="btn-ghost w-full justify-center py-3">Empezar gratis</a>
+                </div>
+
+                <!-- Pro Plan -->
+                <div class="glass-green rounded-3xl p-8 w-full pointer-events-auto bg-green-950/50 shadow-2xl backdrop-blur-xl border-green-500/40 glow-sm relative hover:shadow-[0_0_30px_rgba(22,163,74,0.3)] hover:bg-green-900/60 transition">
+                    <div class="absolute top-4 right-4 px-3 py-1 rounded text-[10px] font-black bg-gradient-to-r from-yellow-400 to-amber-500 text-black">MÁS POPULAR</div>
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="text-4xl">🏆</div>
+                        <div>
+                            <h3 class="text-xl font-black">Liga Pro</h3>
+                            <p class="text-gray-400 text-xs">Para los que quieren competir</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-8">
+                        <span class="text-5xl font-black text-green-400">20€</span>
+                        <span class="text-gray-400 text-sm">/temporada por eq.</span>
+                    </div>
+                    
+                    <ul class="space-y-3 mb-10">
+                        <li class="flex items-center gap-3 text-sm text-gray-200"><span class="bg-green-500 w-4 h-4 flex items-center justify-center rounded-full text-white text-[10px] font-bold">✓</span> Todo lo de Amistosa</li>
+                        <li class="flex items-center gap-3 text-sm text-gray-200"><span class="bg-green-500 w-4 h-4 flex items-center justify-center rounded-full text-white text-[10px] font-bold">✓</span> Árbitro oficial</li>
+                        <li class="flex items-center gap-3 text-sm text-gray-200"><span class="bg-green-500 w-4 h-4 flex items-center justify-center rounded-full text-white text-[10px] font-bold">✓</span> Estadísticas completas</li>
+                        <li class="flex items-center gap-3 text-sm text-gray-200"><span class="bg-green-500 w-4 h-4 flex items-center justify-center rounded-full text-white text-[10px] font-bold">✓</span> Premios económicos reales</li>
+                    </ul>
+                    <a href="<?= APP_URL ?>/register" class="btn-primary w-full justify-center py-3 glow-green">Inscribir mi equipo →</a>
+                </div>
+
+            </div>
+            
         </div>
+
+        <!-- Scroll Indicator (Visible at top only) -->
+        <div id="scroll-indicator" class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 transition-opacity duration-500 z-30">
+            <span class="text-[10px] font-bold text-white/60 uppercase tracking-[0.3em]">Scroll</span>
+            <div class="w-px h-12 bg-white/20 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1/2 bg-green-400 animate-[scrollDown_1.5s_ease-in-out_infinite]"></div>
+            </div>
+        </div>
+
     </div>
-</section>
+</div>
 
-<!-- ══════════════════════════ CÓMO FUNCIONA ════════════════════════════════ -->
-<section class="py-24 px-6" style="background:linear-gradient(to bottom,#060d09,#0a1610,#060d09);">
-    <div class="max-w-5xl mx-auto">
-        <div class="text-center mb-16">
-            <p class="text-green-400 font-semibold text-sm uppercase tracking-widest mb-3">Proceso</p>
-            <h2 class="text-4xl md:text-5xl font-black tracking-tight">Juega en <span class="gradient-text">3 pasos</span></h2>
-        </div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    const scrollContainer = document.getElementById('main-scroll-container');
+    const scrollIndicator = document.getElementById('scroll-indicator');
+    
+    // The sections to animate
+    const sections = [
+        document.getElementById('section-0'),
+        document.getElementById('section-1'),
+        document.getElementById('section-2'),
+        document.getElementById('section-3'),
+        document.getElementById('section-4')
+    ];
 
-        <div class="grid md:grid-cols-3 gap-8 relative">
-            <!-- Connector line desktop -->
-            <div class="hidden md:block absolute top-10 left-1/4 right-1/4 h-px bg-gradient-to-r from-green-500/40 via-green-500/20 to-green-500/40"></div>
+    // Image Sequence Preloading & Canvas setup
+    const frameCount = 56;
+    const images = [];
+    const currentFrame = index => `<?= APP_URL ?>/assets/ezgif-492d760405175bba-png-split/ezgif-frame-${index.toString().padStart(3, '0')}.png`;
 
-            <?php
-            $steps = [
-                ['num'=>'01','icon'=>'👤','title'=>'Crea tu perfil','desc'=>'Regístrate gratis, añade tu posición, localidad y foto. Tu identidad deportiva en minutos.'],
-                ['num'=>'02','icon'=>'👥','title'=>'Únete o crea un equipo','desc'=>'Busca equipos en tu zona o crea el tuyo como capitán. Mínimo 8 jugadores para competir.'],
-                ['num'=>'03','icon'=>'⚽','title'=>'¡A jugar!','desc'=>'Pacta partidos, reserva el campo y compite. Tus estadísticas se actualizan automáticamente.'],
-            ];
-            foreach($steps as $s): ?>
-            <div class="text-center relative">
-                <div class="w-20 h-20 mx-auto mb-6 glass-green rounded-2xl flex items-center justify-center text-4xl relative">
-                    <?= $s['icon'] ?>
-                    <span class="absolute -top-2 -right-2 w-7 h-7 bg-green-600 rounded-full text-xs font-black flex items-center justify-center text-white"><?= $s['num'] ?></span>
-                </div>
-                <h3 class="text-xl font-black mb-3"><?= $s['title'] ?></h3>
-                <p class="text-gray-400 text-sm leading-relaxed"><?= $s['desc'] ?></p>
-            </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-</section>
+    for (let i = 1; i <= frameCount; i++) {
+        const img = new Image();
+        img.src = currentFrame(i);
+        images.push(img);
+    }
 
-<!-- ═══════════════════════ PRÓXIMOS PARTIDOS ═════════════════════════════════ -->
-<?php if (!empty($upcomingMatches)): ?>
-<section class="py-24 px-6 max-w-7xl mx-auto">
-    <div class="flex items-end justify-between mb-10 flex-wrap gap-4">
-        <div>
-            <p class="text-green-400 font-semibold text-sm uppercase tracking-widest mb-2">En vivo</p>
-            <h2 class="text-3xl font-black">Próximos partidos</h2>
-        </div>
-        <a href="<?= APP_URL ?>/matches" class="btn-ghost px-6 py-2.5 text-sm">Ver todos →</a>
-    </div>
-    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <?php foreach ($upcomingMatches as $m): ?>
-        <a href="<?= APP_URL ?>/matches/<?= $m['id'] ?>" class="glass rounded-2xl p-6 hover:bg-white/[.07] hover:border-green-500/20 transition-all duration-200 group">
-            <div class="flex items-center justify-between mb-5">
-                <span class="text-xs px-2.5 py-1 rounded-full bg-green-500/10 text-green-400 font-medium border border-green-500/20">Confirmado</span>
-                <span class="text-xs text-gray-500"><?= date('d/m H:i', strtotime($m['match_date'])) ?></span>
-            </div>
-            <div class="flex items-center gap-3">
-                <span class="flex-1 text-center font-bold text-sm truncate"><?= htmlspecialchars($m['home_team_name']) ?></span>
-                <span class="px-3 py-1.5 glass rounded-lg text-xs font-black text-gray-300">VS</span>
-                <span class="flex-1 text-center font-bold text-sm truncate"><?= htmlspecialchars($m['away_team_name']) ?></span>
-            </div>
-            <div class="mt-5 flex items-center gap-2 text-xs text-gray-500">
-                <span>🏟️</span>
-                <span class="truncate"><?= htmlspecialchars($m['field_name'] ?? 'Campo por confirmar') ?></span>
-            </div>
-        </a>
-        <?php endforeach; ?>
-    </div>
-</section>
-<?php endif; ?>
+    let lastRenderedIndex = -1;
+    const renderFrame = (frameIndex) => {
+        if (!images[frameIndex]) return;
+        const img = images[frameIndex];
+        
+        const draw = () => {
+            const canvasRatio = canvas.width / canvas.height;
+            const imgRatio = img.width / img.height;
+            let drawWidth, drawHeight, offsetX, offsetY;
+            
+            // Use 'contain' logic to fit the whole transparent PNG
+            if (canvasRatio > imgRatio) {
+                drawHeight = canvas.height;
+                drawWidth = canvas.height * imgRatio;
+            } else {
+                drawWidth = canvas.width;
+                drawHeight = canvas.width / imgRatio;
+            }
+            offsetX = (canvas.width - drawWidth) / 2;
+            offsetY = (canvas.height - drawHeight) / 2;
 
-<!-- ═══════════════════════════ LIGAS ACTIVAS ════════════════════════════════ -->
-<?php if (!empty($activeLeagues)): ?>
-<section class="py-20 px-6 max-w-7xl mx-auto">
-    <div class="flex items-end justify-between mb-10 flex-wrap gap-4">
-        <div>
-            <p class="text-green-400 font-semibold text-sm uppercase tracking-widest mb-2">Compite</p>
-            <h2 class="text-3xl font-black">Ligas activas</h2>
-        </div>
-        <a href="<?= APP_URL ?>/leagues" class="btn-ghost px-6 py-2.5 text-sm">Ver todas →</a>
-    </div>
-    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <?php foreach ($activeLeagues as $l): ?>
-        <a href="<?= APP_URL ?>/leagues/<?= $l['id'] ?>" class="glass rounded-2xl p-6 hover:bg-white/[.07] transition-all duration-200
-            <?= $l['type'] === 'pro' ? 'border-yellow-500/20 hover:border-yellow-500/40' : '' ?>">
-            <div class="flex items-center gap-2 mb-4">
-                <?php if ($l['type'] === 'pro'): ?>
-                    <span class="text-xs px-3 py-1 rounded-full font-black" style="background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#000;">🏆 LIGA PRO</span>
-                <?php else: ?>
-                    <span class="text-xs px-3 py-1 rounded-full bg-white/10 text-gray-300 font-semibold border border-white/10">🤝 Amistosa</span>
-                <?php endif; ?>
-            </div>
-            <h3 class="font-black text-base mb-1"><?= htmlspecialchars($l['name']) ?></h3>
-            <p class="text-gray-500 text-xs mb-3">📍 <?= htmlspecialchars($l['city']) ?></p>
-            <div class="text-xs text-gray-600">
-                <?= date('d/m/Y', strtotime($l['start_date'])) ?> — <?= date('d/m/Y', strtotime($l['end_date'])) ?>
-            </div>
-        </a>
-        <?php endforeach; ?>
-    </div>
-</section>
-<?php endif; ?>
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+        };
 
-<!-- ═══════════════════════════════ PRECIOS ══════════════════════════════════ -->
-<section class="py-28 px-6" style="background:linear-gradient(to bottom,#060d09,#081209,#060d09);">
-    <div class="max-w-4xl mx-auto">
-        <div class="text-center mb-16">
-            <p class="text-green-400 font-semibold text-sm uppercase tracking-widest mb-3">Planes</p>
-            <h2 class="text-4xl md:text-5xl font-black tracking-tight">Sin sorpresas.<br><span class="gradient-text">Sin letras pequeñas.</span></h2>
-        </div>
+        if (!img.complete) {
+            img.onload = () => { if (lastRenderedIndex === frameIndex) draw(); };
+        } else {
+            draw();
+        }
+    };
 
-        <div class="grid md:grid-cols-2 gap-6">
+    // Particles Engine
+    const pCanvas = document.getElementById('particles-canvas');
+    const pCtx = pCanvas.getContext('2d');
+    let particles = [];
+    
+    const createParticles = () => {
+        particles = [];
+        const count = window.innerWidth < 768 ? 40 : 100;
+        for (let i = 0; i < count; i++) {
+            particles.push({
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+                w: Math.random() * 3 + 2,
+                h: Math.random() * 8 + 6,
+                vx: (Math.random() - 0.5) * 1.5,
+                vy: (Math.random() - 0.5) * 1.5 - 0.5,
+                angle: Math.random() * Math.PI * 2,
+                spin: (Math.random() - 0.5) * 0.1,
+                alpha: Math.random() * 0.4 + 0.1,
+                color: Math.random() > 0.5 ? '#16a34a' : '#4ade80'
+            });
+        }
+    };
 
-            <!-- Free -->
-            <div class="glass rounded-3xl p-8 flex flex-col">
-                <div class="mb-6">
-                    <span class="text-3xl mb-4 block">🤝</span>
-                    <h3 class="text-xl font-black mb-1">Liga Amistosa</h3>
-                    <p class="text-gray-400 text-sm">Para los que quieren jugar sin compromisos</p>
-                </div>
-                <div class="mb-8">
-                    <span class="text-5xl font-black">Gratis</span>
-                </div>
-                <ul class="space-y-3 mb-8 flex-1">
-                    <?php foreach(['Perfil de jugador completo','Búsqueda de equipos y rivales','Partidos sin árbitro','Chat con capitanes','Acceso a campos disponibles'] as $f): ?>
-                    <li class="flex items-center gap-3 text-sm text-gray-300">
-                        <span class="w-5 h-5 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center text-xs flex-shrink-0">✓</span>
-                        <?= $f ?>
-                    </li>
-                    <?php endforeach; ?>
-                </ul>
-                <a href="<?= APP_URL ?>/register" class="btn-ghost text-center py-3.5 rounded-xl font-bold">Empezar gratis</a>
-            </div>
+    const drawParticles = () => {
+        if(!pCanvas.width) return requestAnimationFrame(drawParticles);
+        pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+        
+        particles.forEach(p => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.angle += p.spin;
+            
+            // Wrap around
+            if (p.x < -20) p.x = pCanvas.width + 20;
+            if (p.x > pCanvas.width + 20) p.x = -20;
+            if (p.y < -20) p.y = pCanvas.height + 20;
+            if (p.y > pCanvas.height + 20) p.y = -20;
+            
+            pCtx.save();
+            pCtx.translate(p.x, p.y);
+            pCtx.rotate(p.angle);
+            pCtx.fillStyle = p.color;
+            pCtx.globalAlpha = p.alpha;
+            pCtx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+            pCtx.restore();
+        });
+        requestAnimationFrame(drawParticles);
+    };
+    drawParticles();
 
-            <!-- Pro -->
-            <div class="rounded-3xl p-8 flex flex-col relative overflow-hidden glow-sm"
-                 style="background:linear-gradient(135deg,rgba(22,163,74,0.12),rgba(22,163,74,0.04));border:1px solid rgba(22,163,74,0.3);">
-                <div class="absolute top-5 right-5 px-3 py-1 rounded-full text-xs font-black"
-                     style="background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#000;">MÁS POPULAR</div>
-                <div class="mb-6">
-                    <span class="text-3xl mb-4 block">🏆</span>
-                    <h3 class="text-xl font-black mb-1">Liga Pro</h3>
-                    <p class="text-gray-400 text-sm">Para los que quieren competir de verdad</p>
-                </div>
-                <div class="mb-8">
-                    <span class="text-5xl font-black text-green-400">20€</span>
-                    <span class="text-gray-400 text-sm ml-2">/temporada por equipo</span>
-                </div>
-                <ul class="space-y-3 mb-8 flex-1">
-                    <?php foreach(['Todo lo de Amistosa','Árbitro oficial en cada partido','Estadísticas: goles, asistencias, tarjetas','Tabla de clasificación en tiempo real','Premios: 🥇40% · 🥈20% · 🥉10% del fondo','Certificación de campos','Reset por temporada'] as $f): ?>
-                    <li class="flex items-center gap-3 text-sm text-gray-200">
-                        <span class="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center text-xs flex-shrink-0 text-white">✓</span>
-                        <?= $f ?>
-                    </li>
-                    <?php endforeach; ?>
-                </ul>
-                <a href="<?= APP_URL ?>/register" class="btn-primary text-center py-3.5 rounded-xl font-bold glow-green">
-                    Inscribir mi equipo →
-                </a>
-            </div>
-        </div>
+    const resizeCanvas = () => {
+        // Set actual pixel dimensions to match display dimensions
+        canvas.width = canvas.clientWidth;
+        canvas.height = canvas.clientHeight;
+        pCanvas.width = canvas.clientWidth;
+        pCanvas.height = canvas.clientHeight;
+        
+        createParticles();
 
-        <p class="text-center text-gray-600 text-sm mt-8">
-            Tasa de capitán (única): <strong class="text-gray-400">4,99 €</strong> · Pagos mediante Stripe / PayPal · Sin suscripción mensual
-        </p>
-    </div>
-</section>
+        if (lastRenderedIndex !== -1) {
+            renderFrame(lastRenderedIndex);
+        } else {
+            renderFrame(0);
+        }
+    };
+    
+    window.addEventListener('resize', resizeCanvas);
+    // Let browser calculate CSS size first, then adjust canvas pixels
+    setTimeout(resizeCanvas, 0);
 
-<!-- ═══════════════════════════════ CTA FINAL ════════════════════════════════ -->
-<?php if (empty($_SESSION['user_id'])): ?>
-<section class="py-28 px-6">
-    <div class="max-w-3xl mx-auto text-center">
-        <div class="glass-green rounded-3xl p-12 relative overflow-hidden">
-            <div class="absolute inset-0 bg-grid-dark bg-grid opacity-40 pointer-events-none"></div>
-            <div class="relative z-10">
-                <div class="text-6xl mb-6">⚽</div>
-                <h2 class="text-4xl md:text-5xl font-black mb-5">¿Listo para jugar?</h2>
-                <p class="text-gray-400 text-lg mb-10 max-w-xl mx-auto">
-                    Únete gratis. Crea tu perfil en minutos y empieza a conectar con jugadores de tu zona hoy mismo.
-                </p>
-                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <a href="<?= APP_URL ?>/register" class="btn-primary text-lg px-10 py-4 glow-green">
-                        Crear cuenta gratis →
-                    </a>
-                    <a href="<?= APP_URL ?>/login" class="btn-ghost text-lg px-10 py-4">
-                        Ya tengo cuenta
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-<?php endif; ?>
+    let animationFrameId = null;
+
+    // Define scroll boundaries for each section
+    // Total scroll progress goes from 0.0 to 1.0
+    const breakpoints = [
+        { start: 0.00, end: 0.15 }, // Section 0: Hero
+        { start: 0.20, end: 0.35 }, // Section 1: Stats
+        { start: 0.40, end: 0.55 }, // Section 2: Features
+        { start: 0.60, end: 0.75 }, // Section 3: Leagues
+        { start: 0.80, end: 1.00 }  // Section 4: Pricing
+    ];
+
+    const onScroll = () => {
+        // Calculate scroll progress percentage (0 to 1)
+        const scrollY = window.scrollY;
+        const containerTop = scrollContainer.offsetTop;
+        const containerHeight = scrollContainer.scrollHeight - window.innerHeight;
+        
+        // Progress bounded between 0 and 1
+        let progress = (scrollY - containerTop) / containerHeight;
+        if (progress < 0) progress = 0;
+        if (progress > 1) progress = 1;
+
+        // 1. Scrub frames based on progress
+        const frameIndex = Math.min(
+            frameCount - 1,
+            Math.floor(progress * frameCount)
+        );
+        lastRenderedIndex = frameIndex;
+        renderFrame(frameIndex);
+
+        // 2. Hide scroll indicator after scrolling down a bit
+        if (progress > 0.03) {
+            scrollIndicator.style.opacity = '0';
+            scrollIndicator.style.pointerEvents = 'none';
+        } else {
+            scrollIndicator.style.opacity = '1';
+        }
+
+        // 3. Animate sections in and out
+        sections.forEach((sec, index) => {
+            const bp = breakpoints[index];
+            const fadeZone = 0.03; // 3% of scroll for fading in/out
+            
+            const fadeStart = bp.start - fadeZone;
+            const fadeEnd = bp.end + fadeZone;
+
+            if (progress > fadeStart && progress < fadeEnd) {
+                sec.classList.add('active');
+                
+                let opacity = 1;
+                let yOffset = 0; // translation in pixels
+
+                if (progress < bp.start) {
+                    // Entering from bottom
+                    const ratio = (bp.start - progress) / fadeZone; // 1 to 0
+                    opacity = 1 - ratio;
+                    yOffset = ratio * 40; 
+                } else if (progress > bp.end) {
+                    // Exiting to top
+                    const ratio = (progress - bp.end) / fadeZone; // 0 to 1
+                    opacity = 1 - ratio;
+                    yOffset = -ratio * 40;
+                }
+
+                // Apply opacity and transform
+                sec.style.opacity = opacity;
+                sec.style.transform = `translateY(calc(-50% + ${yOffset}px))`;
+            } else {
+                sec.classList.remove('active');
+                sec.style.opacity = '0';
+            }
+        });
+    };
+
+    window.addEventListener('scroll', () => {
+        if (!animationFrameId) {
+            animationFrameId = requestAnimationFrame(() => {
+                onScroll();
+                animationFrameId = null;
+            });
+        }
+    });
+
+    // Run once on load to set initial state
+    onScroll();
+});
+</script>
 
 <?php require_once APP_PATH . '/views/partials/footer.php'; ?>

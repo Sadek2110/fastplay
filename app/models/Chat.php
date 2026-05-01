@@ -31,4 +31,36 @@ class Chat extends Model {
         $st->execute([$roomId, $limit]);
         return array_reverse($st->fetchAll());
     }
+
+    public function sendMessage(int $roomId, int $userId, string $content): array|false {
+        $this->db->beginTransaction();
+        try {
+            $st = $this->db->prepare('INSERT INTO chat_messages (room_id, user_id, content) VALUES (?, ?, ?)');
+            $st->execute([$roomId, $userId, $content]);
+            $id = (int) $this->db->lastInsertId();
+
+            $st = $this->db->prepare('
+                SELECT cm.id, cm.content, cm.created_at, cm.user_id,
+                       u.name AS author_name, u.photo AS author_photo
+                FROM chat_messages cm
+                JOIN users u ON u.id = cm.user_id
+                WHERE cm.id = ?
+            ');
+            $st->execute([$id]);
+            $msg = $st->fetch();
+            $msg['created_at'] = date('H:i', strtotime($msg['created_at']));
+
+            $this->db->commit();
+            return $msg;
+        } catch (Throwable $e) {
+            $this->db->rollBack();
+            return false;
+        }
+    }
+
+    public function isMember(int $roomId, int $userId): bool {
+        $st = $this->db->prepare('SELECT 1 FROM chat_room_members WHERE room_id = ? AND user_id = ? LIMIT 1');
+        $st->execute([$roomId, $userId]);
+        return (bool) $st->fetch();
+    }
 }

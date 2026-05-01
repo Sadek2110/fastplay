@@ -15,6 +15,11 @@ require_once CORE_PATH   . '/Router.php';
 
 session_start();
 
+// Generate CSRF token if not exists
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 $router = new Router();
 
 // Public
@@ -23,7 +28,7 @@ $router->get('/login',            'AuthController',   'loginForm');
 $router->post('/login',           'AuthController',   'login');
 $router->get('/register',         'AuthController',   'registerForm');
 $router->post('/register',        'AuthController',   'register');
-$router->get('/logout',           'AuthController',   'logout');
+$router->post('/logout',          'AuthController',   'logout');
 
 // Teams
 $router->get('/teams',            'TeamController',   'index');
@@ -47,10 +52,13 @@ $router->post('/profile/update',  'UserController',   'update');
 // Chat
 $router->get('/chat',             'ChatController',   'index');
 $router->get('/chat/{id}',        'ChatController',   'room');
+$router->post('/chat/{id}/send',  'ChatController',   'sendMessage');
+$router->get('/chat/{id}/messages', 'ChatController', 'getMessages');
 
 // Admin
 $router->get('/admin',            'AdminController',  'dashboard');
 $router->get('/admin/users',      'AdminController',  'users');
+$router->post('/admin/users/{id}/toggle-ban', 'AdminController', 'toggleBan');
 $router->get('/admin/teams',      'AdminController',  'teams');
 $router->get('/admin/leagues',    'AdminController',  'leagues');
 $router->get('/admin/fields',     'AdminController',  'fields');

@@ -23,19 +23,34 @@ class AdminController extends Controller {
 
     public function users(): void {
         $this->requireAdmin();
-        $users = (new User())->findAll('created_at DESC', 50);
+        $users = (new User())->findAll('created_at DESC', 200);
         $this->render('admin/users', compact('users'));
+    }
+
+    public function toggleBan(string $id): void {
+        $this->requireAdmin();
+        $this->requireCsrf();
+
+        $user = (new User())->findById((int)$id);
+        if (!$user) {
+            $this->flash('error', 'Usuario no encontrado.');
+            $this->redirect('/admin/users');
+        }
+
+        (new User())->update((int)$id, ['is_banned' => !$user['is_banned']]);
+        $this->flash('success', 'Estado de ' . htmlspecialchars($user['name']) . ' actualizado.');
+        $this->redirect('/admin/users');
     }
 
     public function teams(): void {
         $this->requireAdmin();
-        $teams = (new Team())->findAll('created_at DESC', 50);
+        $teams = (new Team())->findAll('created_at DESC', 100);
         $this->render('admin/teams', compact('teams'));
     }
 
     public function leagues(): void {
         $this->requireAdmin();
-        $leagues = (new League())->findAll('start_date DESC', 50);
+        $leagues = (new League())->findAll('start_date DESC', 100);
         $this->render('admin/leagues', compact('leagues'));
     }
 

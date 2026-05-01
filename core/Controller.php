@@ -79,4 +79,35 @@ abstract class Controller
     {
         return $this->sanitize($_GET[$key] ?? $default);
     }
+
+    protected function generateCsrfToken(): string
+    {
+        if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+        return $_SESSION['csrf_token'];
+    }
+
+    protected function verifyCsrf(): bool
+    {
+        $token = $_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+        return !empty($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
+    }
+
+    protected function requireCsrf(): void
+    {
+        if (!$this->verifyCsrf()) {
+            if ($this->isAjax()) {
+                $this->json(['error' => 'Token CSRF inválido'], 403);
+            }
+            $this->flash('error', 'Error de seguridad. Recarga la página.');
+            $this->redirect('/');
+        }
+    }
+
+    protected function isAjax(): bool
+    {
+        return isset($_SERVER['HTTP_X_REQUESTED_WITH'])
+            && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+    }
 }
