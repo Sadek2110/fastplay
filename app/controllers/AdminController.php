@@ -1,63 +1,106 @@
 <?php
-require_once CORE_PATH . '/Controller.php';
-require_once APP_PATH  . '/models/User.php';
-require_once APP_PATH  . '/models/Team.php';
-require_once APP_PATH  . '/models/League.php';
-require_once APP_PATH  . '/models/MatchModel.php';
+// FastPlay · panel admin
 
-class AdminController extends Controller {
-
-    public function dashboard(): void {
+class AdminController extends Controller
+{
+    public function index(): void
+    {
         $this->requireAdmin();
-        $userModel = new User();
-        $stats = [
-            'users'   => $userModel->count(),
-            'players' => $userModel->count(['role' => 'player']),
-            'captains'=> $userModel->count(['role' => 'captain']),
-            'teams'   => (new Team())->count(),
-            'leagues' => (new League())->count(),
-            'matches' => (new MatchModel())->count(),
+        $counts = [
+            'users'    => (int) Database::value('SELECT COUNT(*) FROM users'),
+            'teams'    => (int) Database::value('SELECT COUNT(*) FROM teams'),
+            'leagues'  => (int) Database::value('SELECT COUNT(*) FROM leagues'),
+            'matches'  => (int) Database::value('SELECT COUNT(*) FROM matches'),
+            'fields'   => (int) Database::value('SELECT COUNT(*) FROM fields'),
+            'rooms'    => (int) Database::value('SELECT COUNT(*) FROM chat_rooms'),
         ];
-        $this->render('admin/dashboard', compact('stats'));
+        $this->view('admin/index', [
+            'active' => 'admin',
+            'counts' => $counts,
+            'recent' => Database::all("SELECT email, success, attempted_at FROM login_attempts ORDER BY id DESC LIMIT 12"),
+            'title'  => 'Admin — FastPlay',
+        ]);
     }
 
-    public function users(): void {
+    public function users(): void
+    {
         $this->requireAdmin();
-        $users = (new User())->findAll('created_at DESC', 200);
-        $this->render('admin/users', compact('users'));
+        $usuario = $this->model('Usuario');
+        $this->view('admin/users', [
+            'active' => 'admin',
+            'users'  => $usuario->all(),
+            'title'  => 'Admin · Usuarios — FastPlay',
+        ]);
     }
 
-    public function toggleBan(string $id): void {
+    public function setRole(string $id = ''): void
+    {
         $this->requireAdmin();
-        $this->requireCsrf();
+        $this->requirePost();
+        $usuario = $this->model('Usuario');
+        $usuario->setRole((int) $id, (string) ($_POST['role'] ?? 'player'));
+        flash('ok', 'Rol actualizado.');
+        redirect('admin/users');
+    }
 
-        $user = (new User())->findById((int)$id);
-        if (!$user) {
-            $this->flash('error', 'Usuario no encontrado.');
-            $this->redirect('/admin/users');
+    public function deleteUser(string $id = ''): void
+    {
+        $this->requireAdmin();
+        $this->requirePost();
+        if ((int) $id === (int) current_user()['id']) {
+            flash('warn', 'No puedes eliminar tu propia cuenta desde aquí.');
+            redirect('admin/users');
         }
-
-        (new User())->update((int)$id, ['is_banned' => !$user['is_banned']]);
-        $this->flash('success', 'Estado de ' . htmlspecialchars($user['name']) . ' actualizado.');
-        $this->redirect('/admin/users');
+        $this->model('Usuario')->delete((int) $id);
+        flash('ok', 'Usuario eliminado.');
+        redirect('admin/users');
     }
 
-    public function teams(): void {
+    public function teams(): void
+    {
         $this->requireAdmin();
-        $teams = (new Team())->findAll('created_at DESC', 100);
-        $this->render('admin/teams', compact('teams'));
+        $this->view('admin/teams', [
+            'active' => 'admin',
+            'teams'  => $this->model('Equipo')->all(),
+            'title'  => 'Admin · Equipos — FastPlay',
+        ]);
     }
 
-    public function leagues(): void {
+    public function leagues(): void
+    {
         $this->requireAdmin();
-        $leagues = (new League())->findAll('start_date DESC', 100);
-        $this->render('admin/leagues', compact('leagues'));
+        $this->view('admin/leagues', [
+            'active'  => 'admin',
+            'leagues' => $this->model('Liga')->all(),
+            'title'   => 'Admin · Ligas — FastPlay',
+        ]);
     }
 
-    public function fields(): void {
+    public function fields(): void
+    {
         $this->requireAdmin();
-        require_once APP_PATH . '/models/Field.php';
-        $fields = (new Field())->findAll('name ASC', 100);
-        $this->render('admin/fields', compact('fields'));
+        $this->view('admin/fields', [
+            'active' => 'admin',
+            'fields' => $this->model('Campo')->all(),
+            'title'  => 'Admin · Campos — FastPlay',
+        ]);
+    }
+
+    public function deleteLeague(string $id = ''): void
+    {
+        $this->requireAdmin();
+        $this->requirePost();
+        $this->model('Liga')->delete((int) $id);
+        flash('ok', 'Liga eliminada.');
+        redirect('admin/leagues');
+    }
+
+    public function deleteField(string $id = ''): void
+    {
+        $this->requireAdmin();
+        $this->requirePost();
+        $this->model('Campo')->delete((int) $id);
+        flash('ok', 'Campo eliminado.');
+        redirect('admin/fields');
     }
 }

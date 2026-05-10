@@ -1,41 +1,23 @@
-<?php $pageTitle = 'Chat'; ?>
-<?php require_once APP_PATH . '/views/partials/header.php'; ?>
-<?php require_once APP_PATH . '/views/partials/navbar.php'; ?>
+<main class="fp-fade fp-page" style="max-width:880px;">
+    <p class="fp-eyebrow">Conecta</p>
+    <h1 class="fp-h1">Chat</h1>
+    <p style="color:#9ca3af;font-size:14px;margin-top:6px;">Coordina partidos, busca rivales y habla con la comunidad.</p>
 
-<main class="pt-24 pb-20 px-6 max-w-4xl mx-auto">
-    <div class="mb-8 fade-up">
-        <p class="text-green-400 font-semibold text-sm uppercase tracking-widest mb-2">Mensajes</p>
-        <h1 class="text-3xl font-black">Chat</h1>
-    </div>
-
-    <?php if (empty($rooms)): ?>
-    <div class="text-center py-24 fade-up-1">
-        <div class="text-5xl mb-4">💬</div>
-        <p class="text-gray-400 font-medium">No tienes conversaciones todavía</p>
-        <p class="text-gray-600 text-sm mt-2">Únete a un equipo para acceder al chat</p>
-    </div>
-    <?php else: ?>
-    <div class="space-y-2 fade-up-1">
-        <?php foreach($rooms as $r): ?>
-        <a href="<?= APP_URL ?>/chat/<?= $r['id'] ?>"
-           class="glass rounded-2xl p-5 flex items-center gap-4 hover:bg-white/[.07] transition-all duration-200">
-            <div class="w-12 h-12 glass-green rounded-xl flex items-center justify-center text-xl flex-shrink-0">
-                <?= $r['type']==='team' ? '👥' : ($r['type']==='match_negotiation' ? '⚽' : '💬') ?>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="font-bold text-sm"><?= htmlspecialchars($r['name']) ?></div>
-                <div class="text-xs text-gray-500 truncate mt-0.5">
-                    <?= htmlspecialchars($r['last_message'] ?? 'Sin mensajes todavía') ?>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:24px;">
+        <?php foreach ($rooms as $r): ?>
+            <a href="<?= url('chat/room/' . (int) $r['id']) ?>" class="fp-glass fp-card-link" style="border-radius:14px;padding:18px;display:flex;gap:14px;align-items:center;text-decoration:none;color:#fff;">
+                <span style="width:44px;height:44px;border-radius:9999px;background:rgba(22,163,74,.20);display:inline-flex;align-items:center;justify-content:center;font-size:20px;">
+                    <?= $r['type'] === 'match_negotiation' ? '🤝' : '💬' ?>
+                </span>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-weight:700;font-size:15px;"><?= e($r['name']) ?></div>
+                    <div style="font-size:12px;color:#9ca3af;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><?= e($r['last_body'] ?? 'Sin mensajes todavía.') ?></div>
                 </div>
-            </div>
-            <?php if (!empty($r['last_message_time'])): ?>
-            <div class="text-xs text-gray-600 flex-shrink-0">
-                <?= date('H:i', strtotime($r['last_message_time'])) ?>
-            </div>
-            <?php endif; ?>
-        </a>
+                <div style="font-size:11px;color:#6b7280;text-align:right;">
+                    <div><?= (int) ($r['msg_count'] ?? 0) ?> msgs</div>
+                    <?php if (!empty($r['last_at'])): ?><div><?= e(date('d/m H:i', strtotime($r['last_at']))) ?></div><?php endif; ?>
+                </div>
+            </a>
         <?php endforeach; ?>
     </div>
-    <?php endif; ?>
 </main>
-<?php require_once APP_PATH . '/views/partials/footer.php'; ?>

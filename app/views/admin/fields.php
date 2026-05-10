@@ -1,56 +1,34 @@
-<?php $pageTitle = 'Campos'; ?>
-<?php require_once APP_PATH . '/views/partials/header.php'; ?>
-<?php require_once APP_PATH . '/views/partials/navbar.php'; ?>
-
-<main class="pt-24 pb-20 px-6 max-w-7xl mx-auto">
-    <div class="mb-8 fade-up">
-        <a href="<?= APP_URL ?>/admin" class="text-sm text-gray-500 hover:text-white mb-3 inline-flex items-center gap-1">
-            ← Volver al panel
-        </a>
-        <h1 class="text-2xl font-black">🏟️ Gestión de Campos</h1>
-        <p class="text-gray-500 text-sm mt-1"><?= count($fields) ?> campos registrados</p>
+<main class="fp-fade fp-page">
+    <div class="fp-page-head">
+        <div>
+            <p class="fp-eyebrow">Admin</p>
+            <h1 class="fp-h1">Campos</h1>
+        </div>
+        <a class="fp-btn fp-btn-primary fp-btn-glow" href="<?= url('campos/create') ?>">+ Nuevo campo</a>
     </div>
 
-    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 fade-up-1">
-        <?php foreach ($fields as $f): ?>
-        <div class="glass rounded-2xl p-5 hover:bg-white/[.04] transition-colors">
-            <div class="flex items-start justify-between mb-3">
-                <h3 class="font-bold text-lg"><?= htmlspecialchars($f['name']) ?></h3>
-                <?php if ($f['is_certified']): ?>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-500/20 text-green-400">✓ Certificado</span>
-                <?php endif; ?>
-            </div>
-
-            <p class="text-sm text-gray-400 mb-3">📍 <?= htmlspecialchars($f['address']) ?></p>
-            <p class="text-xs text-gray-500 mb-4">🏙️ <?= htmlspecialchars($f['city']) ?></p>
-
-            <div class="flex items-center gap-2 text-xs text-gray-500 border-t border-white/5 pt-3">
-                <span class="px-2 py-0.5 rounded-full
-                    <?= $f['surface'] === 'grass'     ? 'bg-green-500/10 text-green-400' :
-                       ($f['surface'] === 'artificial' ? 'bg-blue-500/10 text-blue-400'
-                                                       : 'bg-purple-500/10 text-purple-400') ?>">
-                    <?= match($f['surface']) {
-                        'grass'     => '🌿 Césped natural',
-                        'artificial' => '🟢 Artificial',
-                        'futsal'    => '🏀 Futsal',
-                        default     => $f['surface']
-                    } ?>
-                </span>
-                <span class="ml-auto
-                    <?= $f['status'] === 'active' ? 'text-green-400' : 'text-red-400' ?>">
-                    <?= $f['status'] === 'active' ? '● Activo' : '● Inactivo' ?>
-                </span>
-            </div>
-        </div>
-        <?php endforeach; ?>
-
-        <?php if (empty($fields)): ?>
-            <div class="col-span-full text-center py-16 text-gray-500">
-                <div class="text-4xl mb-3">🏟️</div>
-                <p>No hay campos registrados</p>
-            </div>
-        <?php endif; ?>
+    <div class="fp-glass" style="border-radius:18px;overflow:hidden;margin-top:24px;">
+        <table class="fp-table">
+            <thead><tr><th>ID</th><th>Nombre</th><th>Ciudad</th><th>Superficie</th><th>Cap.</th><th>Tarifa</th><th></th></tr></thead>
+            <tbody>
+                <?php foreach ($fields as $f): ?>
+                    <tr>
+                        <td><?= (int) $f['id'] ?></td>
+                        <td><?= e($f['name']) ?></td>
+                        <td><?= e($f['city']) ?></td>
+                        <td><?= e($f['surface']) ?></td>
+                        <td><?= (int) $f['capacity'] ?></td>
+                        <td><?= number_format((float) $f['hourly_rate'], 2, ',', '.') ?> €/h</td>
+                        <td>
+                            <a class="fp-btn fp-btn-ghost" style="padding:6px 12px;font-size:11px;" href="<?= url('campos/show/' . (int) $f['id']) ?>">Ver</a>
+                            <form method="post" action="<?= url('admin/deleteField/' . (int) $f['id']) ?>" style="display:inline;margin:0;" onsubmit="return confirm('¿Eliminar el campo?');">
+                                <?= csrf_field() ?>
+                                <button class="fp-btn fp-btn-ghost" style="padding:6px 12px;font-size:11px;color:#f87171;">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
     </div>
 </main>
-
-<?php require_once APP_PATH . '/views/partials/footer.php'; ?>

@@ -1,61 +1,49 @@
-<footer class="mt-auto border-t border-white/5" style="background:#040a06; animation: fadeUp .7s .15s cubic-bezier(.22,1,.36,1) both;">
-    <div class="max-w-7xl mx-auto px-6 py-16">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-10">
-            <!-- Brand -->
-            <div class="md:col-span-1">
-                <div class="flex items-center gap-2 font-black text-xl mb-4">
-                    <span class="text-2xl">⚽</span>
-                    <span>Fast<span class="text-green-400">Play</span></span>
-                </div>
-                <p class="text-gray-500 text-sm leading-relaxed mb-5">
-                    Fútbol amateur organizado para todos, en cualquier lugar.
-                </p>
-                <div class="flex items-center gap-3">
-                    <a href="#" class="w-9 h-9 glass rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:border-green-500/40 hover:scale-110 hover:shadow-[0_0_12px_rgba(22,163,74,.3)] transition-all duration-200 text-sm">𝕏</a>
-                    <a href="#" class="w-9 h-9 glass rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:border-green-500/40 hover:scale-110 hover:shadow-[0_0_12px_rgba(22,163,74,.3)] transition-all duration-200 text-sm">in</a>
-                    <a href="#" class="w-9 h-9 glass rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:border-green-500/40 hover:scale-110 hover:shadow-[0_0_12px_rgba(22,163,74,.3)] transition-all duration-200 text-sm">ig</a>
-                </div>
-            </div>
-
-            <!-- Plataforma -->
-            <div>
-                <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">Plataforma</h4>
-                <ul class="space-y-3">
-                    <li><a href="<?= APP_URL ?>/teams"   class="text-sm text-gray-400 hover:text-white transition-colors">Equipos</a></li>
-                    <li><a href="<?= APP_URL ?>/matches" class="text-sm text-gray-400 hover:text-white transition-colors">Partidos</a></li>
-                    <li><a href="<?= APP_URL ?>/leagues" class="text-sm text-gray-400 hover:text-white transition-colors">Ligas</a></li>
-                    <li><a href="<?= APP_URL ?>/chat"    class="text-sm text-gray-400 hover:text-white transition-colors">Chat</a></li>
-                </ul>
-            </div>
-
-            <!-- Cuenta -->
-            <div>
-                <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">Cuenta</h4>
-                <ul class="space-y-3">
-                    <li><a href="<?= APP_URL ?>/register" class="text-sm text-gray-400 hover:text-white transition-colors">Registrarse</a></li>
-                    <li><a href="<?= APP_URL ?>/login"    class="text-sm text-gray-400 hover:text-white transition-colors">Iniciar sesión</a></li>
-                    <?php if (!empty($_SESSION['user_id'])): ?>
-                    <li><a href="<?= APP_URL ?>/dashboard" class="text-sm text-gray-400 hover:text-white transition-colors">Dashboard</a></li>
-                    <?php endif; ?>
-                </ul>
-            </div>
-
-            <!-- Legal -->
-            <div>
-                <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">Legal</h4>
-                <ul class="space-y-3">
-                    <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">Términos de uso</a></li>
-                    <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">Privacidad (GDPR)</a></li>
-                    <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">Cookies</a></li>
-                </ul>
+<?php
+$cols = [
+    ['h' => 'Plataforma', 'items' => [
+        ['l' => 'Equipos',  'u' => 'teams'],
+        ['l' => 'Partidos', 'u' => 'matches'],
+        ['l' => 'Ligas',    'u' => 'leagues'],
+        ['l' => 'Campos',   'u' => 'campos'],
+        ['l' => 'Chat',     'u' => 'chat'],
+    ]],
+    ['h' => 'Cuenta', 'items' => [
+        ['l' => 'Registrarse',    'u' => 'auth/register'],
+        ['l' => 'Iniciar sesión', 'u' => 'auth/login'],
+        ['l' => 'Mi panel',       'u' => 'dashboard'],
+        ['l' => 'Mi perfil',      'u' => 'profile'],
+    ]],
+    ['h' => 'Legal', 'items' => [
+        ['l' => 'Términos de uso',     'u' => 'legal/terms'],
+        ['l' => 'Privacidad (GDPR)',   'u' => 'legal/privacy'],
+        ['l' => 'Cookies',             'u' => 'legal/cookies'],
+    ]],
+];
+?>
+<footer class="fp-footer">
+    <div class="fp-footer-inner">
+        <div>
+            <a href="<?= url('') ?>" class="fp-logo" style="margin-bottom:16px;">
+                <span class="ball">⚽</span>
+                <span>Fast<span class="accent">Play</span></span>
+            </a>
+            <p style="color:#6b7280;font-size:13px;line-height:1.55;margin:16px 0 18px;">Fútbol amateur organizado para todos, en cualquier lugar.</p>
+            <div style="display:flex;gap:10px;">
+                <?php foreach (['𝕏', 'in', 'ig'] as $s): ?>
+                    <span style="width:34px;height:34px;border-radius:9999px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);display:inline-flex;align-items:center;justify-content:center;color:#9ca3af;font-size:13px;cursor:pointer;"><?= e($s) ?></span>
+                <?php endforeach; ?>
             </div>
         </div>
+        <?php foreach ($cols as $col): ?>
+            <div>
+                <h4 style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.22em;margin-bottom:16px;"><?= e($col['h']) ?></h4>
+                <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px;">
+                    <?php foreach ($col['items'] as $item): ?>
+                        <li><a href="<?= url($item['u']) ?>" style="font-size:13px;color:#9ca3af;text-decoration:none;"><?= e($item['l']) ?></a></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        <?php endforeach; ?>
     </div>
-    <div class="border-t border-white/5 py-5">
-        <p class="text-center text-gray-600 text-xs">
-            &copy; <?= date('Y') ?> FastPlay — Todos los derechos reservados.
-        </p>
-    </div>
+    <div class="fp-footer-bottom">© <?= date('Y') ?> FastPlay — Todos los derechos reservados.</div>
 </footer>
-</body>
-</html>

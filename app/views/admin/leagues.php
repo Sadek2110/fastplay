@@ -1,60 +1,34 @@
-<?php $pageTitle = 'Ligas'; ?>
-<?php require_once APP_PATH . '/views/partials/header.php'; ?>
-<?php require_once APP_PATH . '/views/partials/navbar.php'; ?>
-
-<main class="pt-24 pb-20 px-6 max-w-7xl mx-auto">
-    <div class="mb-8 fade-up">
-        <a href="<?= APP_URL ?>/admin" class="text-sm text-gray-500 hover:text-white mb-3 inline-flex items-center gap-1">
-            ← Volver al panel
-        </a>
-        <h1 class="text-2xl font-black">🏆 Gestión de Ligas</h1>
-        <p class="text-gray-500 text-sm mt-1"><?= count($leagues) ?> ligas registradas</p>
+<main class="fp-fade fp-page">
+    <div class="fp-page-head">
+        <div>
+            <p class="fp-eyebrow">Admin</p>
+            <h1 class="fp-h1">Ligas</h1>
+        </div>
+        <a class="fp-btn fp-btn-primary fp-btn-glow" href="<?= url('leagues/create') ?>">+ Nueva liga</a>
     </div>
 
-    <div class="glass rounded-2xl overflow-hidden fade-up-1">
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead class="bg-white/[.03] text-gray-400 text-xs uppercase tracking-wider">
+    <div class="fp-glass" style="border-radius:18px;overflow:hidden;margin-top:24px;">
+        <table class="fp-table">
+            <thead><tr><th>ID</th><th>Liga</th><th>Tier</th><th>Ciudad</th><th>Equipos</th><th>Calendario</th><th></th></tr></thead>
+            <tbody>
+                <?php foreach ($leagues as $l): ?>
                     <tr>
-                        <th class="text-left px-4 py-3">Liga</th>
-                        <th class="text-left px-4 py-3 hidden sm:table-cell">Tipo</th>
-                        <th class="text-left px-4 py-3 hidden md:table-cell">Ciudad</th>
-                        <th class="text-left px-4 py-3 hidden lg:table-cell">Fechas</th>
-                        <th class="text-left px-4 py-3">Premio</th>
-                        <th class="text-left px-4 py-3">Estado</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-white/5">
-                    <?php foreach ($leagues as $l): ?>
-                    <tr class="hover:bg-white/[.03] transition-colors">
-                        <td class="px-4 py-3 font-semibold"><?= htmlspecialchars($l['name']) ?></td>
-                        <td class="px-4 py-3 hidden sm:table-cell">
-                            <span class="px-2 py-0.5 rounded-full text-xs font-semibold
-                                <?= $l['type'] === 'pro' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-green-500/20 text-green-400' ?>">
-                                <?= $l['type'] === 'pro' ? '⭐ Pro' : '🤝 Amistosa' ?>
-                            </span>
-                        </td>
-                        <td class="px-4 py-3 text-gray-500 hidden md:table-cell"><?= htmlspecialchars($l['city']) ?></td>
-                        <td class="px-4 py-3 text-xs text-gray-500 hidden lg:table-cell">
-                            <?= date('d/m/Y', strtotime($l['start_date'])) ?> — <?= date('d/m/Y', strtotime($l['end_date'])) ?>
-                        </td>
-                        <td class="px-4 py-3 font-semibold <?= $l['prize_pool'] > 0 ? 'text-yellow-400' : 'text-gray-500' ?>">
-                            <?= $l['prize_pool'] > 0 ? '€' . number_format((float)$l['prize_pool'], 2) : '—' ?>
-                        </td>
-                        <td class="px-4 py-3">
-                            <span class="px-2 py-0.5 rounded-full text-xs font-semibold
-                                <?= $l['status'] === 'active'    ? 'bg-green-500/20 text-green-400' :
-                                   ($l['status'] === 'upcoming'  ? 'bg-blue-500/20 text-blue-400'
-                                                                 : 'bg-gray-500/20 text-gray-400') ?>">
-                                <?= ucfirst($l['status']) ?>
-                            </span>
+                        <td><?= (int) $l['id'] ?></td>
+                        <td><?= e($l['name']) ?></td>
+                        <td><?= $l['pro'] ? '🏆 Pro' : '🤝 Amistosa' ?></td>
+                        <td><?= e($l['city']) ?></td>
+                        <td><?= (int) ($l['team_count'] ?? 0) ?>/<?= (int) $l['max_teams'] ?></td>
+                        <td style="color:#9ca3af;"><?= e($l['start']) ?> – <?= e($l['end']) ?></td>
+                        <td>
+                            <a class="fp-btn fp-btn-ghost" style="padding:6px 12px;font-size:11px;" href="<?= url('leagues/show/' . (int) $l['id']) ?>">Ver</a>
+                            <form method="post" action="<?= url('admin/deleteLeague/' . (int) $l['id']) ?>" style="display:inline;margin:0;" onsubmit="return confirm('¿Eliminar la liga?');">
+                                <?= csrf_field() ?>
+                                <button class="fp-btn fp-btn-ghost" style="padding:6px 12px;font-size:11px;color:#f87171;">Eliminar</button>
+                            </form>
                         </td>
                     </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
     </div>
 </main>
-
-<?php require_once APP_PATH . '/views/partials/footer.php'; ?>
