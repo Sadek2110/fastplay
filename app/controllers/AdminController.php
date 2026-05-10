@@ -37,8 +37,18 @@ class AdminController extends Controller
     {
         $this->requireAdmin();
         $this->requirePost();
-        $usuario = $this->model('Usuario');
-        $usuario->setRole((int) $id, (string) ($_POST['role'] ?? 'player'));
+        $targetId = (int) $id;
+        $newRole = (string) ($_POST['role'] ?? 'player');
+        if ($newRole !== 'admin') {
+            $admins = (int) Database::value("SELECT COUNT(*) FROM users WHERE role='admin'");
+            $current = Database::one('SELECT role FROM users WHERE id=?', [$targetId]);
+            if ($current && $current['role'] === 'admin' && $admins <= 1) {
+                flash('warn', 'No puedes degradar al último administrador.');
+                redirect('admin/users');
+                return;
+            }
+        }
+        $this->model('Usuario')->setRole($targetId, $newRole);
         flash('ok', 'Rol actualizado.');
         redirect('admin/users');
     }
@@ -47,11 +57,30 @@ class AdminController extends Controller
     {
         $this->requireAdmin();
         $this->requirePost();
-        if ((int) $id === (int) current_user()['id']) {
+        $targetId = (int) $id;
+        if ($targetId === (int) current_user()['id']) {
             flash('warn', 'No puedes eliminar tu propia cuenta desde aquí.');
             redirect('admin/users');
+            return;
         }
-        $this->model('Usuario')->delete((int) $id);
+
+        $usuario = $this->model('Usuario');
+        $target = $usuario->find($targetId);
+        if (!$target) {
+            flash('warn', 'Usuario no encontrado.');
+            redirect('admin/users');
+            return;
+        }
+        if (($target['role'] ?? 'player') === 'admin') {
+            $admins = (int) Database::value("SELECT COUNT(*) FROM users WHERE role='admin'");
+            if ($admins <= 1) {
+                flash('warn', 'No puedes eliminar al último administrador del sistema.');
+                redirect('admin/users');
+                return;
+            }
+        }
+
+        $usuario->delete($targetId);
         flash('ok', 'Usuario eliminado.');
         redirect('admin/users');
     }

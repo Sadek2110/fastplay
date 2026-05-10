@@ -13,7 +13,7 @@
         <p>FastPlay no se hace responsable de daños, lesiones o pérdidas derivadas del uso de la plataforma o de la participación en partidos organizados a través de ella.</p>
         <h2 style="font-size:20px;font-weight:700;color:#fff;margin:32px 0 12px;">5. Modificaciones</h2>
         <p>Podemos actualizar estos términos en cualquier momento. Los cambios se publicarán en esta misma página.</p>
-        <p style="margin-top:32px;color:#6b7280;font-size:13px;">Última actualización: mayo de 2026</p>
+        <p style="margin-top:32px;color:#6b7280;font-size:13px;">Última actualización: <?= e($lastUpdated ?? 'mayo de 2026') ?></p>
     </div>
     <a href="<?= url('') ?>" class="fp-btn fp-btn-primary fp-btn-glow" style="display:inline-flex;margin-top:32px;padding:14px 28px;font-size:15px;">Volver al inicio →</a>
 </main>

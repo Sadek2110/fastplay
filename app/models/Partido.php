@@ -67,6 +67,14 @@ class Partido
         $ts = strtotime($when);
         if (!$ts)                                  $errors['scheduled_at'] = 'Fecha/hora inválida.';
         elseif ($ts < time() - 60)                 $errors['scheduled_at'] = 'La fecha debe ser futura.';
+
+        if (!$errors && $league > 0) {
+            $homeIn = (int) Database::value('SELECT 1 FROM league_teams WHERE league_id=? AND team_id=?', [$league, $home]);
+            $awayIn = (int) Database::value('SELECT 1 FROM league_teams WHERE league_id=? AND team_id=?', [$league, $away]);
+            if (!$homeIn || !$awayIn) {
+                $errors['league_id'] = 'Ambos equipos deben estar inscritos en la liga seleccionada.';
+            }
+        }
         if ($errors) return [null, $errors];
 
         Database::run(
@@ -93,6 +101,19 @@ class Partido
     public function delete(int $id): void
     {
         Database::run('DELETE FROM matches WHERE id=?', [$id]);
+    }
+
+    public function deleteIfAllowed(int $matchId, int $userId, bool $isAdmin, Equipo $equipo): bool
+    {
+        $m = $this->find($matchId);
+        if (!$m) return false;
+        if (!$isAdmin
+            && !$equipo->isCaptain((int) $m['home_team_id'], $userId)
+            && !$equipo->isCaptain((int) $m['away_team_id'], $userId)) {
+            return false;
+        }
+        $this->delete($matchId);
+        return true;
     }
 
     private function card(array $r): array

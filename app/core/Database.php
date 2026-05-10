@@ -185,22 +185,28 @@ class Database
             success INTEGER NOT NULL DEFAULT 0,
             attempted_at TEXT NOT NULL DEFAULT (datetime('now'))
         )");
+        $pdo->exec('CREATE INDEX IF NOT EXISTS idx_login_attempts_email ON login_attempts(email, attempted_at)');
+        $pdo->exec('CREATE INDEX IF NOT EXISTS idx_login_attempts_ip    ON login_attempts(ip,    attempted_at)');
 
         self::seed($pdo);
     }
 
     private static function seed(PDO $pdo): void
     {
+        // Nunca seedeamos datos demo en producción.
+        if (defined('APP_ENV') && APP_ENV === 'production') {
+            return;
+        }
         $count = (int) $pdo->query('SELECT COUNT(*) FROM users')->fetchColumn();
         if ($count > 0) {
             return;
         }
 
-        // Admin + jugador demo
+        // Admin + jugador demo (sólo en dev por el guard de APP_ENV)
         $st = $pdo->prepare("INSERT INTO users (name,email,phone,age,city,position,password_hash,role) VALUES (?,?,?,?,?,?,?,?)");
-        $st->execute(['Sadek Admin', 'admin@fastplay.es', '+34600000000', 28, 'Madrid', 'Mediocampo', password_hash('admin1234', PASSWORD_DEFAULT), 'admin']);
+        $st->execute(['Sadek Admin', 'admin@fastplay.es', '+34600000000', 28, 'Madrid', 'Mediocampo', password_hash('Admin1234!', PASSWORD_DEFAULT), 'admin']);
         $adminId = (int) $pdo->lastInsertId();
-        $st->execute(['Jugador Demo', 'demo@fastplay.es', '+34611111111', 24, 'Madrid', 'Delantero', password_hash('demo1234', PASSWORD_DEFAULT), 'player']);
+        $st->execute(['Jugador Demo', 'demo@fastplay.es', '+34611111111', 24, 'Madrid', 'Delantero', password_hash('Demo1234!', PASSWORD_DEFAULT), 'player']);
         $demoId = (int) $pdo->lastInsertId();
 
         $players = [
@@ -213,7 +219,7 @@ class Database
         ];
         $playerIds = [];
         foreach ($players as $p) {
-            $st->execute([$p[0], $p[1], '+34600' . random_int(100000, 999999), $p[2], $p[3], $p[4], password_hash('demo1234', PASSWORD_DEFAULT), 'player']);
+            $st->execute([$p[0], $p[1], '+34600' . random_int(100000, 999999), $p[2], $p[3], $p[4], password_hash('Demo1234!', PASSWORD_DEFAULT), 'player']);
             $playerIds[] = (int) $pdo->lastInsertId();
         }
 

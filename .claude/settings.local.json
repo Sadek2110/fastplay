@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php -l \"c:/xampp/htdocs/Proyectos/Versiones fastplay/FastPlay_v3/app/controllers/MatchesController.php\")",
+      "Bash(php -l \"c:/xampp/htdocs/Proyectos/Versiones fastplay/FastPlay_v3/app/controllers/AdminController.php\")",
+      "Bash(php -l \"c:/xampp/htdocs/Proyectos/Versiones fastplay/FastPlay_v3/app/controllers/LeaguesController.php\")",
+      "Bash(php -l \"c:/xampp/htdocs/Proyectos/Versiones fastplay/FastPlay_v3/app/controllers/HomeController.php\")",
+      "Bash(php -l \"c:/xampp/htdocs/Proyectos/Versiones fastplay/FastPlay_v3/app/controllers/ChatController.php\")"
+    ]
+  }
+}

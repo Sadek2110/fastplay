@@ -44,4 +44,21 @@ class ChatController extends Controller
         }
         redirect('chat/room/' . $id);
     }
+
+    public function createRoom(): void
+    {
+        $this->requireAdmin();
+        $this->requirePost();
+        $name = trim((string) ($_POST['name'] ?? ''));
+        $type = (string) ($_POST['type'] ?? 'group');
+        if ($name === '') {
+            flash('warn', 'Indica un nombre para la sala.');
+            redirect('chat');
+            return;
+        }
+        $chat = $this->model('Chat');
+        $newId = $chat->createRoom($name, $type);
+        flash('ok', 'Sala creada.');
+        redirect('chat/room/' . $newId);
+    }
 }

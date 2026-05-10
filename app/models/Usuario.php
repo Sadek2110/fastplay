@@ -120,11 +120,14 @@ class Usuario
              WHERE tm.user_id = ? AND m.status = 'finished'",
             [$userId]
         );
+        $teams = (int) Database::value('SELECT COUNT(*) FROM team_members WHERE user_id=?', [$userId]);
+        $captainOf = (int) Database::value('SELECT COUNT(*) FROM teams WHERE captain_id=?', [$userId]);
+        $achievements = (int) Database::value('SELECT COUNT(*) FROM user_achievements WHERE user_id=?', [$userId]);
         return [
-            ['i' => '⚽', 'v' => $played, 'l' => 'Partidos jugados',   'c' => '#4ade80'],
-            ['i' => '🎯', 'v' => 0,       'l' => 'Goles',              'c' => '#fbbf24'],
-            ['i' => '🤝', 'v' => 0,       'l' => 'Asistencias',        'c' => '#60a5fa'],
-            ['i' => '🟨', 'v' => 0,       'l' => 'Tarjetas amarillas', 'c' => '#fde047'],
+            ['i' => '⚽', 'v' => $played,       'l' => 'Partidos jugados', 'c' => '#4ade80'],
+            ['i' => '👥', 'v' => $teams,        'l' => 'Equipos',          'c' => '#60a5fa'],
+            ['i' => '🛡️', 'v' => $captainOf,    'l' => 'Como capitán',     'c' => '#fbbf24'],
+            ['i' => '🏅', 'v' => $achievements, 'l' => 'Logros',           'c' => '#fde047'],
         ];
     }
 

@@ -20,7 +20,6 @@
 </div>
 
 <?php $this->partial('footer'); ?>
-<?php $this->partial('tabs', ['active' => $active ?? '']); ?>
 
 </body>
 </html>

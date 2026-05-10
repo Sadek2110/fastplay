@@ -28,9 +28,9 @@ $cols = [
                 <span>Fast<span class="accent">Play</span></span>
             </a>
             <p style="color:#6b7280;font-size:13px;line-height:1.55;margin:16px 0 18px;">Fútbol amateur organizado para todos, en cualquier lugar.</p>
-            <div style="display:flex;gap:10px;">
+            <div style="display:flex;gap:10px;" aria-label="Redes sociales (próximamente)">
                 <?php foreach (['𝕏', 'in', 'ig'] as $s): ?>
-                    <span style="width:34px;height:34px;border-radius:9999px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);display:inline-flex;align-items:center;justify-content:center;color:#9ca3af;font-size:13px;cursor:pointer;"><?= e($s) ?></span>
+                    <span aria-disabled="true" title="Próximamente" style="width:34px;height:34px;border-radius:9999px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);display:inline-flex;align-items:center;justify-content:center;color:#9ca3af;font-size:13px;"><?= e($s) ?></span>
                 <?php endforeach; ?>
             </div>
         </div>

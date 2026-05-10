@@ -1,0 +1,22 @@
+# --- FastPlay ---
+storage/*.sqlite
+storage/*.sqlite-journal
+storage/*.log
+
+# Uploads del usuario (no los assets de marca controlados)
+uploads/*
+!uploads/.htaccess
+!uploads/frames/
+!uploads/frames/**
+
+# Editores / IDEs
+.idea/
+.vscode/
+*.bak
+*.swp
+*~
+
+# Sistema
+Thumbs.db
+.DS_Store
+desktop.ini

@@ -6,13 +6,25 @@ require_once APP_PATH . '/core/Database.php';
 require_once APP_PATH . '/core/Router.php';
 require_once APP_PATH . '/core/Controller.php';
 
+// Manejo unificado de excepciones y errores fatales
+set_exception_handler(function (Throwable $e) {
+    Router::serverError($e);
+});
+
+register_shutdown_function(function () {
+    $err = error_get_last();
+    if ($err && in_array($err['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
+        Router::serverError(new ErrorException(
+            $err['message'], 0, $err['type'], $err['file'], $err['line']
+        ));
+    }
+});
+
 // Inicializa BD (idempotente — sólo migra/seedea si está vacía)
 try {
     Database::pdo();
 } catch (Throwable $e) {
-    http_response_code(500);
-    error_log('[FastPlay/DB] ' . $e->getMessage());
-    echo 'No se pudo inicializar la base de datos.';
+    Router::serverError($e);
     exit;
 }
 

@@ -24,7 +24,6 @@ html { scroll-behavior: auto !important; }
   background: linear-gradient(180deg, rgba(6,13,9,.92) 0%, rgba(6,13,9,.70) 55%, rgba(6,13,9,0) 100%);
   backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
 }
-.fp-tabs { z-index: 60 !important; background: rgba(13,24,16,.55) !important; }
 .fp-footer, .fp-bg-glow { display: none !important; }
 
 /* ====== Leagues ====== */
@@ -363,12 +362,7 @@ unset($_l);
 (function() {
   'use strict';
 
-  <?php
-    $projectBase = rtrim(dirname(BASE_URL), '/\\');
-    if ($projectBase === '' || $projectBase === '.') $projectBase = '';
-    $projectBase = str_replace(' ', '%20', $projectBase);
-  ?>
-  var FRAME_PATH = '<?= $projectBase ?>/uploads/frames/frame_';
+  var FRAME_PATH = '<?= str_replace(' ', '%20', asset('frames/frame_')) ?>';
   var navbar = document.querySelector('.fp-navbar');
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 

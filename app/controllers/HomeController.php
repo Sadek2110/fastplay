@@ -15,14 +15,6 @@ class HomeController extends Controller
         ]);
     }
 
-    public function scrollAnimation(): void
-    {
-        $this->view('home/scroll-animation', [
-            'active' => 'home',
-            'title'  => 'FastPlay — Experiencia',
-        ]);
-    }
-
     public function notFound(): void
     {
         http_response_code(404);

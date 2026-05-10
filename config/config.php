@@ -7,8 +7,16 @@ define('APP_PATH', APP_ROOT . DIRECTORY_SEPARATOR . 'app');
 define('STORAGE_PATH', APP_ROOT . DIRECTORY_SEPARATOR . 'storage');
 define('UPLOADS_PATH', APP_ROOT . DIRECTORY_SEPARATOR . 'uploads');
 
+// Entorno de ejecución: 'development' o 'production'.
+// Sobrescribible vía variable de entorno APP_ENV (Apache SetEnv / sistema).
+if (!defined('APP_ENV')) {
+    define('APP_ENV', getenv('APP_ENV') ?: 'development');
+}
+
 if (!is_dir(STORAGE_PATH)) {
-    @mkdir(STORAGE_PATH, 0775, true);
+    if (!mkdir(STORAGE_PATH, 0775, true) && !is_dir(STORAGE_PATH)) {
+        throw new RuntimeException('No se pudo crear el directorio de almacenamiento: ' . STORAGE_PATH);
+    }
 }
 
 // SQLite — sin necesidad de configurar MySQL
@@ -25,9 +33,12 @@ mb_internal_encoding('UTF-8');
 // ===== Sesión endurecida =====
 if (session_status() === PHP_SESSION_NONE) {
     $secureCookie = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+    // Acotamos la cookie a la subcarpeta de instalación para no chocar con
+    // otras apps que vivan en el mismo host (típico en XAMPP).
+    $cookiePath = BASE_URL !== '' ? BASE_URL . '/' : '/';
     session_set_cookie_params([
         'lifetime' => 0,
-        'path'     => '/',
+        'path'     => $cookiePath,
         'domain'   => '',
         'secure'   => $secureCookie,
         'httponly' => true,
@@ -40,6 +51,9 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // ===== Cabeceras de seguridad =====
+// Único origen de cabeceras: NO duplicar en .htaccess (mod_headers).
+// CSP: 'unsafe-inline' es necesario hoy porque varias vistas (home, dashboard)
+// llevan <style>/<script> inline. Pendiente migrarlas a archivos para retirarlo.
 function security_headers(): void
 {
     header('X-Frame-Options: SAMEORIGIN');

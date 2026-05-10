@@ -46,6 +46,7 @@ class LeaguesController extends Controller
         if (!$equipo->isCaptain($teamId, (int) current_user()['id']) && !is_admin()) {
             flash('warn', 'Sólo el capitán puede inscribir su equipo.');
             redirect('leagues/show/' . $id);
+            return;
         }
 
         $liga = $this->model('Liga');
@@ -56,6 +57,7 @@ class LeaguesController extends Controller
             flash('warn', $res['error'] ?? 'No se pudo inscribir el equipo.');
         }
         redirect('leagues/show/' . $id);
+        return;
     }
 
     public function create(): void
@@ -70,6 +72,7 @@ class LeaguesController extends Controller
             if ($league) {
                 flash('ok', 'Liga creada.');
                 redirect('leagues/show/' . $league['id']);
+                return;
             }
             flash_old($_POST);
         }

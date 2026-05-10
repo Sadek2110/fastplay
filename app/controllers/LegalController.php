@@ -3,11 +3,14 @@
 
 class LegalController extends Controller
 {
+    private const LEGAL_LAST_UPDATED = '2026-05-10';
+
     public function terms(): void
     {
         $this->view('legal/terms', [
-            'active' => '',
-            'title'  => 'Términos de uso — FastPlay',
+            'active'      => '',
+            'lastUpdated' => self::LEGAL_LAST_UPDATED,
+            'title'       => 'Términos de uso — FastPlay',
         ]);
     }
 

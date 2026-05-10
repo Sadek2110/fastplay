@@ -34,20 +34,17 @@ class Router
 
         $controller = new $controllerClass();
 
-        // Bloqueamos métodos heredados o internos
-        $blocked = ['view', 'model', 'partial', 'back', 'requireauth', 'requireadmin', 'requireguest', 'requirepost'];
-        if (in_array(strtolower($action), $blocked, true) || strpos($action, '_') === 0) {
-            self::notFound();
-            return;
-        }
-        if (!method_exists($controller, $action)) {
+        // Métodos privados/protected del Controller base ya quedan bloqueados
+        // por ReflectionMethod::isPublic(); aquí sólo descartamos prefijo "_".
+        if (strpos($action, '_') === 0 || !method_exists($controller, $action)) {
             self::notFound();
             return;
         }
 
         try {
             $reflection = new ReflectionMethod($controller, $action);
-            if (!$reflection->isPublic() || $reflection->isStatic()) {
+            if (!$reflection->isPublic() || $reflection->isStatic()
+                || $reflection->getDeclaringClass()->getName() === 'Controller') {
                 self::notFound();
                 return;
             }

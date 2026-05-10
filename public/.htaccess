@@ -12,16 +12,16 @@
 
 # Bloquear acceso directo a archivos sensibles
 <FilesMatch "\.(env|md|log|sqlite|sqlite-journal|ini|sql)$">
-    Require all denied
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
 </FilesMatch>
 
-Options -Indexes
 ServerSignature Off
 
-# Cabeceras de seguridad (mod_headers)
-<IfModule mod_headers.c>
-    Header always set X-Content-Type-Options "nosniff"
-    Header always set X-Frame-Options "SAMEORIGIN"
-    Header always set Referrer-Policy "strict-origin-when-cross-origin"
-    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
-</IfModule>
+# Las cabeceras de seguridad (X-Frame-Options, CSP, etc.) se envían desde
+# config/config.php (security_headers()) para no duplicar y mantener un único origen.

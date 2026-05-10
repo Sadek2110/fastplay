@@ -14,6 +14,5 @@
 <div id="app">
     <?= $content ?>
 </div>
-<?php $this->partial('tabs', ['active' => $active ?? '']); ?>
 </body>
 </html>
