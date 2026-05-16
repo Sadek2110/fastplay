@@ -18,9 +18,7 @@ unset($_l);
   <div class="scroll-progress" id="scrollProgress"></div>
 
   <div class="scroll-anim__canvas-wrap">
-    <video id="heroVideo" muted playsinline autoplay loop preload="auto" poster="<?= asset('images/hero-poster.jpg') ?>">
-      <source src="<?= asset('video/hero.webm') ?>" type="video/webm">
-    </video>
+    <canvas id="frameCanvas" data-frame-path="<?= asset('frames-webp/frame_') ?>" data-frame-count="192"></canvas>
   </div>
 
   <div class="scroll-anim__vignette"></div>
