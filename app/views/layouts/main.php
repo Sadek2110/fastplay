@@ -8,6 +8,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title><?= e($title ?? 'FastPlay') ?></title>
 <link rel="stylesheet" href="<?= asset('css/app.css') ?>">
+<?= $head ?? '' ?>
 </head>
 <body>
 <div class="fp-bg-glow"></div>

@@ -20,10 +20,20 @@ class MatchesController extends Controller
         $match = $partido->find($id);
         if (!$match) { Router::notFound(); return; }
 
+        $isManager = false;
+        if (is_auth()) {
+            $equipo = $this->model('Equipo');
+            $userId = (int) current_user()['id'];
+            $isManager = is_admin()
+                || $equipo->isCaptain((int) $match['home_team_id'], $userId)
+                || $equipo->isCaptain((int) $match['away_team_id'], $userId);
+        }
+
         $this->view('matches/show', [
-            'active' => 'matches',
-            'match'  => $match,
-            'title'  => $match['home_name'] . ' vs ' . $match['away_name'],
+            'active'    => 'matches',
+            'match'     => $match,
+            'isManager' => $isManager,
+            'title'     => $match['home_name'] . ' vs ' . $match['away_name'],
         ]);
     }
 
@@ -40,8 +50,6 @@ class MatchesController extends Controller
 
         if (!$teams && !is_admin()) {
             flash('warn', 'Necesitas pertenecer a un equipo para crear un partido.');
-            redirect('teams/create');
-            return;
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {

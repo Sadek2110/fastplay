@@ -1,0 +1,14 @@
+.git
+.gitignore
+.claude
+arreglos.md
+README.md
+Dockerfile
+.dockerignore
+php/
+public/frames/
+storage/*.sqlite
+storage/*.sqlite-journal
+storage/*.log
+uploads/*
+!uploads/.htaccess

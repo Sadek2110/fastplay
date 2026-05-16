@@ -12,6 +12,7 @@ class HomeController extends Controller
             'leagues' => array_slice($liga->all(), 0, 4),
             'stats'   => $liga->stats(),
             'title'   => 'FastPlay — Fútbol amateur organizado',
+            'head'    => '<link rel="stylesheet" href="' . asset('css/scroll-anim.css') . '">',
         ]);
     }
 

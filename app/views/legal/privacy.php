@@ -20,7 +20,7 @@
         <p>Tienes derecho a acceder, rectificar, suprimir, limitar el tratamiento y portar tus datos. Para ejercer estos derechos, contáctanos en el email de soporte.</p>
         <h2 style="font-size:20px;font-weight:700;color:#fff;margin:32px 0 12px;">6. Cookies</h2>
         <p>Utilizamos cookies técnicas necesarias para el funcionamiento de la plataforma (sesión, CSRF). No utilizamos cookies de rastreo ni publicitarias. Consulta nuestra política de cookies para más detalles.</p>
-        <p style="margin-top:32px;color:#6b7280;font-size:13px;">Última actualización: mayo de 2026</p>
+        <p style="margin-top:32px;color:#6b7280;font-size:13px;">Última actualización: <?= e($lastUpdated) ?></p>
     </div>
     <a href="<?= url('') ?>" class="fp-btn fp-btn-primary fp-btn-glow" style="display:inline-flex;margin-top:32px;padding:14px 28px;font-size:15px;">Volver al inicio →</a>
 </main>

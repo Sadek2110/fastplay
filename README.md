@@ -155,7 +155,7 @@ FastPlay_v3/
 │   ├── css/                      # app.css + scroll-anim.css
 │   ├── js/                       # scroll-anim.js
 │   ├── images/                   # Assets gráficos (hero-pitch, etc.)
-│   ├── frames/                   # Secuencia de scroll (192 PNG)
+│   ├── frames/                   # Ignorado por git (assets generados localmente)
 │   └── index.php                 # Front Controller
 ├── storage/                      # SQLite (ignorado por git)
 │   └── .htaccess
@@ -246,7 +246,7 @@ El router resuelve siempre `/{controlador}/{acción}/{parametros...}`. La ruta r
 - **PHP 8.0** o superior con las extensiones:
   - `pdo_sqlite`
   - `mbstring`
-  - `fileinfo` (para validar uploads)
+  - `fileinfo` (opcional, para futura validación de uploads)
 - Permisos de escritura en `storage/` y `uploads/`.
 
 ### Despliegue local con XAMPP
@@ -266,6 +266,19 @@ chmod -R 775 FastPlay_v3/storage FastPlay_v3/uploads
 ```
 
 > La aplicación detecta automáticamente la `BASE_URL` en función del subdirectorio donde esté instalada — no necesita configuración manual.
+
+### Despliegue con Docker
+
+```bash
+docker build -t fastplay .
+docker run -p 8080:80 -e APP_ENV=production fastplay
+```
+
+### Servidor embebido de PHP (sin XAMPP)
+
+```bash
+php -S localhost:8000 router.php
+```
 
 ### Primer arranque
 
@@ -358,7 +371,7 @@ FastPlay trata cada pantalla como un **partido nocturno bajo focos**. La identid
 - Refactor profundo del _router_.
 - Endurecimiento de sesiones y CSP.
 - Extracción de animaciones de scroll a archivos externos.
-- Auditoría de seguridad completa.
+- Auditoría de seguridad en curso (ver [`arreglos.md`](arreglos.md)).
 
 ### 🔜 v4 (planeado)
 - [ ] API REST para cliente móvil.
@@ -376,7 +389,7 @@ Esta versión incluye:
 
 - **Refactorización profunda del sistema de rutas** — Router más expresivo y mantenible.
 - **Correcciones críticas en seguridad de sesiones** — Regeneración de ID, cookies endurecidas, _path_ acotado a la sub-instalación.
-- **Extracción parcial de animaciones a archivos externos** — `scroll-anim.css` y `scroll-anim.js` viven en `public/`. Quedan bloques `<style>`/`<script>` _inline_ en `home/index.php` por la dependencia de variables PHP.
+- **Extracción de animaciones a archivos externos** — `scroll-anim.css`, `scroll-anim.js` y `home-init.js` viven en `public/`. Ya no quedan bloques `<style>`/`<script>` _inline_ críticos en `home/index.php`.
 - **Autorización en partidos** — Crear, confirmar, cancelar y finalizar partidos exige ser capitán de uno de los equipos (o admin).
 - **Endurecimiento del panel admin** — No se puede eliminar ni degradar al último administrador.
 - **Limpieza de assets** — Frames del scroll movidos a `public/frames/`; archivos huérfanos eliminados.

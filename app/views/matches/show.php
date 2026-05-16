@@ -27,7 +27,7 @@
         </div>
     </div>
 
-    <?php if (is_auth() && $match['st'] !== 'finished' && $match['st'] !== 'cancelled'): ?>
+    <?php if ($isManager && $match['st'] !== 'finished' && $match['st'] !== 'cancelled'): ?>
         <section style="margin-top:24px;display:flex;gap:10px;flex-wrap:wrap;">
             <?php if ($match['st'] === 'pending'): ?>
                 <form method="post" action="<?= url('matches/confirm/' . (int) $match['id']) ?>" style="margin:0;">

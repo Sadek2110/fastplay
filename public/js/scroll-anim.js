@@ -8,10 +8,9 @@
 
   let _config;
   let video, progressBar, ticking, reduceMotion;
-  let targetTime = 0;
-  let renderedTime = 0;
-  let scrubRaf = 0;
-  let lastSeekAt = 0;
+  let lastScrollTop = 0;
+  let lastScrollAt = 0;
+  let playbackResetTimer = 0;
 
   function init(config) {
     _config = config || {};
@@ -20,16 +19,14 @@
     progressBar = document.getElementById('scrollProgress');
     reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    video.pause();
-    video.currentTime = 0;
-    video.addEventListener('loadedmetadata', function() {
-      targetTime = 0;
-      renderedTime = 0;
-      updateScrollState();
-    }, { once: true });
     if (video.readyState >= 1) markReady();
     else video.addEventListener('loadedmetadata', markReady, { once: true });
     video.addEventListener('loadeddata', markReady, { once: true });
+    if (reduceMotion) {
+      video.pause();
+    } else {
+      video.play().catch(function() {});
+    }
     window.addEventListener('scroll', onScroll, { passive: true });
 
     setTimeout(function() {
@@ -60,40 +57,30 @@
     const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
     const scrollFraction = maxScroll > 0 ? Math.min(scrollTop / maxScroll, 1) : 0;
     if (progressBar) progressBar.style.width = (scrollFraction * 100) + '%';
-    if (!reduceMotion && video && video.duration && isFinite(video.duration)) {
-      targetTime = Math.min(video.duration * scrollFraction, Math.max(video.duration - 0.04, 0));
-      requestScrub();
+    if (!reduceMotion && video) {
+      updatePlaybackRate(scrollTop);
     }
     if (_config.onScroll) _config.onScroll(scrollTop, scrollFraction);
   }
 
-  function requestScrub() {
-    if (scrubRaf) return;
-    scrubRaf = requestAnimationFrame(scrubVideo);
-  }
-
-  function scrubVideo(now) {
-    scrubRaf = 0;
-    if (!video || !video.duration || !isFinite(video.duration)) return;
-
-    const delta = targetTime - renderedTime;
-    const absDelta = Math.abs(delta);
-    if (absDelta < 0.012) {
-      renderedTime = targetTime;
-    } else {
-      renderedTime += delta * 0.28;
+  function updatePlaybackRate(scrollTop) {
+    const now = performance.now();
+    if (!lastScrollAt) {
+      lastScrollAt = now;
+      lastScrollTop = scrollTop;
+      return;
     }
-
-    // Limit seeks to roughly 30fps; browsers decode video seeks much more
-    // smoothly when they are paced instead of fired on every scroll event.
-    if (now - lastSeekAt > 32 || absDelta > 0.18) {
-      video.currentTime = renderedTime;
-      lastSeekAt = now;
-    }
-
-    if (Math.abs(targetTime - renderedTime) >= 0.012) {
-      requestScrub();
-    }
+    const elapsed = Math.max(now - lastScrollAt, 16);
+    const velocity = Math.abs(scrollTop - lastScrollTop) / elapsed;
+    const rate = Math.min(1.75, Math.max(0.75, 0.9 + velocity * 0.22));
+    video.playbackRate = rate;
+    if (video.paused) video.play().catch(function() {});
+    lastScrollAt = now;
+    lastScrollTop = scrollTop;
+    window.clearTimeout(playbackResetTimer);
+    playbackResetTimer = window.setTimeout(function() {
+      if (video) video.playbackRate = 1;
+    }, 180);
   }
 
   function initObserver() {

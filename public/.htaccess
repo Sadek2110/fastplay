@@ -11,7 +11,7 @@
 </IfModule>
 
 # Bloquear acceso directo a archivos sensibles
-<FilesMatch "\.(env|md|log|sqlite|sqlite-journal|ini|sql)$">
+<FilesMatch "\.(env|md|log|sqlite|sqlite-journal|ini|sql|json|lock|yml|yaml|dockerfile)$">
     <IfModule mod_authz_core.c>
         Require all denied
     </IfModule>

@@ -74,8 +74,35 @@ class Database
             badge TEXT DEFAULT '🛡️',
             captain_id INTEGER NOT NULL,
             created_at TEXT NOT NULL DEFAULT (datetime('now')),
-            FOREIGN KEY (captain_id) REFERENCES users(id) ON DELETE CASCADE
+            FOREIGN KEY (captain_id) REFERENCES users(id) ON DELETE RESTRICT
         )");
+
+        // Migración: si la tabla existía con ON DELETE CASCADE, recrear con RESTRICT
+        $needsMigrate = false;
+        foreach ($pdo->query("PRAGMA foreign_key_list('teams')") as $fk) {
+            if ($fk['table'] === 'users' && $fk['from'] === 'captain_id' && $fk['on_delete'] === 'CASCADE') {
+                $needsMigrate = true;
+                break;
+            }
+        }
+        if ($needsMigrate) {
+            $pdo->exec('PRAGMA foreign_keys = OFF');
+            $pdo->exec('BEGIN TRANSACTION');
+            $pdo->exec("CREATE TABLE teams_new (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                city TEXT NOT NULL,
+                badge TEXT DEFAULT '🛡️',
+                captain_id INTEGER NOT NULL,
+                created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                FOREIGN KEY (captain_id) REFERENCES users(id) ON DELETE RESTRICT
+            )");
+            $pdo->exec("INSERT INTO teams_new SELECT * FROM teams");
+            $pdo->exec("DROP TABLE teams");
+            $pdo->exec("ALTER TABLE teams_new RENAME TO teams");
+            $pdo->exec('COMMIT');
+            $pdo->exec('PRAGMA foreign_keys = ON');
+        }
 
         $pdo->exec("CREATE TABLE IF NOT EXISTS team_members (
             team_id INTEGER NOT NULL,

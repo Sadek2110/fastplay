@@ -31,7 +31,7 @@
         <p>No utilizamos cookies de terceros para publicidad, analítica ni redes sociales. Las fuentes de Google Fonts se cargan sin cookies.</p>
         <h2 style="font-size:20px;font-weight:700;color:#fff;margin:32px 0 12px;">4. Cómo gestionar las cookies</h2>
         <p>Puedes configurar tu navegador para bloquear todas las cookies. Sin embargo, dado que utilizamos cookies técnicas esenciales, es posible que algunas funciones de la plataforma dejen de funcionar correctamente si las desactivas.</p>
-        <p style="margin-top:32px;color:#6b7280;font-size:13px;">Última actualización: mayo de 2026</p>
+        <p style="margin-top:32px;color:#6b7280;font-size:13px;">Última actualización: <?= e($lastUpdated) ?></p>
     </div>
     <a href="<?= url('') ?>" class="fp-btn fp-btn-primary fp-btn-glow" style="display:inline-flex;margin-top:32px;padding:14px 28px;font-size:15px;">Volver al inicio →</a>
 </main>

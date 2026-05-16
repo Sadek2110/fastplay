@@ -32,5 +32,54 @@
 (function () {
     var feed = document.getElementById('fp-chat-feed');
     if (feed) feed.scrollTop = feed.scrollHeight;
+
+    var roomId = <?= (int) $room['id'] ?>;
+    var lastId = <?= !empty($messages) ? (int) end($messages)['id'] : 0 ?>;
+    var url = '<?= url('chat/messages/') ?>' + roomId;
+
+    function escapeHtml(t) {
+        var d = document.createElement('div');
+        d.textContent = t;
+        return d.innerHTML;
+    }
+
+    function renderMsg(m) {
+        var cls = m.own ? 'own' : '';
+        return '<div class="fp-msg ' + cls + '">' +
+            '<div class="fp-msg-meta"><strong>' + escapeHtml(m.user_name) + '</strong> <span>' + escapeHtml(m.created_at) + '</span></div>' +
+            '<div class="fp-msg-body">' + escapeHtml(m.body) + '</div>' +
+        '</div>';
+    }
+
+    function shouldScroll() {
+        if (!feed) return false;
+        return feed.scrollTop + feed.clientHeight >= feed.scrollHeight - 20;
+    }
+
+    function fetchMessages() {
+        fetch(url)
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (!data || data.error || !feed) return;
+                var html = '';
+                if (data.length === 0) {
+                    html = '<div class="fp-empty" style="margin:auto;">⏳ Sé el primero en escribir.</div>';
+                } else {
+                    data.forEach(function (m) {
+                        if (m.id > lastId) lastId = m.id;
+                        html += renderMsg(m);
+                    });
+                }
+                var scroll = shouldScroll();
+                feed.innerHTML = html;
+                if (scroll) feed.scrollTop = feed.scrollHeight;
+            })
+            .catch(function () {})
+            .finally(function () {
+                setTimeout(fetchMessages, 5000);
+            });
+    }
+
+    setTimeout(fetchMessages, 5000);
 })();
 </script>

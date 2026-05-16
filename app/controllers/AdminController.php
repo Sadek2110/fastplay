@@ -126,7 +126,17 @@ class AdminController extends Controller
     {
         $this->requireAdmin();
         $this->requirePost();
-        $this->model('Liga')->delete((int) $id);
+        $id = (int) $id;
+        $hasFinished = (int) Database::value(
+            "SELECT COUNT(*) FROM matches WHERE league_id=? AND status='finished'",
+            [$id]
+        );
+        if ($hasFinished > 0) {
+            flash('warn', 'No puedes eliminar una liga con partidos finalizados en su historial.');
+            redirect('admin/leagues');
+            return;
+        }
+        $this->model('Liga')->delete($id);
         flash('ok', 'Liga eliminada.');
         redirect('admin/leagues');
     }
@@ -135,7 +145,17 @@ class AdminController extends Controller
     {
         $this->requireAdmin();
         $this->requirePost();
-        $this->model('Campo')->delete((int) $id);
+        $id = (int) $id;
+        $hasFinished = (int) Database::value(
+            "SELECT COUNT(*) FROM matches WHERE field_id=? AND status='finished'",
+            [$id]
+        );
+        if ($hasFinished > 0) {
+            flash('warn', 'No puedes eliminar un campo con partidos finalizados en su historial.');
+            redirect('admin/fields');
+            return;
+        }
+        $this->model('Campo')->delete($id);
         flash('ok', 'Campo eliminado.');
         redirect('admin/fields');
     }

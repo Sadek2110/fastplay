@@ -55,9 +55,7 @@ class AuthController extends Controller
 
     public function logout(): void
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            require_csrf();
-        }
+        $this->requirePost();
         logout_user();
         flash('ok', 'Has cerrado sesión.');
         redirect('');

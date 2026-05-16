@@ -17,16 +17,18 @@ class LegalController extends Controller
     public function privacy(): void
     {
         $this->view('legal/privacy', [
-            'active' => '',
-            'title'  => 'Privacidad (GDPR) — FastPlay',
+            'active'      => '',
+            'lastUpdated' => self::LEGAL_LAST_UPDATED,
+            'title'       => 'Privacidad (GDPR) — FastPlay',
         ]);
     }
 
     public function cookies(): void
     {
         $this->view('legal/cookies', [
-            'active' => '',
-            'title'  => 'Cookies — FastPlay',
+            'active'      => '',
+            'lastUpdated' => self::LEGAL_LAST_UPDATED,
+            'title'       => 'Cookies — FastPlay',
         ]);
     }
 }

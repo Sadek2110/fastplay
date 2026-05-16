@@ -31,12 +31,14 @@ class Usuario
     public function register(array $data): array
     {
         $errors = [];
-        $name  = trim((string) ($data['name'] ?? ''));
-        $email = mb_strtolower(trim((string) ($data['email'] ?? '')));
-        $phone = trim((string) ($data['phone'] ?? ''));
-        $age   = (int) ($data['age'] ?? 0);
-        $pass  = (string) ($data['password'] ?? '');
-        $conf  = (string) ($data['password_confirm'] ?? '');
+        $name     = trim((string) ($data['name'] ?? ''));
+        $email    = mb_strtolower(trim((string) ($data['email'] ?? '')));
+        $phone    = trim((string) ($data['phone'] ?? ''));
+        $age      = (int) ($data['age'] ?? 0);
+        $city     = trim((string) ($data['city'] ?? ''));
+        $position = trim((string) ($data['position'] ?? ''));
+        $pass     = (string) ($data['password'] ?? '');
+        $conf     = (string) ($data['password_confirm'] ?? '');
 
         if (!v_required($name) || mb_strlen($name) < 2)        $errors['name']  = 'Indica tu nombre completo.';
         if (!v_email($email))                                  $errors['email'] = 'Email no válido.';
@@ -59,8 +61,8 @@ class Usuario
         }
 
         Database::run(
-            "INSERT INTO users (name,email,phone,age,password_hash,role) VALUES (?,?,?,?,?,?)",
-            [$name, $email, $phone ?: null, $age ?: null, password_hash($pass, PASSWORD_DEFAULT), 'player']
+            "INSERT INTO users (name,email,phone,age,city,position,password_hash,role) VALUES (?,?,?,?,?,?,?,?)",
+            [$name, $email, $phone ?: null, $age ?: null, $city ?: null, $position ?: null, password_hash($pass, PASSWORD_DEFAULT), 'player']
         );
         $user = Database::one('SELECT * FROM users WHERE id = ?', [Database::insertId()]);
         unset($user['password_hash']);

@@ -51,6 +51,31 @@ class ChatController extends Controller
         redirect('chat/room/' . $id);
     }
 
+    public function messages(string $id = ''): void
+    {
+        $this->requireAuth();
+        $id = (int) $id;
+        $chat = $this->model('Chat');
+        $room = $chat->room($id);
+        if (!$room || !$chat->canAccessRoom($room, (int) current_user()['id'], is_admin())) {
+            http_response_code(403);
+            header('Content-Type: application/json');
+            echo json_encode(['error' => 'Acceso denegado']);
+            return;
+        }
+        header('Content-Type: application/json');
+        $msgs = array_reverse($chat->messages($id));
+        echo json_encode(array_map(function ($m) {
+            return [
+                'id'         => (int) $m['id'],
+                'user_name'  => $m['user_name'],
+                'body'       => $m['body'],
+                'created_at' => date('d/m H:i', strtotime($m['created_at'])),
+                'own'        => (int) $m['user_id'] === (int) current_user()['id'],
+            ];
+        }, $msgs));
+    }
+
     public function createRoom(): void
     {
         $this->requireAdmin();
