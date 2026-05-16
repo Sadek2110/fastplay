@@ -8,7 +8,9 @@
       "Bash(php -l \"c:/xampp/htdocs/Proyectos/Versiones fastplay/FastPlay_v3/app/controllers/ChatController.php\")",
       "mcp__plugin_engram_engram__mem_current_project",
       "mcp__plugin_engram_engram__mem_search",
-      "mcp__plugin_engram_engram__mem_save"
+      "mcp__plugin_engram_engram__mem_save",
+      "Bash(git -C \"c:/Users/sadek/Desktop/Proyectos personales/Fastplay\" log --oneline -20)",
+      "Bash(git -C \"c:/Users/sadek/Desktop/Proyectos personales/Fastplay\" ls-files)"
     ]
   }
 }

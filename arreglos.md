@@ -1,6 +1,6 @@
 # 🔧 FastPlay v3 — Arreglos pendientes
 
-> Re-auditoría del proyecto al 2026-05-16. Compara el estado actual con la auditoría previa del 2026-05-10 (commit `3fc0df9`) y añade los fallos nuevos detectados.
+> Re-auditoría del proyecto al 2026-05-16 (post commit `56de7fd` _“Arreglos del proyecto”_). Compara el estado actual con la auditoría previa (`ebee7fa`) y añade los fallos nuevos detectados.
 >
 > Leyenda: 🔴 crítico · 🟠 importante · 🟡 menor · 🔵 documentación / cosmético · ✅ resuelto desde la auditoría previa
 
@@ -8,9 +8,9 @@
 
 ## 0. Resumen ejecutivo
 
-La mayor parte del Sprint 1 y Sprint 2 propuestos en la versión anterior **están aplicados**: autorización en partidos, guardas de admin, sesiones acotadas, `.gitignore`, índices SQL, `.htaccess` endurecidos, seed protegido por `APP_ENV`, frames movidos a `public/`, assets huérfanos eliminados.
+Esta tanda **cierra el Sprint 1** de la auditoría anterior: el runtime de PHP y los 192 PNG ya no se versionan, las transiciones de estado del partido se validan, el borrado de equipo bloquea si hay histórico y `MatchesController::finish` acota el marcador. El `ChatController` también pasa por una capa de control de acceso (parcial), y `AdminController::deleteUser` añade defensa en profundidad para los borrados en cascada.
 
-Quedan abiertos algunos ítems del Sprint 2/3 originales y aparecen problemas nuevos serios — sobre todo dos focos que ahora dominan la deuda técnica: **(a)** el repositorio versiona ~250 MB de binarios (runtime de PHP para Windows y los 192 frames PNG) y **(b)** el chat y algunas acciones de partidos siguen sin validar pertenencia/estado.
+Quedan abiertos casi todos los ítems del Sprint 2/3 (UX, documentación, refactor de CSP) y aparecen problemas nuevos centrados en el **deploy**: el `Dockerfile` empaqueta el repositorio entero (incluido `php/` y la SQLite local), `AuthController::logout` acepta GET sin CSRF, y los borrados de liga/campo desde admin no chequean histórico.
 
 ---
 
@@ -20,181 +20,191 @@ Solo se listan para cerrar la trazabilidad. No requieren acción.
 
 | Ítem | Cambio que lo resuelve |
 |---|---|
-| ✅ 1.1 | `uploads/.htaccess` ahora desactiva `ExecCGI`, hace `RemoveHandler` para PHP/CGI/scripting y bloquea por `<FilesMatch>` |
-| ✅ 1.2 | `app/`, `config/`, `storage/` con bloque dual Apache 2.4 + 2.2 (`mod_authz_core` con fallback) |
-| ✅ 1.3 | `public/.htaccess` ya no duplica cabeceras; comentario explícito indica que el único origen es `security_headers()` en `config.php` |
-| ✅ 2.1 / 2.2 / 2.5 | `uploads/image(2).png` y `uploads/video_landing_fastplay.mp4` eliminados; `uploads/` sólo conserva `.htaccess` |
-| ✅ 2.3 | Frames movidos a `public/frames/` (`home/index.php:365` ya apunta a `asset('frames/frame_')`) |
-| ✅ 3.1 | `home/scroll-animation.php` eliminado; sólo queda `home/index.php` como landing |
-| ✅ 3.3 | `partials/tabs.php` eliminado; ya no lo cargan `layouts/main.php` ni `layouts/auth.php` |
-| ✅ 3.4 | `home/index.php:27` oculta solo `.fp-footer` y `.fp-bg-glow`; navbar permanece visible |
-| ✅ 3.5 | Stats vienen de `Liga::stats()` ([app/models/Liga.php:85-96](app/models/Liga.php#L85-L96)), no de números inventados |
-| ✅ 4.1 | `MatchesController::canManageMatch()` valida capitanía en `confirm`/`cancel`/`finish` ([app/controllers/MatchesController.php:135-150](app/controllers/MatchesController.php#L135-L150)) |
-| ✅ 4.2 | `create()` valida capitanía sobre `home_team_id` y `away_team_id` ([app/controllers/MatchesController.php:52-57](app/controllers/MatchesController.php#L52-L57)) |
-| ✅ 4.3 | `Partido::create()` verifica que ambos equipos estén inscritos en la liga ([app/models/Partido.php:71-77](app/models/Partido.php#L71-L77)) |
-| ✅ 4.4 | `AdminController::deleteUser` y `setRole` protegen al último admin ([app/controllers/AdminController.php:42-49](app/controllers/AdminController.php#L42-L49), [74-81](app/controllers/AdminController.php#L74-L81)) |
-| ✅ 4.5 | `redirect` seguido de `return;` explícito en `LeaguesController::register` |
-| ✅ 4.7 | `Usuario::dashboardStats()` ya devuelve métricas reales (partidos jugados, equipos, capitanías, logros) en lugar de ceros |
-| ✅ 4.8 | `Partido::delete()` se invoca desde `MatchesController::delete`; `Chat::createRoom()` se usa desde `ChatController::createRoom` |
-| ✅ 5.1 | `config.php:38` acota la cookie de sesión a `BASE_URL ?: '/'` |
-| ✅ 5.4 | `mkdir()` con `RuntimeException` en lugar de `@` ([config/config.php:16-20](config/config.php#L16-L20)) |
-| ✅ 6.2 | `Router` elimina el array `$blocked`; ahora confía en `ReflectionMethod::isPublic()` + `getDeclaringClass()` ([app/core/Router.php:44-50](app/core/Router.php#L44-L50)) |
-| ✅ 6.3 | `public/index.php:10-21` registra `set_exception_handler` y `register_shutdown_function` |
-| ✅ 7.1 / 7.6 / 7.7 | README sin referencias a `BUGS.md`, sin árbol obsoleto, sin SHAs de commits |
-| ✅ 7.2 | Mapa de Rutas (`README.md:200-237`) coincide con el código real (`/auth/login`, `/leagues/show/{id}`, etc.) |
-| ✅ 7.3 | `README.md:346` aclara explícitamente que **no se usan namespaces** |
-| ✅ 7.4 | `README.md:305` reconoce que la subida de archivos está "pendiente de implementación"; ya no promete validación MIME |
-| ✅ 7.5 | El árbol del README ya no promete un subsistema de logs inexistente |
-| ✅ 8.1 | `.gitignore` creado: cubre SQLite, journal, IDE, sistema |
-| ✅ 8.2 | `Database::seed()` protegido por `APP_ENV !== 'production'` ([app/core/Database.php:197-199](app/core/Database.php#L197-L199)) |
-| ✅ 8.3 | Índices `idx_login_attempts_email` e `idx_login_attempts_ip` creados ([app/core/Database.php:188-189](app/core/Database.php#L188-L189)) |
-| ✅ 8.7 | Seed sube las contraseñas demo a `Admin1234!` / `Demo1234!` |
+| ✅ 3.1.1 | `php/` movido a `.gitignore` (`/.gitignore:11`). `git ls-files` ya no devuelve ninguno de los 82 archivos del runtime. |
+| ✅ 3.1.3 | `public/frames/` movido a `.gitignore` (`/.gitignore:12`); ningún PNG queda rastreado. |
+| ✅ 3.1.4 | `php/php.ini` deja de distribuirse como consecuencia de 3.1.1. |
+| ✅ 3.1.5 | `.gitignore` ya no incluye `!uploads/frames/`; sólo conserva la excepción `!uploads/.htaccess`. |
+| ✅ 3.2.2 | `Partido::setStatus` valida transiciones: rechaza salir de `finished`/`cancelled`, exige `pending→confirmed` y `confirmed→finished` ([app/models/Partido.php:95-123](app/models/Partido.php#L95-L123)). |
+| ✅ 3.2.3 | `Partido::create` valida que `field_id` y `league_id` existan antes de insertar ([app/models/Partido.php:71-76](app/models/Partido.php#L71-L76)). |
+| ✅ 3.2.4 | `MatchesController::finish` recorta con `min(99, max(0, …))` y rechaza marcadores 0–0 ([app/controllers/MatchesController.php:134-142](app/controllers/MatchesController.php#L134-L142)). |
+| ✅ 3.2.5 | `TeamsController::delete` consulta `Equipo::deletionBlocker` y aborta si hay partidos o ligas activas ([app/models/Equipo.php:103-123](app/models/Equipo.php#L103-L123)). |
+| ✅ 3.2.1 _(parcial)_ | `ChatController::send` ahora pasa por `Chat::send`, que invoca `Chat::canAccessRoom`. La sala `match_negotiation` queda restringida a capitanes. Las salas de tipo `group`/`general`/`team` siguen abiertas a cualquier usuario autenticado — ver nuevo punto 3.2.1b abajo. |
+| ✅ 3.2.6 _(parcial)_ | `AdminController::deleteUser` bloquea si el usuario capitanea equipos ([app/controllers/AdminController.php:83-88](app/controllers/AdminController.php#L83-L88)). Defensa en profundidad — la FK `teams.captain_id ON DELETE CASCADE` sigue activa en [Database.php:77](app/core/Database.php#L77), por lo que cualquier borrado directo en DB o vía otro path seguiría arrasando equipos. |
 
 ---
 
 ## 2. Pendientes de la auditoría previa que siguen abiertos
 
-🟠 **2.1 — Inline CSS/JS masivo en `home/index.php`** (heredado de 5.2 y 7.8)
-- [home/index.php:2-149](app/views/home/index.php#L2-L149) contiene un bloque `<style>` de **148 líneas** con todas las clases `.scroll-*` específicas de la landing.
-- [home/index.php:361-428](app/views/home/index.php#L361-L428) tiene un bloque `<script>` de 67 líneas con la inicialización del scroll.
+🟠 **2.1 — Inline CSS/JS masivo en `home/index.php`**
+- [home/index.php:2-149](app/views/home/index.php#L2-L149) sigue conteniendo un bloque `<style>` de **148 líneas** con todas las clases `.scroll-*` específicas de la landing.
+- [home/index.php:363-428](app/views/home/index.php#L363-L428) tiene un bloque `<script>` de 66 líneas con el inicializador de `FastPlayScrollAnim`.
 - Mientras existan, la CSP debe seguir permitiendo `'unsafe-inline'` para `style-src` y `script-src` ([config.php:64-71](config/config.php#L64-L71)).
-- **Fix:** mover las reglas `.scroll-*` a `public/css/scroll-anim.css` (ya existe) y el inicializador a `public/js/scroll-anim.js`. El path de frames puede llegar vía `<canvas data-frames-base="…">` para no depender de PHP en línea.
+- **Fix:** mover las reglas `.scroll-*` a `public/css/scroll-anim.css` (ya existe) y el inicializador a `public/js/scroll-anim.js`. Los datos dinámicos (lista de ligas, stats) pueden viajar vía atributos `data-*` para no romper la CSP.
 
-🟠 **2.2 — `<link rel="stylesheet">` cargado desde dentro de `<body>`**
-- [home/index.php:1](app/views/home/index.php#L1) emite `<link rel="stylesheet" href="…/scroll-anim.css">` como **primera línea de la vista**, pero la vista se inyecta en [layouts/main.php:19](app/views/layouts/main.php#L19), debajo de `</head>` (línea 11). Resultado: la etiqueta `<link>` queda dentro de `<body>`, lo que causa FOUC y orden HTML inválido.
-- **Fix:** exponer un slot `$head` en `main.php` (`<?= $head ?? '' ?>` antes de `</head>`) y que las vistas que necesiten CSS propio lo declaren ahí, o fusionar `scroll-anim.css` dentro de `app.css`.
+🟠 **2.2 — `<link rel="stylesheet">` cargado dentro de `<body>`**
+- [home/index.php:1](app/views/home/index.php#L1) emite `<link rel="stylesheet" href="…/scroll-anim.css">` como primera línea de la vista, pero la vista se inyecta en [layouts/main.php:19](app/views/layouts/main.php#L19), debajo de `</head>` (línea 11). Resultado: la etiqueta `<link>` queda dentro de `<body>` → FOUC y HTML inválido.
+- **Fix:** exponer un slot `$head` en `main.php` (`<?= $head ?? '' ?>` antes de `</head>`) y mover el `<link>` ahí, o fusionar `scroll-anim.css` dentro de `app.css`.
 
-🟠 **2.3 — `Usuario::register()` ignora `city` y `position`** (era Fallo 4.6)
-- [app/models/Usuario.php:61-64](app/models/Usuario.php#L61-L64) hace `INSERT INTO users (name,email,phone,age,password_hash,role)` y omite las columnas `city` y `position`, aunque el esquema las define ([Database.php:62-63](app/core/Database.php#L62-L63)) y el README las anuncia como parte del perfil.
-- **Fix:** o se piden en el formulario de alta y se persisten, o se quitan del esquema inicial y se admite que solo se rellenan vía `profile/edit`.
+🟠 **2.3 — `Usuario::register()` sigue ignorando `city` y `position`**
+- [app/models/Usuario.php:61-64](app/models/Usuario.php#L61-L64) hace `INSERT INTO users (name,email,phone,age,password_hash,role)` y omite las columnas `city` y `position`, aunque el esquema las define ([Database.php:62-63](app/core/Database.php#L62-L63)) y el README promete perfil con esos campos.
+- **Fix:** o se piden en el formulario de alta y se persisten, o se documenta que sólo se rellenan vía `profile/edit`.
 
-🟠 **2.4 — CSP sigue con `'unsafe-inline'` en `script-src` y `style-src`** (Fallo 5.2)
-- Consecuencia directa de 2.1. Documentado en el propio `config.php:55-56`, pero sigue siendo una concesión real.
+🟠 **2.4 — CSP sigue con `'unsafe-inline'` en `script-src` y `style-src`**
+- Consecuencia directa de 2.1. El propio `config.php:55-56` ya lo asume.
 
-🟡 **2.5 — Footer con iconos de redes no clicables** (Fallo 3.6)
-- [partials/footer.php:31-35](app/views/partials/footer.php#L31-L35) renderiza tres `<span aria-disabled="true">` (`𝕏`, `in`, `ig`) con estilo de botón pero sin enlace. Aunque tienen `aria-disabled` y `title="Próximamente"`, visualmente parecen interactivos.
-- **Fix:** o convertir a `<a href>` reales cuando existan, o eliminarlos hasta que haya cuentas activas.
+🟡 **2.5 — Footer con iconos de redes no clicables**
+- [partials/footer.php:31-35](app/views/partials/footer.php#L31-L35) renderiza tres `<span aria-disabled="true">` (`𝕏`, `in`, `ig`) con estilo de botón. Aunque tienen `title="Próximamente"`, visualmente parecen interactivos.
 
-🟡 **2.6 — Chat sin auto-refresh** (Fallo 8.5)
-- [chat/room.php:31-36](app/views/chat/room.php#L31-L36) sólo hace scroll inicial al final del feed; no hay polling ni WebSocket. El README sigue anunciando "chat en vivo" en línea 67.
-- **Fix corto:** `fetch('/chat/messages/{id}?after={lastId}')` cada 5-10 s, devolviendo JSON. Si v3 va a ser final, etiquetar como "chat asíncrono" en el README.
+🟡 **2.6 — Chat sin auto-refresh**
+- [chat/room.php:31-36](app/views/chat/room.php#L31-L36) sólo hace `scrollTop = scrollHeight` en carga; no hay polling ni WebSocket. El README sigue anunciando “chat en vivo” en línea 67.
+- **Fix corto:** `fetch('chat/messages/{id}?after={lastId}')` cada 5–10 s devolviendo JSON. Si v3 es final, retitular como “chat asíncrono” en el README.
 
-🟡 **2.7 — Router rechaza guiones medios en URLs** (Fallo 6.1)
-- [Router.php:15](app/core/Router.php#L15) sigue con `^[a-zA-Z0-9_]+$`. Ahora mismo no genera inconsistencias visibles (el método `setRole`/`deleteUser` usa camelCase, ver README:237), pero limita la expresividad futura. Es decisión consciente; documentado en el README.
+🟡 **2.7 — Router rechaza guiones medios en URLs**
+- [Router.php:15](app/core/Router.php#L15) sigue con `^[a-zA-Z0-9_]+$`. Decisión consciente; documentada en README:237. Sin impacto funcional hoy.
 
-🟡 **2.8 — `MatchesController::create` redirige si el usuario no tiene equipo** (Fallo 8.6)
-- [MatchesController.php:41-45](app/controllers/MatchesController.php#L41-L45). Aún rompe el ciclo POST. Mejor render in-place con CTA "Crea un equipo →".
+🟡 **2.8 — `MatchesController::create` redirige al usuario sin equipo**
+- [MatchesController.php:41-45](app/controllers/MatchesController.php#L41-L45) rompe el ciclo POST. Mejor render in-place con CTA “Crea un equipo →”.
 
-🟡 **2.9 — `config.php` sigue siendo un "todo en uno" de ~194 líneas** (Fallo 5.3)
-- Refactor opcional; el código funciona. Solo se documenta para no perderlo del radar.
+🟡 **2.9 — `config.php` sigue siendo “todo en uno” (~194 líneas)**
+- Refactor opcional. El código funciona.
 
-🟡 **2.10 — `Content-Type` UTF-8 dependiente del default de Apache** (Fallo 8.4)
-- Conviene `header('Content-Type: text/html; charset=UTF-8')` explícito en `security_headers()` o en el layout principal, para no depender de la config del host.
+🟡 **2.10 — `Content-Type` UTF-8 dependiente del default de Apache**
+- `security_headers()` ([config.php:57-72](config/config.php#L57-L72)) no envía `Content-Type: text/html; charset=UTF-8`. Conviene hacerlo explícito para no depender de la config del host.
 
-🔵 **2.11 — Fallback `'mayo de 2026'` en `terms.php:16`** (heredado de Fallo 8.8)
-- `LegalController::terms` ya inyecta `LEGAL_LAST_UPDATED = '2026-05-10'` ([LegalController.php:6,12](app/controllers/LegalController.php#L6)), por lo que el fallback `<?= e($lastUpdated ?? 'mayo de 2026') ?>` en [terms.php:16](app/views/legal/terms.php#L16) ya nunca se usa. Es código muerto: o se quita el `??` o se centraliza el valor.
+🔵 **2.11 — Fallback `'mayo de 2026'` en `terms.php:16`**
+- `LegalController::terms` ya inyecta `LEGAL_LAST_UPDATED = '2026-05-10'` ([LegalController.php:6,12](app/controllers/LegalController.php#L6)), así que el `<?= e($lastUpdated ?? 'mayo de 2026') ?>` de [terms.php:16](app/views/legal/terms.php#L16) es código muerto.
 
----
+🔵 **3.1.2 — El `.git/` sigue pesando**
+- Aunque los blobs nuevos del runtime PHP y los frames ya no se incorporan, los blobs ya commiteados en el historial siguen ahí. Si el repo se hace público (portfolio), purgar con `git filter-repo` o BFG tras coordinar con cualquier colaborador.
 
-## 3. Fallos nuevos detectados en esta auditoría
+🔵 **3.1.6 — Faltan `LICENSE`, `SECURITY.md`, `CHANGELOG.md`**
+- README cita “uso académico”, pero sin archivo `LICENSE` el código no tiene licencia explícita y nadie puede reutilizarlo legalmente. Tampoco hay canal documentado para reportar vulnerabilidades.
 
-### 3.1 Repositorio / assets
-
-🔴 **3.1.1 — `php/` (runtime de PHP para Windows) versionado en el repo**
-- El directorio [`php/`](php/) contiene 82 archivos rastreados (`php.exe`, `php-cgi.exe`, `php8ts.dll`, `libcrypto-3-x64.dll`, `icudt71.dll`, `php.ini`, etc.) por un total de **~85 MB**.
-- Un runtime no pertenece al repositorio: rompe la portabilidad (no funciona en Linux/Mac), expone una `php.ini` arbitraria del entorno del autor y multiplica el tamaño del clon.
-- **Fix:**
-  ```bash
-  git rm -r --cached php/
-  echo 'php/' >> .gitignore
-  git commit -m "Quita runtime PHP del repositorio"
-  ```
-- Si se necesita reproducibilidad de entorno, usar el `Dockerfile` ya presente o documentar la versión de PHP requerida en el README. El historial seguirá pesando — ver 3.1.2.
-
-🔴 **3.1.2 — El `.git/` pesa ~230 MB**
-- Suma de los 85 MB del runtime + 169 MB de frames + churn. Cualquier clon nuevo descarga 230 MB. Si el proyecto va a ser público (portfolio), considerar `git filter-repo` o BFG **una vez** tras aplicar 3.1.1 y 3.1.3 para purgar los blobs históricos.
-- ⚠️ Acción destructiva: hablarlo antes y avisar a cualquier colaborador. Si nadie ha clonado el repo todavía, ahora es el mejor momento.
-
-🟠 **3.1.3 — 192 PNG (~169 MB) en `public/frames/` versionados**
-- `git ls-files public/frames/ | wc -l → 192`; tamaño en disco 169 MB.
-- Mismo problema que ya señalaba la auditoría 2.4 anterior (en `uploads/`), simplemente mudado de carpeta.
-- **Fix recomendado:** re-codificar la secuencia a un único `.webm`/`.mp4` (`ffmpeg -framerate 30 -i frame_%04d.png -c:v libvpx-vp9 -b:v 0 -crf 32 hero.webm` típicamente <5 MB) y reemplazar el render por canvas por `<video autoplay muted playsinline>`. Si se mantiene el canvas, generar los frames en deploy a partir del vídeo y excluirlos del repo.
-
-🟠 **3.1.4 — `php/php.ini` se distribuye con la app**
-- Aunque sea solo de desarrollo, versionar el `.ini` del runtime mezcla configuración local con código fuente y puede filtrar rutas absolutas / extensiones cargadas que el host real no tiene. Eliminar junto con el resto de `php/`.
-
-🔵 **3.1.5 — `.gitignore` con reglas muertas**
-- [.gitignore:9-10](.gitignore#L9-L10) mantiene `!uploads/frames/` y `!uploads/frames/**`, pero esa carpeta ya no existe (los frames están en `public/frames/`). Líneas obsoletas que confunden.
-
-🔵 **3.1.6 — Faltan `LICENSE`, `SECURITY.md` y `CHANGELOG.md`**
-- El README cita "uso académico" pero no hay archivo `LICENSE`. Sin él, por defecto el código no tiene licencia explícita y nadie puede reutilizarlo legalmente.
-- Tampoco hay `SECURITY.md` (canal para reportar vulnerabilidades) ni `CHANGELOG.md` (el README delega "el historial completo de cambios vive en git log", lo cual es razonable pero no sustituye un changelog narrado).
-
-### 3.2 Seguridad y autorización
-
-🟠 **3.2.1 — `ChatController::send` no valida pertenencia a la sala**
-- [ChatController.php:35-46](app/controllers/ChatController.php#L35-L46) sólo exige `requireAuth()` y CSRF. Cualquier usuario autenticado puede escribir en cualquier `chat_rooms.id`, incluida `match_negotiation` (privada entre capitanes) o cualquier futura sala de equipo.
-- **Fix:** introducir el concepto de "miembros de sala" (tabla `chat_room_members` o derivar dinámicamente desde `team_members`/`matches`) y verificar antes de insertar.
-
-🟠 **3.2.2 — `MatchesController::cancel` y `finish` no validan transiciones de estado**
-- [MatchesController.php:92-102](app/controllers/MatchesController.php#L92-L102): un capitán puede llamar `cancel` sobre un partido ya `finished`, perdiendo el marcador registrado. Y al revés: `finish` sobre un `cancelled` resucita el partido sin chequeo.
-- **Fix:** en `Partido::setStatus` rechazar transiciones inválidas (de `finished`/`cancelled` no se puede salir; a `finished` solo desde `confirmed`).
-
-🟠 **3.2.3 — `Partido::create` no verifica que `field_id` exista**
-- [Partido.php:55-86](app/models/Partido.php#L55-L86) acepta cualquier `field_id` recibido por POST y lo inserta sin SELECT previo. La FK con `ON DELETE SET NULL` (Database.php:143) protege ante borrados, pero permite insertar IDs inventados (ej. `field_id=999`). Lo mismo aplicaba a `league_id` antes del chequeo de inscripción.
-- **Fix:** `if ($field && !Database::value('SELECT 1 FROM fields WHERE id=?', [$field])) $errors[…]`.
-
-🟠 **3.2.4 — `MatchesController::finish` acepta marcadores fuera de rango**
-- [MatchesController.php:128-130](app/controllers/MatchesController.php#L128-L130) hace `(int) $_POST['home_score']` y solo aplica `max(0, …)`. Un POST con `home_score=99999` se guarda. Para datos no críticos no es urgente, pero conviene un tope (`min(99, …)`) y rechazar si los dos son 0 en un partido finalizado real.
-
-🟠 **3.2.5 — Borrado de equipo destruye partidos pasados y standings**
-- `teams.id` tiene `ON DELETE CASCADE` en `matches.home_team_id`, `matches.away_team_id`, `league_teams.team_id` ([Database.php:140-141, 114-115](app/core/Database.php#L140)). `TeamsController::delete` ([TeamsController.php:94-109](app/controllers/TeamsController.php#L94-L109)) permite al capitán borrar el equipo sin pasar por ningún chequeo: se llevará por delante todo el histórico de partidos jugados, la posición en cualquier liga activa y los datos de clasificación.
-- **Fix:** soft-delete (`teams.archived_at`) o bloqueo si `EXISTS (SELECT 1 FROM matches WHERE home_team_id=? OR away_team_id=?)` o si el equipo está inscrito en una liga con `status='open'`/`'in_progress'`.
-
-🟠 **3.2.6 — Borrar un usuario captain destruye su equipo (cascada)**
-- `teams.captain_id` tiene `ON DELETE CASCADE` contra `users.id` ([Database.php:77](app/core/Database.php#L77)). Eliminar un usuario que sea capitán de varios equipos los borra todos, y por 3.2.5 borra también todos sus partidos. Si un admin elimina a un usuario problemático, se lleva por delante a equipos enteros.
-- **Fix:** usar `ON DELETE RESTRICT` y obligar a transferir la capitanía antes de eliminar; o exponer un endpoint `teams/transferCaptaincy`.
+🟠 **3.2.6b — La FK `teams.captain_id ON DELETE CASCADE` sigue activa**
+- Aunque `AdminController::deleteUser` ahora protege la ruta admin (3.2.6 ✅ parcial), [Database.php:77](app/core/Database.php#L77) sigue definiendo `FOREIGN KEY (captain_id) REFERENCES users(id) ON DELETE CASCADE`. Cualquier borrado vía SQL directo, futura migración mal hecha o nuevo endpoint que llame a `Usuario::delete()` sin el guard arrastra los equipos enteros.
+- **Fix:** cambiar a `ON DELETE RESTRICT` (o `SET NULL` si se introduce un capitán “orfan”). Implica regenerar la tabla en SQLite (`CREATE TABLE … _new`, copiar, `DROP/RENAME`) o aceptar el coste y borrar el SQLite en dev — los datos los regenera el seeder.
 
 🟡 **3.2.7 — `Equipo::leave` cierra al capitán sin ofrecer salida**
-- [Equipo.php:88-96](app/models/Equipo.php#L88-L96) devuelve `false` si el usuario es capitán, y `TeamsController` le pide "transfiere la capitanía o elimina el equipo" — pero no existe ningún endpoint de transferencia de capitanía. UX bloqueada.
-- **Fix:** añadir `Equipo::transferCaptaincy(int $teamId, int $fromUserId, int $toUserId)` y un POST en `TeamsController`.
+- [Equipo.php:88-96](app/models/Equipo.php#L88-L96) devuelve `false` si el usuario es capitán y `TeamsController` le pide _“transfiere la capitanía o elimina el equipo”_, pero **no existe** ningún endpoint de transferencia. Y desde la auditoría anterior `AdminController::deleteUser` también bloquea si el usuario capitanea equipos (3.2.6 ✅) — la UX queda atrapada: ni jugador ni admin pueden continuar sin transfer.
+- **Fix:** añadir `Equipo::transferCaptaincy(int $teamId, int $fromUserId, int $toUserId)` con verificación de pertenencia, y exponer un `POST /teams/transferCaptaincy/{id}`.
 
-🟡 **3.2.8 — Demo credentials públicas en el README** (aviso revisado)
-- [README.md:286-287](README.md#L286-L287) sigue publicando `admin@fastplay.es / Admin1234!`. El seed está protegido por `APP_ENV !== 'production'`, así que en teoría es inofensivo, pero si alguien despliega sin definir `APP_ENV=production`, el atacante tiene admin instantáneamente. La nota del README ya advierte (línea 289); aceptable para portfolio, mantener el ojo puesto.
+🟡 **3.2.8 — Demo credentials públicas en el README**
+- [README.md:286-287](README.md#L286-L287) sigue publicando `admin@fastplay.es / Admin1234!`. El seed está protegido por `APP_ENV !== 'production'` ([Database.php:197-199](app/core/Database.php#L197-L199)); si se despliega sin definir `APP_ENV=production`, el atacante tiene admin instantáneo. Para portfolio aceptable; mantener vigilado el aviso de [README.md:289](README.md#L289).
 
-🟡 **3.2.9 — `public/.htaccess` no bloquea `composer.json`, `package.json`, `Dockerfile`**
-- [public/.htaccess:14](public/.htaccess#L14) solo cubre `\.(env|md|log|sqlite|sqlite-journal|ini|sql)$`. Hoy no hay `composer.json` ni `package.json` en `public/` (y el rewrite raíz manda todo a `public/`, así que `Dockerfile` directo cae al 404), pero conviene ampliar la lista preventivamente: `…|json|lock|yml|yaml|dockerfile`.
-
-### 3.3 README y documentación
+🟡 **3.2.9 — `public/.htaccess` no bloquea `json`, `lock`, `yml`, `Dockerfile`**
+- [public/.htaccess:14](public/.htaccess#L14) sólo cubre `\.(env|md|log|sqlite|sqlite-journal|ini|sql)$`. Hoy ningún `composer.json`/`package.json`/`Dockerfile` vive bajo `public/`, pero conviene endurecer: `…|json|lock|yml|yaml|dockerfile`.
 
 🔵 **3.3.1 — `Dockerfile` presente pero sin instrucciones en README**
-- Existe un [`Dockerfile`](Dockerfile) funcional (php:8.2-apache + pdo_sqlite + mod_rewrite), pero el README solo describe el flujo XAMPP. Añadir una sección "Despliegue con Docker":
+- Existe un [`Dockerfile`](Dockerfile) funcional (php:8.2-apache + pdo_sqlite + mod_rewrite). El README sólo describe XAMPP. Añadir una sección **Despliegue con Docker**:
   ```bash
   docker build -t fastplay .
   docker run -p 8080:80 -e APP_ENV=production fastplay
   ```
 
 🔵 **3.3.2 — `router.php` para `php -S` no está documentado**
-- [`router.php`](router.php) emula el comportamiento del `public/.htaccess` cuando se usa el servidor embebido. No se menciona en el README. Útil para devs sin XAMPP:
+- [`router.php`](router.php) emula `public/.htaccess` para el servidor embebido. Sin mención en el README, los devs sin XAMPP no lo encuentran:
   ```bash
   php -S localhost:8000 router.php
   ```
 
 🔵 **3.3.3 — `fileinfo` listado como requisito sin uso**
-- [README.md:249](README.md#L249) pide la extensión `fileinfo` "para validar uploads", pero no hay flujo de uploads (el propio README lo reconoce en línea 305). Quitar o reetiquetar como "requerida cuando se implemente la subida de avatares".
+- [README.md:249](README.md#L249) pide la extensión `fileinfo` _“para validar uploads”_, pero el propio README reconoce en línea 305 que la subida está pendiente. Quitar o reetiquetar.
 
 🔵 **3.3.4 — `LegalController::cookies` y `privacy` no pasan `$lastUpdated`**
-- [LegalController.php:17-31](app/controllers/LegalController.php#L17-L31) solo pasa la fecha a `terms`. Inconsistente: las tres páginas legales deberían publicar fecha de última actualización (es lo que una autoridad de protección de datos esperaría ver para GDPR/cookies).
+- [LegalController.php:17-31](app/controllers/LegalController.php#L17-L31) sólo pasa la fecha a `terms`. Las tres páginas legales deberían publicar fecha de última actualización por coherencia y trazabilidad GDPR.
+
+---
+
+## 3. Fallos nuevos detectados en esta auditoría
+
+### 3.1 Deploy y empaquetado
+
+🔴 **3.1.7 — `Dockerfile` empaqueta el repositorio completo sin `.dockerignore`**
+- El [`Dockerfile`](Dockerfile) hace `COPY . .` y el repo **no tiene** `.dockerignore`. El contexto incluye:
+  - `php/` con DLLs Windows (inservibles en Linux, ~85 MB).
+  - `storage/fastplay.sqlite` si el desarrollador tiene una DB local poblada (con hashes bcrypt reales y datos demo). Aunque `.gitignore` lo excluye, Docker copia desde el filesystem, no desde el índice git.
+  - `arreglos.md`, `.claude/`, `.git/` (a menos que esté `*/dockerfile*` excluido por defecto, lo cual no es el caso para `.git/`).
+- **Riesgo:** imagen final con datos de desarrollo, runtime irrelevante y secretos potenciales en `.git/config`. Tamaño multiplicado.
+- **Fix:**
+  ```dockerfile
+  # .dockerignore (raíz)
+  .git
+  .gitignore
+  .claude
+  arreglos.md
+  README.md
+  Dockerfile
+  .dockerignore
+  php/
+  public/frames/
+  storage/*.sqlite
+  storage/*.sqlite-journal
+  storage/*.log
+  uploads/*
+  !uploads/.htaccess
+  ```
+
+🟠 **3.1.8 — `Dockerfile` instala `fileinfo` que el código no usa**
+- [Dockerfile:6](Dockerfile#L6) hace `docker-php-ext-install pdo pdo_sqlite mbstring fileinfo`. Ningún punto del código llama a `finfo_*` (la subida de archivos sigue pendiente — README:305). Mantenerlo está bien si se planifica el feature; si no, eliminar para reducir capa.
+
+🟡 **3.1.9 — `Dockerfile` no fija `APP_ENV=production`**
+- [Dockerfile](Dockerfile) no exporta `ENV APP_ENV=production`, así que la imagen ejecuta en `development` por defecto: el seeder corre y crea `admin@fastplay.es / Admin1234!` en cada arranque que detecte DB vacía. El README documenta el override con `-e APP_ENV=production`, pero conviene blindar la imagen por defecto (`ENV APP_ENV=production` en el `Dockerfile`) y forzar a desactivarlo explícitamente en dev.
+
+### 3.2 Seguridad y autorización
+
+🟠 **3.2.10 — `AuthController::logout` admite GET sin CSRF**
+- [AuthController.php:56-64](app/controllers/AuthController.php#L56-L64):
+  ```php
+  public function logout(): void
+  {
+      if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+          require_csrf();
+      }
+      logout_user();
+      // …
+  }
+  ```
+  Una petición `GET /auth/logout` cierra la sesión **sin** validar token. Permite logout-CSRF (un atacante incrusta `<img src="/auth/logout">` en cualquier sitio y desloguea a la víctima al cargar la página).
+- **Fix:** exigir POST siempre (`$this->requirePost()`) y siempre `require_csrf()`. El README:209 ya documenta la ruta como `POST`.
+
+🟠 **3.2.11 — Borrado de liga/campo en admin sin chequeo de histórico**
+- [AdminController::deleteLeague](app/controllers/AdminController.php#L125-L132) y [AdminController::deleteField](app/controllers/AdminController.php#L134-L141) llaman directamente a `delete(...)`. Por las FKs:
+  - `leagues.id` cae en cascada a `league_teams` (`Database.php:114`), arrastrando la clasificación; y en `matches.league_id` con `SET NULL` (`Database.php:142`), dejando partidos huérfanos sin liga.
+  - `fields.id` con `SET NULL` (`Database.php:143`), eliminando el campo histórico de partidos finalizados.
+- **Fix:** mismo patrón que `Equipo::deletionBlocker`: rechazar si `EXISTS (SELECT 1 FROM matches WHERE league_id=?)` con `status='finished'`, o exponer “archivar” en lugar de “borrar”.
+
+🟡 **3.2.1b — Salas de chat tipo `group`/`team` siguen sin lista de miembros**
+- Tras la mejora de 3.2.1, [Chat::canAccessRoom](app/models/Chat.php#L62-L71) restringe `match_negotiation` a capitanes, pero para cualquier otro tipo devuelve `true`. Eso significa que cualquier usuario autenticado puede leer/escribir en una futura sala `team` o `group` privada.
+- **Fix:** introducir tabla `chat_room_members(room_id, user_id)` (o derivar dinámicamente desde `team_members`/`league_teams` para los tipos correspondientes) y comprobarla en `canAccessRoom` para `group`/`team`.
+
+🟡 **3.2.12 — `match_negotiation` es una única sala global**
+- [Chat::canAccessRoom:67-69](app/models/Chat.php#L67-L69) admite a “cualquier capitán de cualquier equipo” en la sala `match_negotiation`. La auditoría anterior asumía que era “entre capitanes de los dos equipos del partido”, pero el seed sólo crea una sala compartida ([Database.php:317](app/core/Database.php#L317)). Cualquier capitán ve toda la negociación de los demás.
+- **Fix:** convertir la sala en `match_negotiation` _por partido_, creada al programar el partido en `Partido::create` y restringida a los capitanes de `home_team_id`/`away_team_id`.
+
+🟡 **3.2.13 — `matches/show.php` expone Cancelar/Finalizar a cualquier usuario autenticado**
+- [matches/show.php:30-54](app/views/matches/show.php#L30-L54) muestra los formularios de confirmar/cancelar/finalizar a todo usuario logueado, dependiendo sólo del estado del partido. El servidor (`canManageMatch`) rechaza correctamente, pero la UI confunde y produce 302 “No tienes permisos” a usuarios que no debían ver el botón.
+- **Fix:** pasar `isManager = is_admin() || $equipo->isCaptain($home) || $equipo->isCaptain($away)` desde el controlador y envolver los formularios con `<?php if ($isManager): ?>`.
+
+### 3.3 Documentación
+
+🔵 **3.3.5 — `README.md` sigue describiendo `public/frames/` como parte de la estructura**
+- [README.md:158](README.md#L158) lista `│   ├── frames/                      # Secuencia de scroll (192 PNG)`, pero `public/frames/` ya está en `.gitignore` (línea 12) y _no_ se versiona. El árbol promete contenido que un clon nuevo no encuentra. Posibles vías:
+  1. Documentar cómo generar los frames a partir de `public/video/hero.webm` (ya presente) con `ffmpeg`.
+  2. Indicar que el hero usa el `<video>` y dejar de mencionar los PNG en el árbol.
+- Nota: actualmente `home/index.php:169-171` ya usa `<video id="heroVideo">` con `hero.webm`/`hero-poster.jpg`, no `frames/`. Confirmar que `scroll-anim.js` no carga PNG por defecto antes de actualizar el README.
+
+🔵 **3.3.6 — Roadmap del README contradice el estado real**
+- [README.md:378-379](README.md#L378-L379) dice _“Extracción parcial de animaciones a archivos externos … Quedan bloques `<style>`/`<script>` inline en `home/index.php` por la dependencia de variables PHP.”_ Sigue siendo cierto (ver 2.1/2.2), pero el roadmap también declara la auditoría de seguridad _“completa”_ — y este documento prueba lo contrario. Coherencia: el README puede enlazar a `arreglos.md` como fuente viva.
 
 ---
 
 ## 4. Prioridad sugerida
 
-1. **Sprint 1 — Seguridad / repo:** 3.1.1, 3.1.3, 3.2.1, 3.2.2, 3.2.5, 3.2.6.
-2. **Sprint 2 — UX y limpieza visible:** 2.1, 2.2, 2.5, 2.6, 3.2.7, 3.3.1, 3.3.2.
-3. **Sprint 3 — Coherencia y pulido:** 2.3, 2.8, 2.10, 2.11, 3.1.4, 3.1.5, 3.1.6, 3.2.3, 3.2.4, 3.2.8, 3.2.9, 3.3.3, 3.3.4.
-4. **Backlog opcional / refactor:** 2.4, 2.7, 2.9, 3.1.2 (purga histórica, solo si el repo se hace público).
+1. **Sprint 1 — Seguridad / deploy crítico:** 3.1.7 (`.dockerignore`), 3.1.9 (`APP_ENV` en Dockerfile), 3.2.10 (logout CSRF), 3.2.11 (delete liga/campo), 3.2.6b (`ON DELETE RESTRICT` para `teams.captain_id`).
+2. **Sprint 2 — UX y limpieza visible:** 2.1, 2.2, 2.6, 3.2.7 (`transferCaptaincy`), 3.2.13 (UI matches/show), 3.3.1, 3.3.2.
+3. **Sprint 3 — Coherencia y pulido:** 2.3, 2.5, 2.8, 2.10, 2.11, 3.1.8, 3.2.1b, 3.2.12, 3.2.9, 3.3.3, 3.3.4, 3.3.5, 3.3.6.
+4. **Backlog opcional / refactor:** 2.4 (depende de 2.1), 2.7, 2.9, 3.1.2 (purga histórica si el repo se hace público), 3.1.6.
 
 ---
 
-_Generado tras una re-auditoría manual de `/`, `/app`, `/config`, `/public`, `/storage`, `/uploads`, `/php`, `Dockerfile`, `router.php` y `README.md`. Para reproducir, comparar este documento con `git log -- arreglos.md` para ver el delta respecto a la versión anterior._
+_Generado tras una re-auditoría manual de `/`, `/app`, `/config`, `/public`, `/storage`, `/uploads`, `Dockerfile`, `router.php` y `README.md`. Para reproducir, comparar este documento con `git log -- arreglos.md` para ver el delta respecto a la versión anterior._
