@@ -12,6 +12,9 @@
     video = document.getElementById('heroVideo');
     if (!video) return;
 
+    document.documentElement.classList.add('fp-scroll-anim-page');
+    if (document.body) document.body.classList.add('fp-scroll-anim-page');
+
     progressBar = document.getElementById('scrollProgress');
     reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 

@@ -2,6 +2,18 @@
 
 html { scroll-behavior: auto !important; }
 
+html.fp-scroll-anim-page,
+html.fp-scroll-anim-page body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+html.fp-scroll-anim-page::-webkit-scrollbar,
+html.fp-scroll-anim-page body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
 .scroll-anim { position: relative; }
 
 .scroll-anim__canvas-wrap {
