@@ -155,12 +155,17 @@ class Usuario
         $ext = $extByMime[$mime];
 
         $publicDir = APP_ROOT . '/public/uploads/avatars';
-        if (!is_dir($publicDir) && !mkdir($publicDir, 0775, true) && !is_dir($publicDir)) {
-            return [null, ['avatar' => 'No se pudo preparar el directorio de subidas.']];
+        if (!is_dir($publicDir)) {
+            // @ silencia el warning si el usuario PHP no tiene permiso de escritura
+            // sobre public/uploads (típico en producción). El error se reporta abajo.
+            @mkdir($publicDir, 0775, true);
+        }
+        if (!is_dir($publicDir) || !is_writable($publicDir)) {
+            return [null, ['avatar' => 'No se pudo preparar el directorio de subidas. Pide al admin que cree "public/uploads/avatars" con permisos de escritura.']];
         }
         $filename = 'u' . $id . '_' . time() . '.' . $ext;
         $dest = $publicDir . '/' . $filename;
-        if (!move_uploaded_file($tmp, $dest)) {
+        if (!@move_uploaded_file($tmp, $dest)) {
             return [null, ['avatar' => 'No se pudo guardar la imagen.']];
         }
         @chmod($dest, 0644);
