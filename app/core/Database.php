@@ -109,6 +109,25 @@ class Database
             $pdo->exec('PRAGMA foreign_keys = ON');
         }
 
+        // Columnas adicionales para la carta-jugador estilo FIFA del dashboard.
+        // Se añaden de forma idempotente: sólo se crean si no existen ya.
+        $userCols = [];
+        foreach ($pdo->query("PRAGMA table_info('users')") as $col) {
+            $userCols[$col['name']] = true;
+        }
+        if (!isset($userCols['dorsal'])) {
+            $pdo->exec("ALTER TABLE users ADD COLUMN dorsal INTEGER");
+        }
+        if (!isset($userCols['height_cm'])) {
+            $pdo->exec("ALTER TABLE users ADD COLUMN height_cm INTEGER");
+        }
+        if (!isset($userCols['goals'])) {
+            $pdo->exec("ALTER TABLE users ADD COLUMN goals INTEGER NOT NULL DEFAULT 0");
+        }
+        if (!isset($userCols['assists'])) {
+            $pdo->exec("ALTER TABLE users ADD COLUMN assists INTEGER NOT NULL DEFAULT 0");
+        }
+
         $pdo->exec("CREATE TABLE IF NOT EXISTS team_members (
             team_id INTEGER NOT NULL,
             user_id INTEGER NOT NULL,
@@ -254,23 +273,23 @@ class Database
         }
 
         // Admin + jugador demo (sólo en dev por el guard de APP_ENV)
-        $st = $pdo->prepare("INSERT INTO users (name,email,phone,age,city,position,password_hash,role) VALUES (?,?,?,?,?,?,?,?)");
-        $st->execute(['Sadek Admin', 'admin@fastplay.es', '+34600000000', 28, 'Madrid', 'Mediocampo', password_hash('Admin1234!', PASSWORD_DEFAULT), 'admin']);
+        $st = $pdo->prepare("INSERT INTO users (name,email,phone,age,city,position,password_hash,role,dorsal,height_cm,goals,assists) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
+        $st->execute(['Sadek Admin', 'admin@fastplay.es', '+34600000000', 28, 'Madrid', 'Mediocampo', password_hash('Admin1234!', PASSWORD_DEFAULT), 'admin', 10, 178, 4, 12]);
         $adminId = (int) $pdo->lastInsertId();
-        $st->execute(['Jugador Demo', 'demo@fastplay.es', '+34611111111', 24, 'Madrid', 'Delantero', password_hash('Demo1234!', PASSWORD_DEFAULT), 'player']);
+        $st->execute(['Jugador Demo', 'demo@fastplay.es', '+34611111111', 24, 'Madrid', 'Delantero', password_hash('Demo1234!', PASSWORD_DEFAULT), 'player', 9, 182, 15, 8]);
         $demoId = (int) $pdo->lastInsertId();
 
         $players = [
-            ['Lucía Pérez', 'lucia@fastplay.es', 22, 'Barcelona', 'Portera'],
-            ['Marc Costa',  'marc@fastplay.es',  27, 'Valencia',  'Defensa'],
-            ['Ana Ruiz',    'ana@fastplay.es',   26, 'Sevilla',   'Mediocampo'],
-            ['Iván Soto',   'ivan@fastplay.es',  25, 'Bilbao',    'Delantero'],
-            ['Paula Gil',   'paula@fastplay.es', 23, 'Zaragoza',  'Defensa'],
-            ['Hugo Marín',  'hugo@fastplay.es',  29, 'Málaga',    'Mediocampo'],
+            ['Lucía Pérez', 'lucia@fastplay.es', 22, 'Barcelona', 'Portera',     1, 170, 0,  3],
+            ['Marc Costa',  'marc@fastplay.es',  27, 'Valencia',  'Defensa',     4, 184, 2,  5],
+            ['Ana Ruiz',    'ana@fastplay.es',   26, 'Sevilla',   'Mediocampo',  8, 168, 6,  9],
+            ['Iván Soto',   'ivan@fastplay.es',  25, 'Bilbao',    'Delantero',  11, 180, 18, 6],
+            ['Paula Gil',   'paula@fastplay.es', 23, 'Zaragoza',  'Defensa',     3, 173, 1,  4],
+            ['Hugo Marín',  'hugo@fastplay.es',  29, 'Málaga',    'Mediocampo',  6, 177, 5,  7],
         ];
         $playerIds = [];
         foreach ($players as $p) {
-            $st->execute([$p[0], $p[1], '+34600' . random_int(100000, 999999), $p[2], $p[3], $p[4], password_hash('Demo1234!', PASSWORD_DEFAULT), 'player']);
+            $st->execute([$p[0], $p[1], '+34600' . random_int(100000, 999999), $p[2], $p[3], $p[4], password_hash('Demo1234!', PASSWORD_DEFAULT), 'player', $p[5], $p[6], $p[7], $p[8]]);
             $playerIds[] = (int) $pdo->lastInsertId();
         }
 

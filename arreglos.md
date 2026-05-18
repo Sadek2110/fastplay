@@ -1,92 +1,68 @@
-# Arreglos pendientes
+## Objetivo
 
-Auditoría de limpieza del proyecto — 2026-05-18.
+Desarrollar el **Dashboard del Usuario** para una aplicación web deportiva/futbolística.  
+El dashboard debe estar enfocado en mostrar la información personal del jugador, sus estadísticas, su equipo y el acceso a funcionalidades relacionadas con partidos y gestión de equipo.
 
----
-
-## Alta prioridad
-
-### 1. Referencias muertas a `arreglos.md` en `README.md`
-
-El archivo `arreglos.md` fue eliminado pero el README aún lo referencia en dos sitios:
-- **Línea 404**: `ver [arreglos.md](arreglos.md)` dentro de la sección Roadmap v3.
-- **Línea 431**: `se enumeran en [arreglos.md](arreglos.md)` dentro de Notas de Versión.
-
-**Acción**: Eliminar ambas referencias o redirigir a este mismo archivo.
-
-### 2. Referencia a `arreglos.md` en `.dockerignore`
-
-- **Línea 4**: `arreglos.md` — el archivo no existía; ahora existe de nuevo. Si se quiere excluir del contenedor, mantener. Si no, eliminar la línea.
-
-**Acción**: Decidir si `arreglos.md` debe ir en la imagen Docker o no.
-
-### 3. `storage/fastplay.sqlite` trackeado por git
-
-El `.gitignore` tiene la regla `storage/*.sqlite` pero el archivo fue commiteado antes de añadir la regla. Sigue apareciendo en el historial y se trackea en cada cambio.
-
-**Acción**:
-```
-git rm --cached "storage/fastplay.sqlite"
-```
-
-### 4. `.claude/settings.local.json` trackeado por git
-
-Contiene rutas locales de máquina (`C:\xampp\htdocs\...`) y no está protegido por `.gitignore`. El directorio `.claude/` no aparece en `.gitignore`.
-
-**Acción**:
-- Añadir `.claude/` a `.gitignore`.
-- Ejecutar `git rm --cached ".claude/settings.local.json"`.
+La interfaz debe tener un diseño moderno, deportivo, visualmente atractivo y responsive.
 
 ---
 
-## Media prioridad
+# Dashboard del Usuario
 
-### 5. Dos directorios de memoria del agente
+## 1. Diseño general del dashboard
 
-- `memory/` — contiene `2026-05-18.md` y `project_db_dialects.md` (archivos reales de sesión).
-- `.agent/memory/` — solo contiene `.gitkeep` (vacío).
+Crear una página de dashboard con una estructura clara y moderna, dividida en varias secciones:
 
-`AGENTS.md` instruye escribir resúmenes en `.agent/memory/YYYY-MM-DD.md`, pero el archivo real fue escrito en `memory/`.
+- Header o navbar principal.
+- Sección principal con la información del usuario.
+- Sección de gestión de equipo.
+- Sección de próximos partidos.
+- Sección de partidos.
+- Mensajes informativos cuando el usuario no tenga equipo.
+- Diseño responsive para escritorio, tablet y móvil.
 
-**Acción**: Consolidar en una sola ubicación:
-- Opción A: Mover `memory/*` a `.agent/memory/` y eliminar `memory/`.
-- Opción B: Mover `.agent/memory/.gitkeep` a `memory/`, eliminar `.agent/memory/` y actualizar `AGENTS.md`.
-
-### 6. Dos archivos `MEMORY.md`
-
-- `MEMORY.md` (raíz) — 1 línea, puntero del sistema Engram.
-- `.agent/MEMORY.md` — 35 líneas, template de memoria a largo plazo del agente.
-
-**Acción**: Renombrar o consolidar. Sugerencia: mantener `.agent/MEMORY.md` como template del agente y renombrar el de raíz a `ENGRAM.md` o similar para evitar confusión.
-
-### 7. Directorio `public/frames-webp/` vacío
-
-0 archivos. Ya está en `.gitignore`. No sirve para nada.
-
-**Acción**: Eliminar el directorio.
+El estilo visual debe ser moderno, con inspiración deportiva, usando tarjetas, efectos hover, sombras suaves, bordes redondeados y una estética similar a aplicaciones deportivas profesionales.
 
 ---
 
-## Baja prioridad
+# 2. Tarjeta del jugador estilo FIFA
 
-### 8. CSP con `unsafe-inline`
+En el dashboard debe aparecer una tarjeta principal del usuario con un diseño parecido a una **carta de jugador de FIFA / Ultimate Team**.
 
-`config/config.php` incluye `'unsafe-inline'` en `style-src` y `script-src`. El propio comentario en el código reconoce que es temporal mientras se externalizan estilos y scripts inline.
+La tarjeta debe incluir:
 
-**Acción**: Mover todos los `<style>` y `on*` handlers a archivos externos, luego eliminar `unsafe-inline` del CSP.
+- Foto de perfil del usuario/jugador.
+- Nombre del jugador.
+- Estadísticas principales.
+- Información deportiva.
+- Diseño visual llamativo, con fondo degradado, bordes dorados o estilo premium.
+- Estilo responsive.
 
----
+## Datos que debe mostrar la tarjeta
 
-## Resumen rápido de comandos
+La tarjeta del jugador debe contener los siguientes campos:
 
-```bash
-# Alta prioridad
-git rm --cached "storage/fastplay.sqlite"
-git rm --cached ".claude/settings.local.json"
+- Partidos jugados.
+- Goles.
+- Asistencias.
+- Equipo donde juega.
+- Posición.
+- Dorsal.
+- Altura.
 
-# Añadir al .gitignore (línea nueva)
-# .claude/
+Ejemplo visual de contenido:
 
-# Eliminar directorio vacío
-rm -r "public/frames-webp/"
-```
+```text
+Nombre del jugador
+Foto del jugador
+
+Partidos: 24
+Goles: 15
+Asistencias: 8
+Equipo: FC Ceuta
+Posición: Delantero
+Dorsal: 9
+Altura: 1.82 m
+
+El ejemlpo es este:
+carta-fifa.png

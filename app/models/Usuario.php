@@ -71,7 +71,11 @@ class Usuario
 
     public function find(int $id): ?array
     {
-        $u = Database::one('SELECT id,name,email,phone,age,city,position,role,avatar,created_at FROM users WHERE id = ?', [$id]);
+        $u = Database::one(
+            'SELECT id,name,email,phone,age,city,position,role,avatar,dorsal,height_cm,goals,assists,created_at
+             FROM users WHERE id = ?',
+            [$id]
+        );
         return $u ?: null;
     }
 
@@ -84,17 +88,30 @@ class Usuario
         $position = trim((string) ($data['position'] ?? ''));
         $phone = trim((string) ($data['phone'] ?? ''));
 
+        $hasDorsal  = array_key_exists('dorsal', $data)    && trim((string) $data['dorsal']) !== '';
+        $hasHeight  = array_key_exists('height_cm', $data) && trim((string) $data['height_cm']) !== '';
+        $hasGoals   = array_key_exists('goals', $data)     && trim((string) $data['goals']) !== '';
+        $hasAssists = array_key_exists('assists', $data)   && trim((string) $data['assists']) !== '';
+        $dorsal    = $hasDorsal  ? (int) $data['dorsal']    : null;
+        $height_cm = $hasHeight  ? (int) $data['height_cm'] : null;
+        $goals     = $hasGoals   ? (int) $data['goals']     : 0;
+        $assists   = $hasAssists ? (int) $data['assists']   : 0;
+
         if (!v_required($name) || mb_strlen($name) < 2)              $errors['name'] = 'Indica tu nombre.';
         if ($age && !v_int_range($age, 14, 99))                      $errors['age']  = 'Edad inválida.';
         if ($phone !== '' && !preg_match('/^[+0-9 ()-]{6,20}$/', $phone)) $errors['phone'] = 'Teléfono inválido.';
         if ($position !== '' && !in_array($position, ['Portero','Portera','Defensa','Mediocampo','Delantero'], true)) {
             $errors['position'] = 'Posición no válida.';
         }
+        if ($hasDorsal  && !v_int_range($dorsal,    1,  99))  $errors['dorsal']    = 'Dorsal entre 1 y 99.';
+        if ($hasHeight  && !v_int_range($height_cm, 140, 220)) $errors['height_cm'] = 'Altura entre 140 y 220 cm.';
+        if ($hasGoals   && !v_int_range($goals,     0,  999)) $errors['goals']     = 'Goles entre 0 y 999.';
+        if ($hasAssists && !v_int_range($assists,   0,  999)) $errors['assists']   = 'Asistencias entre 0 y 999.';
         if ($errors) return $errors;
 
         Database::run(
-            'UPDATE users SET name=?, age=?, city=?, position=?, phone=? WHERE id=?',
-            [$name, $age ?: null, $city ?: null, $position ?: null, $phone ?: null, $id]
+            'UPDATE users SET name=?, age=?, city=?, position=?, phone=?, dorsal=?, height_cm=?, goals=?, assists=? WHERE id=?',
+            [$name, $age ?: null, $city ?: null, $position ?: null, $phone ?: null, $dorsal, $height_cm, $goals, $assists, $id]
         );
         return [];
     }
@@ -130,6 +147,44 @@ class Usuario
             ['i' => '👥', 'v' => $teams,        'l' => 'Equipos',          'c' => '#60a5fa'],
             ['i' => '🛡️', 'v' => $captainOf,    'l' => 'Como capitán',     'c' => '#fbbf24'],
             ['i' => '🏅', 'v' => $achievements, 'l' => 'Logros',           'c' => '#fde047'],
+        ];
+    }
+
+    /**
+     * Datos compactos para la carta estilo FIFA del dashboard:
+     * nombre, foto, posición, dorsal, altura, partidos, goles, asistencias y equipo principal.
+     */
+    public function playerCard(int $userId): array
+    {
+        $u = Database::one(
+            'SELECT id,name,avatar,position,dorsal,height_cm,goals,assists FROM users WHERE id = ?',
+            [$userId]
+        );
+        if (!$u) return [];
+        $played = (int) Database::value(
+            "SELECT COUNT(*) FROM matches m
+             JOIN team_members tm ON tm.team_id IN (m.home_team_id, m.away_team_id)
+             WHERE tm.user_id = ? AND m.status = 'finished'",
+            [$userId]
+        );
+        $team = Database::one(
+            "SELECT t.id, t.name, t.badge, t.city
+             FROM teams t
+             JOIN team_members tm ON tm.team_id = t.id
+             WHERE tm.user_id = ?
+             ORDER BY t.name LIMIT 1",
+            [$userId]
+        );
+        return [
+            'name'      => (string) $u['name'],
+            'avatar'    => $u['avatar'] ?? null,
+            'position'  => (string) ($u['position'] ?? ''),
+            'dorsal'    => isset($u['dorsal']) && $u['dorsal'] !== null ? (int) $u['dorsal'] : null,
+            'height_cm' => isset($u['height_cm']) && $u['height_cm'] !== null ? (int) $u['height_cm'] : null,
+            'goals'     => (int) ($u['goals']   ?? 0),
+            'assists'   => (int) ($u['assists'] ?? 0),
+            'played'    => $played,
+            'team'      => $team ?: null,
         ];
     }
 

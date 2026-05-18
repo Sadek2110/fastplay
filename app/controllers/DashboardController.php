@@ -19,6 +19,7 @@ class DashboardController extends Controller
             'achievements' => $usuario->achievements((int) $user['id']),
             'upcoming'     => $partido->upcoming(),
             'team'         => $equipo->mine((int) $user['id']),
+            'card'         => $usuario->playerCard((int) $user['id']),
             'title'        => 'Mi panel — FastPlay',
         ]);
     }

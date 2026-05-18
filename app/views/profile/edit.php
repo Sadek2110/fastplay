@@ -37,6 +37,30 @@
                     <?php if (!empty($errors['position'])): ?><small class="fp-err"><?= e($errors['position']) ?></small><?php endif; ?>
                 </label>
             </div>
+            <div class="fp-grid-2" style="gap:14px;">
+                <label>
+                    <span class="fp-label">Dorsal</span>
+                    <input type="number" name="dorsal" class="fp-input" min="1" max="99" value="<?= old('dorsal', $profile['dorsal'] ?? '') ?>" placeholder="1-99">
+                    <?php if (!empty($errors['dorsal'])): ?><small class="fp-err"><?= e($errors['dorsal']) ?></small><?php endif; ?>
+                </label>
+                <label>
+                    <span class="fp-label">Altura (cm)</span>
+                    <input type="number" name="height_cm" class="fp-input" min="140" max="220" value="<?= old('height_cm', $profile['height_cm'] ?? '') ?>" placeholder="140-220">
+                    <?php if (!empty($errors['height_cm'])): ?><small class="fp-err"><?= e($errors['height_cm']) ?></small><?php endif; ?>
+                </label>
+            </div>
+            <div class="fp-grid-2" style="gap:14px;">
+                <label>
+                    <span class="fp-label">Goles</span>
+                    <input type="number" name="goals" class="fp-input" min="0" max="999" value="<?= old('goals', $profile['goals'] ?? 0) ?>">
+                    <?php if (!empty($errors['goals'])): ?><small class="fp-err"><?= e($errors['goals']) ?></small><?php endif; ?>
+                </label>
+                <label>
+                    <span class="fp-label">Asistencias</span>
+                    <input type="number" name="assists" class="fp-input" min="0" max="999" value="<?= old('assists', $profile['assists'] ?? 0) ?>">
+                    <?php if (!empty($errors['assists'])): ?><small class="fp-err"><?= e($errors['assists']) ?></small><?php endif; ?>
+                </label>
+            </div>
             <div style="display:flex;gap:10px;">
                 <button class="fp-btn fp-btn-primary fp-btn-glow">Guardar cambios →</button>
                 <a class="fp-btn fp-btn-ghost" href="<?= url('profile') ?>">Cancelar</a>

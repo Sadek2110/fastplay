@@ -1,3 +1,24 @@
+<?php
+$positionShort = static function (string $p): string {
+    return match ($p) {
+        'Portero', 'Portera' => 'POR',
+        'Defensa'            => 'DEF',
+        'Mediocampo'         => 'MED',
+        'Delantero'          => 'DEL',
+        default              => '—',
+    };
+};
+$card = $card ?? [];
+$dorsalLabel = isset($card['dorsal']) && $card['dorsal'] !== null
+    ? str_pad((string) (int) $card['dorsal'], 2, '0', STR_PAD_LEFT)
+    : '—';
+$heightLabel = isset($card['height_cm']) && $card['height_cm'] !== null
+    ? number_format(((int) $card['height_cm']) / 100, 2, '.', '') . 'm'
+    : '—';
+$avatarSrc = !empty($card['avatar']) ? asset($card['avatar']) : asset('images/default-avatar.svg');
+$teamLabel = !empty($card['team']['name']) ? $card['team']['name'] : 'Sin equipo';
+$posShort  = $positionShort((string) ($card['position'] ?? ''));
+?>
 <main class="fp-fade" style="max-width:1280px;margin:0 auto;padding:96px 24px 80px;">
 
     <div style="margin-bottom:36px;">
@@ -5,15 +26,53 @@
         <h1 style="font-size:30px;font-weight:900;margin:0;">Hola, <span class="fp-gradient-text"><?= e($user['name']) ?></span> 👋</h1>
     </div>
 
-    <div class="fp-grid-4" style="margin-bottom:36px;">
-        <?php foreach ($stats as $s): ?>
-            <div class="fp-glass" style="border-radius:18px;padding:20px;">
-                <div style="font-size:22px;margin-bottom:10px;"><?= e($s['i']) ?></div>
-                <div style="font-size:30px;font-weight:900;color:<?= e($s['c']) ?>;letter-spacing:-.02em;line-height:1;"><?= (int) $s['v'] ?></div>
-                <div style="font-size:11px;color:#6b7280;margin-top:6px;font-weight:500;"><?= e($s['l']) ?></div>
+    <!-- Hero: carta FIFA + stats -->
+    <section class="fp-hero-card" style="margin-bottom:36px;">
+        <div class="fp-card-fifa-wrap">
+            <article class="fp-card-fifa" aria-label="Carta de jugador">
+                <div class="fp-card-fifa-shine" aria-hidden="true"></div>
+                <header class="fp-card-fifa-head">
+                    <div class="fp-card-fifa-rating">
+                        <span class="fp-card-fifa-num"><?= e($dorsalLabel) ?></span>
+                        <span class="fp-card-fifa-pos"><?= e($posShort) ?></span>
+                    </div>
+                    <div class="fp-card-fifa-team" title="<?= e($teamLabel) ?>">
+                        <?php if (!empty($card['team'])): ?>
+                            <span class="fp-card-fifa-team-badge"><?= e($card['team']['badge'] ?? '🛡️') ?></span>
+                        <?php endif; ?>
+                    </div>
+                </header>
+                <div class="fp-card-fifa-photo">
+                    <img src="<?= e($avatarSrc) ?>" alt="<?= e($card['name'] ?? $user['name']) ?>" loading="lazy">
+                </div>
+                <div class="fp-card-fifa-name"><?= e(mb_strtoupper($card['name'] ?? $user['name'])) ?></div>
+                <div class="fp-card-fifa-stats">
+                    <div class="fp-card-fifa-stat"><b><?= (int) ($card['played']   ?? 0) ?></b><span>PAR</span></div>
+                    <div class="fp-card-fifa-stat"><b><?= (int) ($card['goals']    ?? 0) ?></b><span>GOL</span></div>
+                    <div class="fp-card-fifa-stat"><b><?= (int) ($card['assists']  ?? 0) ?></b><span>ASI</span></div>
+                    <div class="fp-card-fifa-stat"><b><?= e($heightLabel) ?></b><span>ALT</span></div>
+                    <div class="fp-card-fifa-stat"><b><?= e($posShort) ?></b><span>POS</span></div>
+                    <div class="fp-card-fifa-stat"><b><?= e($dorsalLabel) ?></b><span>DOR</span></div>
+                </div>
+                <footer class="fp-card-fifa-foot">
+                    <span class="fp-card-fifa-club"><?= e($teamLabel) ?></span>
+                </footer>
+            </article>
+            <a href="<?= url('profile/edit') ?>" class="fp-btn fp-btn-ghost fp-card-fifa-edit">Editar mi carta →</a>
+        </div>
+
+        <div class="fp-hero-stats">
+            <div class="fp-grid-4" style="gap:14px;">
+                <?php foreach ($stats as $s): ?>
+                    <div class="fp-glass" style="border-radius:18px;padding:20px;">
+                        <div style="font-size:22px;margin-bottom:10px;"><?= e($s['i']) ?></div>
+                        <div style="font-size:30px;font-weight:900;color:<?= e($s['c']) ?>;letter-spacing:-.02em;line-height:1;"><?= (int) $s['v'] ?></div>
+                        <div style="font-size:11px;color:#6b7280;margin-top:6px;font-weight:500;"><?= e($s['l']) ?></div>
+                    </div>
+                <?php endforeach; ?>
             </div>
-        <?php endforeach; ?>
-    </div>
+        </div>
+    </section>
 
     <div class="fp-grid-3">
         <!-- Mi equipo -->
