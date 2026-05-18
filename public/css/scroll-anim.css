@@ -2,6 +2,7 @@
 
 html { scroll-behavior: auto !important; }
 
+
 html.fp-scroll-anim-page,
 html.fp-scroll-anim-page body {
   scrollbar-width: none;
