@@ -24,7 +24,8 @@ $cols = [
     <div class="fp-footer-inner">
         <div>
             <a href="<?= url('') ?>" class="fp-logo" style="margin-bottom:16px;">
-                <img src="<?= asset('images/logo.png') ?>" alt="FastPlay">
+                <img src="<?= asset('images/logo.png') ?>" alt="" class="fp-logo-icon">
+                <img src="<?= asset('images/logo_palabra.png') ?>" alt="FastPlay" class="fp-logo-word">
             </a>
             <p style="color:#6b7280;font-size:13px;line-height:1.55;margin:16px 0 18px;">Fútbol amateur organizado para todos, en cualquier lugar.</p>
             <div style="display:flex;gap:10px;" aria-label="Redes sociales (próximamente)">
