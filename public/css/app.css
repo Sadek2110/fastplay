@@ -234,7 +234,7 @@ body {
 .fp-logo {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   font-weight: 900;
   font-size: 20px;
   letter-spacing: -.02em;
@@ -250,7 +250,7 @@ body {
   display: block;
 }
 .fp-logo-word {
-  height: 1.5em;
+  height: 2.8em;
   width: auto;
   display: block;
 }
