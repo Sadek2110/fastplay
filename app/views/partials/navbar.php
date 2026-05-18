@@ -10,8 +10,7 @@ $user = current_user();
 <nav class="fp-navbar">
     <div class="fp-navbar-inner">
         <a href="<?= url('') ?>" class="fp-logo">
-            <img src="<?= asset('images/logo.png') ?>" alt="" class="fp-logo-icon">
-            <img src="<?= asset('images/logo_palabra.png') ?>" alt="FastPlay" class="fp-logo-word">
+            <img src="<?= asset('images/logo.png') ?>" alt="FastPlay">
         </a>
         <div class="fp-nav-links">
             <?php foreach ($links as $l): ?>
