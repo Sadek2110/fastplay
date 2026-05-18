@@ -234,7 +234,7 @@ body {
 .fp-logo {
   display: inline-flex;
   align-items: center;
-  gap: 0px;
+  gap: 10px;
   font-weight: 900;
   font-size: 20px;
   letter-spacing: -.02em;
@@ -253,7 +253,6 @@ body {
   height: 1.6em;
   width: auto;
   display: block;
-  margin-left: -22px;
 }
 
 /* ============= Status badges ============= */

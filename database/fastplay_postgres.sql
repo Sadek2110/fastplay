@@ -82,6 +82,10 @@ CREATE TABLE users (
     role            user_role    NOT NULL DEFAULT 'player',
     avatar          TEXT,
     bio             TEXT,
+    dorsal          SMALLINT,
+    height_cm       SMALLINT,
+    goals           INTEGER      NOT NULL DEFAULT 0,
+    assists         INTEGER      NOT NULL DEFAULT 0,
     created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     updated_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );

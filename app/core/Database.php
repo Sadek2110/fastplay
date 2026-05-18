@@ -19,11 +19,44 @@ class Database
         // El auto-init de esquema y los seeds están escritos en sintaxis SQLite
         // (AUTOINCREMENT, PRAGMA, datetime('now'), INSERT OR IGNORE). Para MySQL
         // o PostgreSQL el esquema se carga vía database/fastplay_{mysql,postgres}.sql.
-        if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
+        $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        if ($driver === 'sqlite') {
             $pdo->exec('PRAGMA foreign_keys = ON;');
             self::migrate($pdo);
+        } else {
+            // Las instalaciones MySQL/PostgreSQL no ejecutan la migración SQLite,
+            // pero las columnas añadidas a posteriori sí deben aparecer también allí.
+            self::ensurePlayerCardColumns($pdo, $driver);
         }
         return $pdo;
+    }
+
+    /** Añade en caliente las columnas de la carta-jugador en MySQL/PostgreSQL si faltan. */
+    private static function ensurePlayerCardColumns(PDO $pdo, string $driver): void
+    {
+        try {
+            if ($driver === 'mysql') {
+                $existing = [];
+                $rows = $pdo->query(
+                    "SELECT COLUMN_NAME FROM information_schema.COLUMNS
+                     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users'"
+                );
+                foreach ($rows as $r) { $existing[$r['COLUMN_NAME']] = true; }
+                if (!isset($existing['dorsal']))    $pdo->exec("ALTER TABLE users ADD COLUMN dorsal SMALLINT NULL");
+                if (!isset($existing['height_cm'])) $pdo->exec("ALTER TABLE users ADD COLUMN height_cm SMALLINT NULL");
+                if (!isset($existing['goals']))     $pdo->exec("ALTER TABLE users ADD COLUMN goals INT NOT NULL DEFAULT 0");
+                if (!isset($existing['assists']))   $pdo->exec("ALTER TABLE users ADD COLUMN assists INT NOT NULL DEFAULT 0");
+            } elseif ($driver === 'pgsql') {
+                $pdo->exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS dorsal SMALLINT");
+                $pdo->exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS height_cm SMALLINT");
+                $pdo->exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS goals INTEGER NOT NULL DEFAULT 0");
+                $pdo->exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS assists INTEGER NOT NULL DEFAULT 0");
+            }
+        } catch (Throwable $e) {
+            // No bloqueamos el arranque si el usuario de BD no tiene permisos DDL;
+            // los queries que dependen de estas columnas fallarán con un error claro.
+            error_log('[FastPlay] ensurePlayerCardColumns: ' . $e->getMessage());
+        }
     }
 
     public static function run(string $sql, array $params = []): PDOStatement

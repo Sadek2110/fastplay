@@ -63,6 +63,10 @@ CREATE TABLE users (
     role            ENUM('player','admin') NOT NULL DEFAULT 'player',
     avatar          TEXT,
     bio             TEXT,
+    dorsal          SMALLINT,
+    height_cm       SMALLINT,
+    goals           INT             NOT NULL DEFAULT 0,
+    assists         INT             NOT NULL DEFAULT 0,
     created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP
                                             ON UPDATE CURRENT_TIMESTAMP,
