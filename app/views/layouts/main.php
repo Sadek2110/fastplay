@@ -7,7 +7,7 @@
 <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title><?= e($title ?? 'FastPlay') ?></title>
-<link rel="icon" type="image/x-icon" href="<?= asset('favicon.ico') ?>">
+<link rel="icon" type="image/x-icon" href="<?= asset('images/icono-pag.ico') ?>">
 <link rel="apple-touch-icon" href="<?= asset('apple-touch-icon.png') ?>">
 <link rel="stylesheet" href="<?= asset('css/app.css') ?>">
 <?= $head ?? '' ?>
