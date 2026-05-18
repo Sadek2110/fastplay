@@ -401,7 +401,7 @@ La suite usa `storage/fastplay_test.sqlite` y se reinicia desde `tests/bootstrap
 - Refactor profundo del _router_.
 - Endurecimiento de sesiones y CSP.
 - ExtracciÃ³n de animaciones de scroll a archivos externos.
-- AuditorÃ­a de seguridad en curso (ver [`arreglos.md`](arreglos.md)).
+- AuditorÃ­a de seguridad en curso.
 
 ### ðŸ”œ v4 (planeado)
 - [ ] API REST para cliente mÃ³vil.
@@ -428,7 +428,7 @@ Esta versiÃ³n incluye:
 - **Rate limit corregido** â€” Las ventanas temporales usan UTC (`gmdate`) para casar con `datetime('now')` de SQLite.
 - **`.gitignore` aÃ±adido** â€” Excluye SQLite, _journal_, logs, sesiones, cachÃ©s, `vendor/` y subidas de usuario.
 
-> El historial completo de cambios vive en `git log`. Las correcciones detectadas durante auditorÃ­a se enumeran en [`arreglos.md`](arreglos.md).
+> El historial completo de cambios vive en `git log`.
 
 ---
 
