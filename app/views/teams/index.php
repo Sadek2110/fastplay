@@ -12,21 +12,46 @@
         </div>
     </div>
 
-    <?php if (!empty($myTeam)): ?>
+    <?php if (!empty($myTeam)):
+        $captainName = $myTeam['captain_name'] ?? 'N/D';
+        $captainInitial = mb_strtoupper(mb_substr($captainName, 0, 1));
+    ?>
         <section class="fp-glass fp-panel fp-team-overview">
             <div class="fp-team-summary">
                 <div class="fp-team-badge large"><?= e($myTeam['badge'] ?? 'FP') ?></div>
-                <div>
-                    <p class="fp-eyebrow">Mi equipo actual</p>
-                    <h2><?= e($myTeam['name']) ?></h2>
-                    <p class="fp-muted"><i class="bi bi-geo-alt"></i> <?= e($myTeam['city'] ?: 'Ceuta') ?> · <i class="bi bi-shield-check"></i> Capitan: <?= e($myTeam['captain_name'] ?? 'N/D') ?></p>
+                <div class="fp-team-summary-info">
+                    <p class="fp-eyebrow">Mi equipo</p>
+                    <h2 class="fp-team-name"><?= e($myTeam['name']) ?></h2>
+                    <p class="fp-muted fp-team-meta">
+                        <span><i class="bi bi-geo-alt"></i> <?= e($myTeam['city'] ?: 'Ceuta') ?></span>
+                        <span class="fp-team-captain">
+                            <span class="fp-captain-pill" aria-hidden="true"><?= e($captainInitial) ?></span>
+                            <span>Capitán: <strong><?= e($captainName) ?></strong></span>
+                        </span>
+                    </p>
                 </div>
             </div>
             <div class="fp-team-kpis">
-                <div><strong><?= (int) ($myTeam['matches_played'] ?? 0) ?></strong><span>Partidos</span></div>
-                <div><strong><?= (int) ($myTeam['finished_matches'] ?? 0) ?></strong><span>Jugados</span></div>
-                <div><strong><?= (int) ($myTeam['players'] ?? 0) ?></strong><span>Jugadores</span></div>
-                <div><strong><?= (int) ($myTeam['points'] ?? 0) ?></strong><span>Puntos</span></div>
+                <div>
+                    <i class="bi bi-calendar2-week fp-kpi-icon"></i>
+                    <strong><?= (int) ($myTeam['matches_played'] ?? 0) ?></strong>
+                    <span>Partidos</span>
+                </div>
+                <div>
+                    <i class="bi bi-flag fp-kpi-icon"></i>
+                    <strong><?= (int) ($myTeam['finished_matches'] ?? 0) ?></strong>
+                    <span>Jugados</span>
+                </div>
+                <div>
+                    <i class="bi bi-people fp-kpi-icon"></i>
+                    <strong><?= (int) ($myTeam['players'] ?? 0) ?></strong>
+                    <span>Jugadores</span>
+                </div>
+                <div>
+                    <i class="bi bi-trophy fp-kpi-icon"></i>
+                    <strong><?= (int) ($myTeam['points'] ?? 0) ?></strong>
+                    <span>Puntos</span>
+                </div>
             </div>
             <div class="fp-actions-row">
                 <a href="<?= url('teams/show/' . (int) $myTeam['id']) ?>" class="fp-btn fp-btn-primary"><i class="bi bi-people"></i><span>Ver jugadores</span></a>

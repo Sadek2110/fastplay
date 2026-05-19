@@ -8,6 +8,33 @@ define('STORAGE_PATH', APP_ROOT . DIRECTORY_SEPARATOR . 'storage');
 define('SESSIONS_PATH', STORAGE_PATH . DIRECTORY_SEPARATOR . 'sessions');
 define('UPLOADS_PATH', APP_ROOT . DIRECTORY_SEPARATOR . 'uploads');
 
+// Carga ligera de .env (KEY=VALUE por línea, líneas en blanco y # comentadas).
+// Sólo cargamos claves no definidas todavía, para que las variables del sistema
+// (Apache SetEnv, contenedores, panel de hosting) siempre tengan prioridad.
+if (!defined('FP_ENV_LOADED')) {
+    $envFile = APP_ROOT . DIRECTORY_SEPARATOR . '.env';
+    if (is_file($envFile) && is_readable($envFile)) {
+        foreach (file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [] as $line) {
+            $line = ltrim($line);
+            if ($line === '' || $line[0] === '#') { continue; }
+            if (!str_contains($line, '=')) { continue; }
+            [$key, $value] = array_map('trim', explode('=', $line, 2));
+            if ($key === '' || getenv($key) !== false) { continue; }
+            // Permite valores entrecomillados sin perder el = interno.
+            if ((strlen($value) >= 2) && (
+                ($value[0] === '"' && substr($value, -1) === '"') ||
+                ($value[0] === "'" && substr($value, -1) === "'")
+            )) {
+                $value = substr($value, 1, -1);
+            }
+            putenv($key . '=' . $value);
+            $_ENV[$key]    = $value;
+            $_SERVER[$key] = $value;
+        }
+    }
+    define('FP_ENV_LOADED', true);
+}
+
 // Entorno de ejecución: 'development' o 'production'.
 // Sobrescribible vía variable de entorno APP_ENV (Apache SetEnv / sistema).
 if (!defined('APP_ENV')) {

@@ -509,20 +509,20 @@ class Database
             return;
         }
 
-        // Admin + jugador demo (sólo en dev por el guard de APP_ENV)
+        // Todos los usuarios, equipos, ligas y campos demo están localizados en Ceuta.
         $st = $pdo->prepare("INSERT INTO users (name,email,phone,age,city,position,password_hash,role,dorsal,height_cm,goals,assists) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
-        $st->execute(['Sadek Admin', 'admin@fastplay.es', '+34600000000', 28, 'Madrid', 'Mediocampo', password_hash('Admin1234!', PASSWORD_DEFAULT), 'admin', 10, 178, 4, 12]);
+        $st->execute(['Sadek Admin', 'admin@fastplay.es', '+34600000000', 28, 'Ceuta', 'Mediocampo', password_hash('Admin1234!', PASSWORD_DEFAULT), 'admin', 10, 178, 4, 12]);
         $adminId = (int) $pdo->lastInsertId();
-        $st->execute(['Jugador Demo', 'demo@fastplay.es', '+34611111111', 24, 'Madrid', 'Delantero', password_hash('Demo1234!', PASSWORD_DEFAULT), 'player', 9, 182, 15, 8]);
+        $st->execute(['Jugador Demo', 'demo@fastplay.es', '+34611111111', 24, 'Ceuta', 'Delantero', password_hash('Demo1234!', PASSWORD_DEFAULT), 'player', 9, 182, 15, 8]);
         $demoId = (int) $pdo->lastInsertId();
 
         $players = [
-            ['Lucía Pérez', 'lucia@fastplay.es', 22, 'Barcelona', 'Portera',     1, 170, 0,  3],
-            ['Marc Costa',  'marc@fastplay.es',  27, 'Valencia',  'Defensa',     4, 184, 2,  5],
-            ['Ana Ruiz',    'ana@fastplay.es',   26, 'Sevilla',   'Mediocampo',  8, 168, 6,  9],
-            ['Iván Soto',   'ivan@fastplay.es',  25, 'Bilbao',    'Delantero',  11, 180, 18, 6],
-            ['Paula Gil',   'paula@fastplay.es', 23, 'Zaragoza',  'Defensa',     3, 173, 1,  4],
-            ['Hugo Marín',  'hugo@fastplay.es',  29, 'Málaga',    'Mediocampo',  6, 177, 5,  7],
+            ['Lucía Pérez', 'lucia@fastplay.es', 22, 'Ceuta', 'Portera',     1, 170, 0,  3],
+            ['Marc Costa',  'marc@fastplay.es',  27, 'Ceuta', 'Defensa',     4, 184, 2,  5],
+            ['Ana Ruiz',    'ana@fastplay.es',   26, 'Ceuta', 'Mediocampo',  8, 168, 6,  9],
+            ['Iván Soto',   'ivan@fastplay.es',  25, 'Ceuta', 'Delantero',  11, 180, 18, 6],
+            ['Paula Gil',   'paula@fastplay.es', 23, 'Ceuta', 'Defensa',     3, 173, 1,  4],
+            ['Hugo Marín',  'hugo@fastplay.es',  29, 'Ceuta', 'Mediocampo',  6, 177, 5,  7],
         ];
         $playerIds = [];
         foreach ($players as $p) {
@@ -530,16 +530,16 @@ class Database
             $playerIds[] = (int) $pdo->lastInsertId();
         }
 
-        // Equipos
+        // Equipos — todos de Ceuta, nombres reales de barrios y zonas.
         $teams = [
-            ['Madrid Real C.F.', 'Madrid',    $demoId],
-            ['Barça Amateurs',   'Barcelona', $playerIds[0]],
-            ['Atlético Centro',  'Madrid',    $adminId],
-            ['Sevilla Street',   'Sevilla',   $playerIds[2]],
-            ['Valencia Calle',   'Valencia',  $playerIds[1]],
-            ['Bilbao Norte',     'Bilbao',    $playerIds[3]],
-            ['Zaragoza FC',      'Zaragoza',  $playerIds[4]],
-            ['Málaga Costa',     'Málaga',    $playerIds[5]],
+            ['Murube United',          'Ceuta', $demoId],
+            ['Benoliel FC',            'Ceuta', $playerIds[0]],
+            ['Ceuta Centro Atletico',  'Ceuta', $adminId],
+            ['Principe Deportivo',     'Ceuta', $playerIds[2]],
+            ['La Marina FC',           'Ceuta', $playerIds[1]],
+            ['Otero Norte',            'Ceuta', $playerIds[3]],
+            ['Hacho FC',               'Ceuta', $playerIds[4]],
+            ['Ribera Sur',             'Ceuta', $playerIds[5]],
         ];
         $teamIds = [];
         $stT = $pdo->prepare("INSERT INTO teams (name,city,captain_id) VALUES (?,?,?)");
@@ -553,12 +553,12 @@ class Database
         // demo se une también a un par
         $stTM->execute([$teamIds[2], $demoId]);
 
-        // Ligas
+        // Ligas — todas en Ceuta.
         $leagues = [
-            ['Liga Pro Madrid 25/26',     'Madrid',    1, 1500.00, '2026-03-01', '2026-06-30'],
-            ['Liga Pro Barcelona 25/26',  'Barcelona', 1, 1500.00, '2026-03-01', '2026-06-30'],
-            ['Liga Amistosa Valencia',    'Valencia',  0, null,    '2026-03-01', '2026-06-30'],
-            ['Liga Amistosa Sevilla',     'Sevilla',   0, null,    '2026-03-01', '2026-06-30'],
+            ['Liga Pro Ceuta 25/26',       'Ceuta', 1, 1500.00, '2026-03-01', '2026-06-30'],
+            ['Copa Local Ceuta 25/26',     'Ceuta', 1, 1500.00, '2026-03-01', '2026-06-30'],
+            ['Liga Amistosa Ceuta',        'Ceuta', 0, null,    '2026-03-01', '2026-06-30'],
+            ['Torneo Barrios de Ceuta',    'Ceuta', 0, null,    '2026-03-01', '2026-06-30'],
         ];
         $stL = $pdo->prepare("INSERT INTO leagues (name,city,pro,prize,start_date,end_date) VALUES (?,?,?,?,?,?)");
         $leagueIds = [];
@@ -568,40 +568,30 @@ class Database
         }
         // Inscribimos equipos en cada liga (asegurando consistencia con los partidos)
         $stLT = $pdo->prepare("INSERT INTO league_teams (league_id,team_id,points,played,won,drawn,lost,gf,ga) VALUES (?,?,?,?,?,?,?,?,?)");
-        $stLT->execute([$leagueIds[0], $teamIds[0], 9,  4, 3, 0, 1, 11, 5]);  // Madrid Real en Liga Madrid
-        $stLT->execute([$leagueIds[0], $teamIds[2], 7,  4, 2, 1, 1, 8,  6]);  // Atlético Centro en Liga Madrid
-        $stLT->execute([$leagueIds[0], $teamIds[1], 3,  3, 1, 0, 2, 4,  7]);  // Barça Amateurs en Liga Madrid (para el partido vs Madrid Real)
-        $stLT->execute([$leagueIds[0], $teamIds[3], 1,  3, 0, 1, 2, 3,  8]);  // Sevilla Street en Liga Madrid (para el partido vs Atlético Centro)
-        $stLT->execute([$leagueIds[1], $teamIds[1], 6,  3, 2, 0, 1, 6,  3]);  // Barça Amateurs en Liga Barcelona
-        $stLT->execute([$leagueIds[2], $teamIds[4], 4,  3, 1, 1, 1, 4,  4]);  // Valencia Calle en Liga Valencia
-        $stLT->execute([$leagueIds[2], $teamIds[0], 2,  3, 0, 2, 1, 2,  5]);  // Madrid Real en Liga Valencia (para el partido vs Valencia Calle)
-        $stLT->execute([$leagueIds[3], $teamIds[3], 8,  4, 2, 2, 0, 7,  3]);  // Sevilla Street en Liga Sevilla
+        $stLT->execute([$leagueIds[0], $teamIds[0], 9,  4, 3, 0, 1, 11, 5]);  // Murube United en Liga Pro Ceuta
+        $stLT->execute([$leagueIds[0], $teamIds[2], 7,  4, 2, 1, 1, 8,  6]);  // Ceuta Centro Atletico en Liga Pro Ceuta
+        $stLT->execute([$leagueIds[0], $teamIds[1], 3,  3, 1, 0, 2, 4,  7]);  // Benoliel FC en Liga Pro Ceuta
+        $stLT->execute([$leagueIds[0], $teamIds[3], 1,  3, 0, 1, 2, 3,  8]);  // Principe Deportivo en Liga Pro Ceuta
+        $stLT->execute([$leagueIds[1], $teamIds[1], 6,  3, 2, 0, 1, 6,  3]);  // Benoliel FC en Copa Local
+        $stLT->execute([$leagueIds[2], $teamIds[4], 4,  3, 1, 1, 1, 4,  4]);  // La Marina FC en Liga Amistosa
+        $stLT->execute([$leagueIds[2], $teamIds[0], 2,  3, 0, 2, 1, 2,  5]);  // Murube United en Liga Amistosa
+        $stLT->execute([$leagueIds[3], $teamIds[3], 8,  4, 2, 2, 0, 7,  3]);  // Principe Deportivo en Torneo Barrios
 
-        // Campos
+        // Campos — todos en Ceuta, con coordenadas reales para Google Maps / Leaflet.
         $fields = [
-            ['La Cantera',         'Madrid',    'Av. de las Glorietas 12', 'césped',     22, 35.00],
-            ['Pista 4',            'Madrid',    'Polideportivo Centro',    'sintético',  14, 22.00],
-            ['Polideportivo Sur',  'Valencia',  'C/ del Mar, 3',           'césped',     22, 30.00],
-            ['Camp Nou Petit',     'Barcelona', 'C/ de Sants, 88',         'césped',     22, 40.00],
-            ['Sevilla Sur',        'Sevilla',   'Av. Heliópolis 21',       'tierra',     14, 18.00],
+            ['Estadio Municipal Alfonso Murube', 'Ceuta', 'Calle Juan de Juanes, Ceuta',     'césped',    22, 0.00,  35.8883, -5.3162, 'https://www.google.com/maps/search/?api=1&query=Estadio+Municipal+Alfonso+Murube+Ceuta', 'Estadio principal para futbol local y competicion en Ceuta.'],
+            ['Campo Jose Martinez Pirri',        'Ceuta', 'Ceuta',                            'sintético', 22, 0.00,  35.8890, -5.3070, 'https://www.google.com/maps/search/?api=1&query=Campo+Jose+Martinez+Pirri+Ceuta', 'Instalacion deportiva para entrenamientos y partidos locales.'],
+            ['Campo Federativo Jose Benoliel',   'Ceuta', 'Avenida de Africa, Ceuta',         'sintético', 22, 0.00,  35.8898, -5.3262, 'https://www.google.com/maps/search/?api=1&query=Campo+Federativo+Jose+Benoliel+Ceuta', 'Campo federativo de futbol en Ceuta.'],
+            ['Campo de futbol del Principe',     'Ceuta', 'Barriada Principe Alfonso, Ceuta', 'sintético', 22, 0.00,  35.8746, -5.3268, 'https://www.google.com/maps/search/?api=1&query=Campo+de+futbol+del+Principe+Ceuta', 'Campo de barrio para futbol base y encuentros locales.'],
+            ['Complejo Deportivo Diaz-Flor',     'Ceuta', 'Avenida de Otero, Ceuta',          'césped',    22, 0.00,  35.8871, -5.3073, 'https://www.google.com/maps/search/?api=1&query=Complejo+Deportivo+Diaz+Flor+Ceuta', 'Complejo deportivo municipal en Ceuta.'],
+            ['Polideportivo La Libertad',        'Ceuta', 'Avenida de Lisboa, Ceuta',         'sintético', 14, 0.00,  35.8844, -5.3441, 'https://www.google.com/maps/search/?api=1&query=Polideportivo+La+Libertad+Ceuta', 'Instalacion polideportiva para entrenamientos y partidos.'],
         ];
-        $stF = $pdo->prepare("INSERT INTO fields (name,city,address,surface,capacity,hourly_rate) VALUES (?,?,?,?,?,?)");
+        $stF = $pdo->prepare("INSERT INTO fields (name,city,address,surface,capacity,hourly_rate,latitude,longitude,maps_url,description) VALUES (?,?,?,?,?,?,?,?,?,?)");
         $fieldIds = [];
         foreach ($fields as $f) {
             $stF->execute($f);
             $fieldIds[] = (int) $pdo->lastInsertId();
         }
-        $ceutaFields = [
-            ['Campo Federativo Jose Benoliel', 'Ceuta', 'Avenida de Africa, Ceuta', 'sintÃ©tico', 22, 0, 35.8898, -5.3262, 'https://www.google.com/maps/search/?api=1&query=Campo+Federativo+Jose+Benoliel+Ceuta', 'Campo federativo de futbol en Ceuta.'],
-            ['Polideportivo La Libertad', 'Ceuta', 'Avenida de Lisboa, Ceuta', 'sintÃ©tico', 14, 0, 35.8844, -5.3441, 'https://www.google.com/maps/search/?api=1&query=Polideportivo+La+Libertad+Ceuta', 'Instalacion polideportiva para entrenamientos y partidos.'],
-            ['Complejo Deportivo Diaz-Flor', 'Ceuta', 'Avenida de Otero, Ceuta', 'cÃ©sped', 22, 0, 35.8871, -5.3073, 'https://www.google.com/maps/search/?api=1&query=Complejo+Deportivo+Diaz+Flor+Ceuta', 'Complejo deportivo municipal en Ceuta.'],
-        ];
-        $stFCeuta = $pdo->prepare("INSERT INTO fields (name,city,address,surface,capacity,hourly_rate,latitude,longitude,maps_url,description) VALUES (?,?,?,?,?,?,?,?,?,?)");
-        foreach ($ceutaFields as $f) {
-            $stFCeuta->execute($f);
-            $fieldIds[] = (int) $pdo->lastInsertId();
-        }
-
         // Partidos
         $stM = $pdo->prepare("INSERT INTO matches (home_team_id,away_team_id,league_id,field_id,scheduled_at,status,home_score,away_score,created_by) VALUES (?,?,?,?,?,?,?,?,?)");
         $stM->execute([$teamIds[0], $teamIds[1], $leagueIds[0], $fieldIds[0], '2026-06-12 19:30:00', 'confirmed', null, null, $adminId]);
@@ -635,8 +625,8 @@ class Database
         $captainsRoom = (int) $pdo->lastInsertId();
 
         $stMsg = $pdo->prepare("INSERT INTO chat_messages (room_id,user_id,body) VALUES (?,?,?)");
-        $stMsg->execute([$generalRoom, $adminId, '¡Bienvenidos a FastPlay! Por aquí coordinamos cualquier duda.']);
-        $stMsg->execute([$generalRoom, $demoId,  '¿Alguien para un 7v7 este finde en Madrid?']);
-        $stMsg->execute([$captainsRoom, $playerIds[0], 'Buscamos rival amistoso este sábado, Barça Amateurs disponibles.']);
+        $stMsg->execute([$generalRoom, $adminId, '¡Bienvenidos a FastPlay Ceuta! Por aquí coordinamos cualquier duda.']);
+        $stMsg->execute([$generalRoom, $demoId,  '¿Alguien para un 7v7 este finde en el Murube?']);
+        $stMsg->execute([$captainsRoom, $playerIds[0], 'Buscamos rival amistoso este sábado, Benoliel FC disponibles.']);
     }
 }

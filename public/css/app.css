@@ -1502,3 +1502,241 @@ body {
   .matches-calendar { padding: 20px; }
   .calendar-day { min-height: 38px; }
 }
+
+/* =============================================================
+   Ceuta v2 · Más respiración + tema claro refinado
+   ============================================================= */
+
+/* Escalado de espaciados — todas las páginas heredan más aire. */
+:root {
+  --space-md: 24px;
+  --space-lg: 40px;
+  --space-xl: 64px;
+  --space-xxl: 96px;
+}
+
+/* Grids con más gap por defecto. */
+.fp-grid-2 { gap: 28px; }
+.fp-grid-3 { gap: 28px; }
+.fp-grid-4 { gap: 24px; }
+
+/* Cabeceras de página: separar del título y de las acciones. */
+.fp-page-head {
+  gap: 24px;
+  margin-bottom: var(--space-xl);
+}
+.fp-page { padding: 128px 28px 112px; }
+
+/* Las filas de acciones respiran un poco más. */
+.fp-actions-row { gap: 14px; }
+
+/* Listas internas con más aire entre items. */
+.fp-list > * + * { margin-top: 10px; }
+.fp-team-list { display: grid; gap: 18px; }
+
+/* Paneles + glass: padding interior más generoso. */
+.fp-panel { padding: 28px; }
+.fp-glass.fp-panel { padding: 32px; }
+
+/* KPIs del equipo: dales presencia. */
+.fp-team-kpis { gap: 18px; }
+.fp-team-kpis div { padding: 22px 20px; border-radius: 18px; }
+.fp-team-kpis strong { font-size: 34px; font-weight: 900; }
+
+/* === TEMA CLARO REFINADO === */
+[data-theme="light"] {
+  /* Blanco roto cálido + verde más suave. */
+  --color-bg-light: #f5f0e2;             /* fondo crema-roto */
+  --color-surface-light: #fffaee;        /* tarjetas blanco roto */
+  --color-surface-alt-light: #e7f3e2;    /* alt verde claro */
+  --color-primary: #3a8e54;              /* verde más amable */
+  --color-primary-light: #94d8a4;        /* verde lima suave */
+  --color-primary-soft: #e3f4e5;
+  --color-gold: #c89a2e;
+  --color-gold-hover: #b3851f;
+  --color-text-main: #1f2a24;
+  --color-text-muted: #65766b;
+  --color-border-light: #d2dbc8;
+  --shadow-soft: 0 10px 28px rgba(31,42,36,.10);
+  --shadow-card: 0 22px 52px rgba(31,42,36,.16);
+
+  --fp-glass-bg: linear-gradient(180deg, #fffcf2 0%, #faf4e2 100%);
+  --fp-glass-green-bg: linear-gradient(180deg, #eaf6e7 0%, #d9eed4 100%);
+}
+
+/* Body con un degradado más rico. */
+[data-theme="light"] body {
+  background:
+    radial-gradient(1200px 600px at 90% -10%, rgba(94,160,108,.18), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(200,154,46,.16), transparent 60%),
+    linear-gradient(180deg, #f8f3e4 0%, #ecf3e3 48%, #f5f0e2 100%);
+}
+
+/* Header un toque más oscuro y con presencia. */
+[data-theme="light"] .fp-navbar {
+  background: linear-gradient(180deg, #283d2f 0%, #2f4a37 100%);
+  border-bottom: 1px solid rgba(0,0,0,.18);
+  box-shadow: 0 10px 28px rgba(31,42,36,.18);
+}
+[data-theme="light"] .fp-navbar .fp-nav-link,
+[data-theme="light"] .fp-navbar .fp-logo,
+[data-theme="light"] .fp-navbar .fp-icon-btn,
+[data-theme="light"] .fp-navbar .fp-login,
+[data-theme="light"] .fp-navbar .fp-user-pill,
+[data-theme="light"] .fp-navbar .fp-logout {
+  color: #fdf7e6;
+}
+[data-theme="light"] .fp-navbar .fp-nav-link:hover { color: var(--color-gold); }
+[data-theme="light"] .fp-navbar .fp-nav-link.active {
+  color: var(--color-gold);
+  background: rgba(255,255,255,.06);
+}
+[data-theme="light"] .fp-navbar .fp-icon-btn { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.14); }
+
+/* Footer también más oscuro. */
+[data-theme="light"] .fp-footer {
+  background: linear-gradient(180deg, #2f4a37 0%, #233628 100%);
+  color: #e5f0e1;
+  border-top: 1px solid rgba(0,0,0,.20);
+  box-shadow: 0 -10px 28px rgba(31,42,36,.10);
+}
+[data-theme="light"] .fp-footer a,
+[data-theme="light"] .fp-footer p,
+[data-theme="light"] .fp-footer small {
+  color: #e5f0e1;
+}
+[data-theme="light"] .fp-footer a:hover { color: var(--color-gold); }
+
+/* Tarjetas glass: degradado sutil + sombra más rica. */
+[data-theme="light"] .fp-glass,
+[data-theme="light"] .fp-panel,
+[data-theme="light"] .matches-calendar {
+  background: linear-gradient(180deg, #fffdf3 0%, #faf3e0 100%);
+  border-color: var(--color-border-light);
+  box-shadow: var(--shadow-soft);
+}
+[data-theme="light"] .fp-card-link:hover,
+[data-theme="light"] .fp-glass:hover {
+  box-shadow: var(--shadow-card);
+  transform: translateY(-2px);
+}
+
+/* Botón primario en tema claro = verde sólido con sombra. */
+[data-theme="light"] .fp-btn-primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, #2f7d46 100%);
+  color: #fff;
+  border: 1px solid rgba(0,0,0,.06);
+  box-shadow: 0 8px 18px rgba(47,125,70,.30);
+}
+[data-theme="light"] .fp-btn-primary:hover {
+  box-shadow: 0 12px 24px rgba(47,125,70,.36);
+  transform: translateY(-1px);
+}
+
+/* CTA principales = dorado con degradado + sombra cálida. */
+[data-theme="light"] .fp-btn-gold,
+[data-theme="light"] .fp-btn-cta,
+[data-theme="light"] .btn-cta {
+  background: linear-gradient(135deg, #e9b945 0%, var(--color-gold) 55%, #a87f1c 100%);
+  color: #1f2a24;
+  border: 1px solid rgba(0,0,0,.08);
+  box-shadow: 0 10px 22px rgba(200,154,46,.38);
+  font-weight: 800;
+}
+[data-theme="light"] .fp-btn-gold:hover,
+[data-theme="light"] .fp-btn-cta:hover,
+[data-theme="light"] .btn-cta:hover {
+  background: linear-gradient(135deg, #f0c456 0%, #c89a2e 60%, #8c6915 100%);
+  box-shadow: 0 14px 30px rgba(200,154,46,.46);
+  transform: translateY(-1px);
+}
+
+/* Botón ghost en tema claro: contorno y fondo casi blanco. */
+[data-theme="light"] .fp-btn-ghost {
+  background: rgba(255,255,255,.7);
+  border-color: var(--color-border-light);
+  color: var(--color-text-main);
+  backdrop-filter: blur(6px);
+}
+[data-theme="light"] .fp-btn-ghost:hover {
+  background: #fff;
+  border-color: rgba(47,125,70,.32);
+}
+
+/* KPIs en tema claro: degradado verde suave. */
+[data-theme="light"] .fp-team-kpis div {
+  background: linear-gradient(180deg, #eaf6e7 0%, #d9eed4 100%);
+  border-color: rgba(47,125,70,.18);
+  box-shadow: 0 6px 14px rgba(47,125,70,.10);
+}
+[data-theme="light"] .fp-team-kpis strong { color: var(--color-primary); }
+
+/* Badge de equipo en tema claro: redondo verde. */
+[data-theme="light"] .fp-team-badge {
+  background: linear-gradient(135deg, var(--color-primary) 0%, #265b35 100%);
+  color: #fff;
+  box-shadow: 0 6px 14px rgba(47,125,70,.30);
+}
+
+/* Inputs cálidos. */
+[data-theme="light"] .fp-input {
+  background: #fffcf0;
+  border-color: var(--color-border-light);
+  box-shadow: inset 0 1px 2px rgba(31,42,36,.04);
+}
+[data-theme="light"] .fp-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(58,142,84,.16);
+  outline: none;
+}
+
+/* Eyebrows con tono dorado en tema claro para destacar. */
+[data-theme="light"] .fp-eyebrow {
+  color: var(--color-gold-hover);
+  font-weight: 700;
+}
+
+/* === Mejoras de la cabecera "Mi equipo" === */
+.fp-team-summary {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+.fp-team-summary-info { display: flex; flex-direction: column; gap: 8px; }
+.fp-team-name { font-size: 30px; font-weight: 900; margin: 0; letter-spacing: -.02em; }
+.fp-team-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin: 4px 0 0;
+}
+.fp-team-captain { display: inline-flex; align-items: center; gap: 8px; }
+.fp-captain-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--fp-green-600), var(--fp-green-400));
+  color: #051a0c;
+  font-weight: 800;
+  font-size: 13px;
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow: 0 4px 12px rgba(22,163,74,.32);
+}
+[data-theme="light"] .fp-captain-pill {
+  background: linear-gradient(135deg, var(--color-primary), #265b35);
+  color: #fff;
+}
+
+.fp-kpi-icon {
+  display: block;
+  font-size: 20px;
+  color: var(--fp-green-400);
+  margin-bottom: 6px;
+  opacity: .85;
+}
+[data-theme="light"] .fp-kpi-icon { color: var(--color-primary); }

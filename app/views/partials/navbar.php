@@ -10,6 +10,12 @@ $unread = 0;
 if ($user) {
     try { $unread = (int) Database::value('SELECT COUNT(*) FROM notifications WHERE user_id=? AND is_read=0', [(int) $user['id']]); } catch (Throwable $e) { $unread = 0; }
 }
+// Las páginas internas (equipos, partidos, ligas, campos) y el selector de tema
+// solo aparecen cuando el usuario está autenticado Y no estamos en el landing.
+// En el landing público (active === 'home') la navbar queda minimalista: logo +
+// botones de entrar / registrarse.
+$onLanding = (($active ?? '') === 'home');
+$showInternalLinks = (bool) $user && !$onLanding;
 ?>
 <nav class="fp-navbar">
     <div class="fp-navbar-inner">
@@ -24,12 +30,12 @@ if ($user) {
 
         <div class="fp-nav-menu" data-nav-menu>
             <div class="fp-nav-links">
-                <?php foreach ($links as $l): ?>
-                    <a href="<?= url($l['url']) ?>" class="fp-nav-link <?= ($active ?? '') === $l['id'] ? 'active' : '' ?>">
-                        <i class="bi <?= e($l['icon']) ?>"></i><span><?= e($l['label']) ?></span>
-                    </a>
-                <?php endforeach; ?>
-                <?php if ($user): ?>
+                <?php if ($showInternalLinks): ?>
+                    <?php foreach ($links as $l): ?>
+                        <a href="<?= url($l['url']) ?>" class="fp-nav-link <?= ($active ?? '') === $l['id'] ? 'active' : '' ?>">
+                            <i class="bi <?= e($l['icon']) ?>"></i><span><?= e($l['label']) ?></span>
+                        </a>
+                    <?php endforeach; ?>
                     <a href="<?= url('dashboard') ?>" class="fp-nav-link <?= ($active ?? '') === 'dashboard' ? 'active' : '' ?>"><i class="bi bi-grid"></i><span>Dashboard</span></a>
                     <?php if (is_admin()): ?>
                         <a href="<?= url('admin') ?>" class="fp-nav-link <?= ($active ?? '') === 'admin' ? 'active' : '' ?>"><i class="bi bi-sliders"></i><span>Admin</span></a>
@@ -38,7 +44,7 @@ if ($user) {
             </div>
 
             <div class="fp-nav-actions">
-                <?php if (($active ?? '') !== 'home'): ?>
+                <?php if ($showInternalLinks): ?>
                     <button class="fp-icon-btn" type="button" data-theme-toggle aria-label="Cambiar tema"><i class="bi bi-moon"></i></button>
                 <?php endif; ?>
                 <?php if ($user): ?>
