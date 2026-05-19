@@ -5,7 +5,17 @@ class Campo
 {
     public function all(): array
     {
-        return Database::all('SELECT * FROM fields ORDER BY city, name');
+        return Database::all("SELECT * FROM fields ORDER BY CASE WHEN city = 'Ceuta' THEN 0 ELSE 1 END, city, name");
+    }
+
+    public function ceuta(): array
+    {
+        return Database::all(
+            "SELECT * FROM fields
+             WHERE city = 'Ceuta'
+               AND id IN (SELECT MIN(id) FROM fields WHERE city = 'Ceuta' GROUP BY name)
+             ORDER BY name"
+        );
     }
 
     public function find(int $id): ?array

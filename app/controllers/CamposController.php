@@ -4,12 +4,20 @@ class CamposController extends Controller
 {
     public function index(): void
     {
+        $googleMapsKey = getenv('GOOGLE_MAPS_API_KEY') ?: '';
+        $mapScripts = '<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>';
+        if ($googleMapsKey !== '') {
+            $mapScripts .= '<script async defer src="https://maps.googleapis.com/maps/api/js?key=' . rawurlencode($googleMapsKey) . '&callback=initCeutaMap"></script>';
+        }
+        $mapScripts .= '<script src="' . asset('js/campos-map.js') . '" defer></script>';
+
         $this->view('campos/index', [
             'active' => 'campos',
-            'fields' => $this->model('Campo')->all(),
+            'fields' => $this->model('Campo')->ceuta(),
+            'googleMapsEnabled' => $googleMapsKey !== '',
             'head' => '<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">',
-            'scripts' => '<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="' . asset('js/campos-map.js') . '" defer></script>',
-            'title' => 'Campos - FastPlay',
+            'scripts' => $mapScripts,
+            'title' => 'Campos de Ceuta - FastPlay',
         ]);
     }
 

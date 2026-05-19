@@ -28,6 +28,7 @@
 <script src="<?= asset('js/theme.js') ?>" defer></script>
 <script src="<?= asset('js/nav.js') ?>" defer></script>
 <script src="<?= asset('js/fifa-card.js') ?>" defer></script>
+<script>window.FP_BASE_URL = "<?= e(BASE_URL) ?>";</script>
 <?= $scripts ?? '' ?>
 </body>
 </html>

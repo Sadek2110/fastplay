@@ -4,10 +4,13 @@ class MatchesController extends Controller
 {
     public function index(): void
     {
+        $matches = $this->model('Partido')->all();
         $this->view('matches/index', [
             'active' => 'matches',
-            'matches' => $this->model('Partido')->all(),
-            'title' => 'Partidos - FastPlay',
+            'matches' => $matches,
+            'calendarMatches' => $matches,
+            'scripts' => '<script src="' . asset('js/matches-calendar.js') . '" defer></script>',
+            'title' => 'Partidos en Ceuta - FastPlay',
         ]);
     }
 

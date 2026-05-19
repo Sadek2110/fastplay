@@ -29,4 +29,10 @@ try {
 }
 
 $url = isset($_GET['url']) ? (string) $_GET['url'] : '';
+if ($url === '' && PHP_SAPI === 'cli-server') {
+    $path = trim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '', '/');
+    if ($path !== '' && !str_contains(basename($path), '.')) {
+        $url = $path;
+    }
+}
 Router::dispatch($url);

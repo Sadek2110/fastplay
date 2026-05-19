@@ -5,13 +5,19 @@ class TeamsController extends Controller
     public function index(): void
     {
         $equipo = $this->model('Equipo');
+        $this->model('Usuario');
         $user = current_user();
-        $myTeam = $user ? $equipo->mine((int) $user['id']) : null;
+        $userId = $user ? (int) $user['id'] : 0;
+        $myTeam = $userId > 0 ? $equipo->summaryForUser($userId) : null;
 
         $this->view('teams/index', [
             'active' => 'teams',
             'teams' => $myTeam ? [] : $equipo->all(),
             'myTeam' => $myTeam,
+            'members' => $myTeam ? $equipo->members((int) $myTeam['id']) : [],
+            'teamMatches' => $myTeam ? $equipo->recentMatches((int) $myTeam['id']) : [],
+            'isCaptain' => $myTeam && $userId > 0 ? (int) $myTeam['captain_id'] === $userId : false,
+            'isPremium' => $userId > 0 ? Usuario::isPremium($userId) : false,
             'title' => 'Equipos - FastPlay',
         ]);
     }
@@ -56,6 +62,7 @@ class TeamsController extends Controller
         $this->requireAuth();
         $errors = [];
         $userId = (int) current_user()['id'];
+        $this->model('Usuario');
 
         if (!Usuario::isPremium($userId)) {
             $this->view('subscription/upgrade_required', [

@@ -26,7 +26,7 @@ $posShort = $positionShort((string) ($card['position'] ?? ''));
 
     <section class="fp-hero-card">
         <div class="fp-card-fifa-wrap">
-            <article class="fp-card-fifa <?= Usuario::isPremium((int) $user['id']) ? 'premium' : '' ?>" aria-label="Carta de jugador">
+            <article class="fp-card-fifa <?= !empty($isPremium) ? 'premium' : '' ?>" aria-label="Carta de jugador">
                 <div class="fp-card-fifa-shine" aria-hidden="true"></div>
                 <header class="fp-card-fifa-head">
                     <div class="fp-card-fifa-rating">
@@ -73,14 +73,14 @@ $posShort = $positionShort((string) ($card['position'] ?? ''));
                     <a href="<?= url('chat/team/' . (int) $team['id']) ?>" class="fp-btn fp-btn-ghost"><i class="bi bi-chat-dots"></i><span>Chat</span></a>
                 </div>
             <?php else: ?>
-                <?php $this->partial('empty-state', ['icon' => 'bi-shield-plus', 'title' => 'Aun no tienes equipo', 'description' => 'Solicita unirte a un equipo o crea uno si tienes premium.', 'ctaUrl' => 'teams', 'ctaLabel' => 'Buscar equipo']); ?>
+                <?php $this->partial('empty-state', ['icon' => 'bi-shield-plus', 'title' => 'Todavia no perteneces a ningun equipo', 'description' => 'Unete a uno o crea tu propio equipo para empezar a competir en Ceuta.', 'ctaUrl' => 'teams', 'ctaLabel' => 'Ver equipos de Ceuta']); ?>
             <?php endif; ?>
         </section>
 
         <section class="fp-glass fp-panel">
             <h2 class="fp-h2">Próximos partidos</h2>
             <?php if (empty($upcoming)): ?>
-                <?php $this->partial('empty-state', ['icon' => 'bi-calendar-x', 'title' => 'Sin partidos', 'description' => 'Cuando tengas equipo podrás solicitar un partido.', 'ctaUrl' => 'matches/create', 'ctaLabel' => 'Solicitar partido']); ?>
+                <?php $this->partial('empty-state', ['icon' => 'bi-calendar-x', 'title' => 'Sin partidos programados', 'description' => 'Cuando tengas equipo podras solicitar partidos en campos de Ceuta.', 'ctaUrl' => 'matches/create', 'ctaLabel' => 'Solicitar partido']); ?>
             <?php else: ?>
                 <div class="fp-list">
                     <?php foreach ($upcoming as $m): ?>

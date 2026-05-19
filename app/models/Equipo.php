@@ -56,6 +56,42 @@ class Equipo
         return $teams[0] ?? null;
     }
 
+    public function summaryForUser(int $userId): ?array
+    {
+        return Database::one(
+            "SELECT t.*, u.name AS captain_name,
+                    COALESCE((SELECT SUM(points) FROM league_teams WHERE team_id = t.id), 0) AS points,
+                    (SELECT COUNT(*) FROM team_members WHERE team_id = t.id) AS players,
+                    (SELECT COUNT(*) FROM matches WHERE home_team_id = t.id OR away_team_id = t.id) AS matches_played,
+                    (SELECT COUNT(*) FROM matches WHERE (home_team_id = t.id OR away_team_id = t.id) AND status = 'finished') AS finished_matches
+             FROM teams t
+             JOIN team_members tm ON tm.team_id = t.id
+             JOIN users u ON u.id = t.captain_id
+             WHERE tm.user_id = ?
+             ORDER BY t.name
+             LIMIT 1",
+            [$userId]
+        );
+    }
+
+    public function recentMatches(int $teamId, int $limit = 5): array
+    {
+        $limit = max(1, min(20, $limit));
+        return Database::all(
+            "SELECT m.id, m.scheduled_at, m.status,
+                    h.name AS home_name, a.name AS away_name,
+                    COALESCE(f.name, m.location, 'Campo de Ceuta a confirmar') AS field_name
+             FROM matches m
+             JOIN teams h ON h.id = m.home_team_id
+             JOIN teams a ON a.id = m.away_team_id
+             LEFT JOIN fields f ON f.id = m.field_id
+             WHERE m.home_team_id = ? OR m.away_team_id = ?
+             ORDER BY m.scheduled_at DESC
+             LIMIT {$limit}",
+            [$teamId, $teamId]
+        );
+    }
+
     public function create(int $captainId, array $data): array
     {
         $errors = [];

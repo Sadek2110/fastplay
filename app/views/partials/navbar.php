@@ -38,7 +38,9 @@ if ($user) {
             </div>
 
             <div class="fp-nav-actions">
-                <button class="fp-icon-btn" type="button" data-theme-toggle aria-label="Cambiar tema"><i class="bi bi-moon"></i></button>
+                <?php if (($active ?? '') !== 'home'): ?>
+                    <button class="fp-icon-btn" type="button" data-theme-toggle aria-label="Cambiar tema"><i class="bi bi-moon"></i></button>
+                <?php endif; ?>
                 <?php if ($user): ?>
                     <a href="<?= url('notification') ?>" class="fp-icon-btn fp-notification-link <?= ($active ?? '') === 'notification' ? 'active' : '' ?>" aria-label="Notificaciones">
                         <i class="bi bi-bell"></i>

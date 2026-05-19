@@ -1,6 +1,7 @@
 <?php
 
 require_once APP_PATH . '/models/Subscription.php';
+require_once APP_PATH . '/models/Usuario.php';
 require_once APP_PATH . '/services/StripeService.php';
 require_once APP_PATH . '/services/NotificationService.php';
 

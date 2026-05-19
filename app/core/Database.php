@@ -402,7 +402,82 @@ class Database
         $pdo->exec('CREATE INDEX IF NOT EXISTS idx_login_attempts_ip    ON login_attempts(ip,    attempted_at)');
 
         self::seed($pdo);
+        self::ensureCeutaData($pdo);
         self::repairConsistency($pdo);
+    }
+
+    private static function ensureCeutaData(PDO $pdo): void
+    {
+        $knownUsers = [
+            'admin@fastplay.es',
+            'demo@fastplay.es',
+            'lucia@fastplay.es',
+            'marc@fastplay.es',
+            'ana@fastplay.es',
+            'ivan@fastplay.es',
+            'paula@fastplay.es',
+            'hugo@fastplay.es',
+        ];
+        $stUser = $pdo->prepare('UPDATE users SET city = ? WHERE email = ?');
+        foreach ($knownUsers as $email) {
+            $stUser->execute(['Ceuta', $email]);
+        }
+
+        $teamRenames = [
+            'Madrid Real C.F.' => 'Murube United',
+            'Barça Amateurs' => 'Benoliel FC',
+            'Atlético Centro' => 'Ceuta Centro Atletico',
+            'Sevilla Street' => 'Principe Deportivo',
+            'Valencia Calle' => 'La Marina FC',
+            'Bilbao Norte' => 'Otero Norte',
+            'Zaragoza FC' => 'Hacho FC',
+            'Málaga Costa' => 'Ribera Sur',
+        ];
+        $stTeam = $pdo->prepare('UPDATE teams SET name = ?, city = ? WHERE name = ?');
+        foreach ($teamRenames as $old => $new) {
+            $stTeam->execute([$new, 'Ceuta', $old]);
+        }
+        $pdo->exec("UPDATE teams SET city = 'Ceuta' WHERE name IN ('Murube United','Benoliel FC','Ceuta Centro Atletico','Principe Deportivo','La Marina FC','Otero Norte','Hacho FC','Ribera Sur')");
+
+        $leagueRenames = [
+            'Liga Pro Madrid 25/26' => 'Liga Pro Ceuta 25/26',
+            'Liga Pro Barcelona 25/26' => 'Copa Local Ceuta 25/26',
+            'Liga Amistosa Valencia' => 'Liga Amistosa Ceuta',
+            'Liga Amistosa Sevilla' => 'Torneo Barrios de Ceuta',
+        ];
+        $stLeague = $pdo->prepare('UPDATE leagues SET name = ?, city = ? WHERE name = ?');
+        foreach ($leagueRenames as $old => $new) {
+            $stLeague->execute([$new, 'Ceuta', $old]);
+        }
+        $pdo->exec("UPDATE leagues SET city = 'Ceuta' WHERE name IN ('Liga Pro Ceuta 25/26','Copa Local Ceuta 25/26','Liga Amistosa Ceuta','Torneo Barrios de Ceuta')");
+
+        $fields = [
+            ['Estadio Municipal Alfonso Murube', 'Ceuta', 'Calle Juan de Juanes, Ceuta', 'cesped', 22, 0, 35.8883, -5.3162, 'https://www.google.com/maps/search/?api=1&query=Estadio+Municipal+Alfonso+Murube+Ceuta', 'Estadio principal para futbol local y competicion en Ceuta.'],
+            ['Campo Jose Martinez Pirri', 'Ceuta', 'Ceuta', 'sintetico', 22, 0, 35.8890, -5.3070, 'https://www.google.com/maps/search/?api=1&query=Campo+Jose+Martinez+Pirri+Ceuta', 'Instalacion deportiva para entrenamientos y partidos locales.'],
+            ['Campo Federativo Jose Benoliel', 'Ceuta', 'Avenida de Africa, Ceuta', 'sintetico', 22, 0, 35.8898, -5.3262, 'https://www.google.com/maps/search/?api=1&query=Campo+Federativo+Jose+Benoliel+Ceuta', 'Campo federativo de futbol en Ceuta.'],
+            ['Campo de futbol del Principe', 'Ceuta', 'Barriada Principe Alfonso, Ceuta', 'sintetico', 22, 0, 35.8746, -5.3268, 'https://www.google.com/maps/search/?api=1&query=Campo+de+futbol+del+Principe+Ceuta', 'Campo de barrio para futbol base y encuentros locales.'],
+            ['Complejo Deportivo Diaz-Flor', 'Ceuta', 'Avenida de Otero, Ceuta', 'cesped', 22, 0, 35.8871, -5.3073, 'https://www.google.com/maps/search/?api=1&query=Complejo+Deportivo+Diaz+Flor+Ceuta', 'Complejo deportivo municipal en Ceuta.'],
+        ];
+        $fieldRenames = [
+            'La Cantera' => $fields[0],
+            'Pista 4' => $fields[1],
+            'Polideportivo Sur' => $fields[2],
+            'Camp Nou Petit' => $fields[3],
+            'Sevilla Sur' => $fields[4],
+        ];
+        $updateField = $pdo->prepare('UPDATE fields SET name=?, city=?, address=?, surface=?, capacity=?, hourly_rate=?, latitude=?, longitude=?, maps_url=?, description=? WHERE name=?');
+        foreach ($fieldRenames as $old => $field) {
+            $updateField->execute([...$field, $old]);
+        }
+
+        $exists = $pdo->prepare('SELECT 1 FROM fields WHERE name = ? AND city = ?');
+        $insert = $pdo->prepare('INSERT INTO fields (name,city,address,surface,capacity,hourly_rate,latitude,longitude,maps_url,description) VALUES (?,?,?,?,?,?,?,?,?,?)');
+        foreach ($fields as $field) {
+            $exists->execute([$field[0], $field[1]]);
+            if (!$exists->fetchColumn()) {
+                $insert->execute($field);
+            }
+        }
     }
 
     private static function repairConsistency(PDO $pdo): void
