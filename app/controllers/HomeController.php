@@ -1,18 +1,18 @@
 <?php
-// FastPlay - landing + paginas de error
+// FastPlay · landing + páginas de error
 
 class HomeController extends Controller
 {
     public function index(): void
     {
         $liga = $this->model('Liga');
-        $campo = $this->model('Campo');
 
         $this->view('home/index', [
-            'active' => 'home',
-            'fields' => array_slice($campo->ceuta(), 0, 3),
-            'stats' => $liga->stats(),
-            'title' => 'FastPlay Ceuta - Futbol local organizado',
+            'active'  => 'home',
+            'leagues' => array_slice($liga->all(), 0, 4),
+            'stats'   => $liga->stats(),
+            'title'   => 'FastPlay — Fútbol amateur organizado',
+            'head'    => '<link rel="stylesheet" href="' . asset('css/scroll-anim.css') . '">',
         ]);
     }
 
@@ -21,7 +21,7 @@ class HomeController extends Controller
         http_response_code(404);
         $this->view('errors/404', [
             'active' => '',
-            'title' => '404 - Pagina no encontrada',
+            'title'  => '404 — Página no encontrada',
         ]);
     }
 
@@ -30,7 +30,7 @@ class HomeController extends Controller
         http_response_code(500);
         $this->view('errors/500', [
             'active' => '',
-            'title' => '500 - Error interno',
+            'title'  => '500 — Error interno',
         ]);
     }
 }
