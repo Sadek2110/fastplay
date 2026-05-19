@@ -72,11 +72,20 @@ class Usuario
     public function find(int $id): ?array
     {
         $u = Database::one(
-            'SELECT id,name,email,phone,age,city,position,role,avatar,dorsal,height_cm,goals,assists,created_at
+            'SELECT id,name,email,phone,age,city,position,role,avatar,dorsal,height_cm,goals,assists,is_premium,current_team_id,created_at
              FROM users WHERE id = ?',
             [$id]
         );
         return $u ?: null;
+    }
+
+    public static function isPremium(int $userId): bool
+    {
+        $active = Database::value("SELECT 1 FROM subscriptions WHERE user_id=? AND status='active' LIMIT 1", [$userId]);
+        if ($active) {
+            return true;
+        }
+        return (bool) Database::value('SELECT 1 FROM users WHERE id=? AND is_premium=1', [$userId]);
     }
 
     public function updateProfile(int $id, array $data): array
@@ -209,12 +218,12 @@ class Usuario
         );
         $teams = (int) Database::value('SELECT COUNT(*) FROM team_members WHERE user_id=?', [$userId]);
         $captainOf = (int) Database::value('SELECT COUNT(*) FROM teams WHERE captain_id=?', [$userId]);
-        $achievements = (int) Database::value('SELECT COUNT(*) FROM user_achievements WHERE user_id=?', [$userId]);
+        $notifications = (int) Database::value('SELECT COUNT(*) FROM notifications WHERE user_id=? AND is_read=0', [$userId]);
         return [
-            ['i' => '⚽', 'v' => $played,       'l' => 'Partidos jugados', 'c' => '#4ade80'],
-            ['i' => '👥', 'v' => $teams,        'l' => 'Equipos',          'c' => '#60a5fa'],
-            ['i' => '🛡️', 'v' => $captainOf,    'l' => 'Como capitán',     'c' => '#fbbf24'],
-            ['i' => '🏅', 'v' => $achievements, 'l' => 'Logros',           'c' => '#fde047'],
+            ['i' => 'bi-calendar2-check', 'v' => $played,    'l' => 'Partidos jugados', 'c' => '#4ade80'],
+            ['i' => 'bi-people',          'v' => $teams,     'l' => 'Equipos',          'c' => '#60a5fa'],
+            ['i' => 'bi-shield-check',    'v' => $captainOf, 'l' => 'Como capitán',     'c' => '#fbbf24'],
+            ['i' => 'bi-bell',            'v' => $notifications, 'l' => 'Notificaciones', 'c' => '#38bdf8'],
         ];
     }
 

@@ -447,3 +447,94 @@ LEFT JOIN fields  f ON f.id = m.field_id
 LEFT JOIN leagues l ON l.id = m.league_id
 WHERE   m.status IN ('pending', 'confirmed')
 ORDER BY m.scheduled_at;
+
+-- ----------------------------------------------------------------------------
+-- 7. EXTENSIONES FUNCIONALES 2026-05-19 (notificaciones, solicitudes, premium)
+-- ----------------------------------------------------------------------------
+ALTER TABLE users ADD COLUMN is_premium BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE users ADD COLUMN current_team_id BIGINT UNSIGNED NULL;
+ALTER TABLE teams ADD COLUMN shield TEXT NULL;
+ALTER TABLE team_members ADD COLUMN role ENUM('captain','player') NOT NULL DEFAULT 'player';
+ALTER TABLE fields
+  ADD COLUMN latitude DECIMAL(10,7) NULL,
+  ADD COLUMN longitude DECIMAL(10,7) NULL,
+  ADD COLUMN maps_url TEXT NULL,
+  ADD COLUMN image TEXT NULL,
+  ADD COLUMN description TEXT NULL;
+ALTER TABLE matches
+  ADD COLUMN local_captain_id BIGINT UNSIGNED NULL,
+  ADD COLUMN visitor_captain_id BIGINT UNSIGNED NULL,
+  ADD COLUMN match_time TIME NULL,
+  ADD COLUMN location VARCHAR(200) NULL;
+ALTER TABLE chat_rooms
+  ADD COLUMN team_id BIGINT UNSIGNED NULL,
+  ADD COLUMN match_request_id BIGINT UNSIGNED NULL;
+
+CREATE TABLE notifications (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    type VARCHAR(80) NOT NULL,
+    message TEXT NOT NULL,
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    action_url TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_notifications_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE INDEX idx_notifications_user_read ON notifications(user_id, is_read, created_at);
+
+CREATE TABLE team_join_requests (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    team_id BIGINT UNSIGNED NOT NULL,
+    user_id BIGINT UNSIGNED NOT NULL,
+    captain_id BIGINT UNSIGNED NOT NULL,
+    status ENUM('pending','accepted','rejected','cancelled') NOT NULL DEFAULT 'pending',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_tjr_team FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
+    CONSTRAINT fk_tjr_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_tjr_captain FOREIGN KEY (captain_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE INDEX idx_tjr_team_user_status ON team_join_requests(team_id, user_id, status);
+
+CREATE TABLE match_requests (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    requesting_team_id BIGINT UNSIGNED NOT NULL,
+    requested_team_id BIGINT UNSIGNED NOT NULL,
+    requesting_captain_id BIGINT UNSIGNED NOT NULL,
+    requested_captain_id BIGINT UNSIGNED NOT NULL,
+    status ENUM('pending','accepted','accepted_final','rejected','cancelled') NOT NULL DEFAULT 'pending',
+    proposed_date DATE NULL,
+    proposed_time TIME NULL,
+    location VARCHAR(200) NULL,
+    requesting_confirmed BOOLEAN NOT NULL DEFAULT FALSE,
+    requested_confirmed BOOLEAN NOT NULL DEFAULT FALSE,
+    match_id BIGINT UNSIGNED NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_mr_requesting_team FOREIGN KEY (requesting_team_id) REFERENCES teams(id) ON DELETE CASCADE,
+    CONSTRAINT fk_mr_requested_team FOREIGN KEY (requested_team_id) REFERENCES teams(id) ON DELETE CASCADE,
+    CONSTRAINT fk_mr_requesting_captain FOREIGN KEY (requesting_captain_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_mr_requested_captain FOREIGN KEY (requested_captain_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_mr_match FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE INDEX idx_mr_teams_status ON match_requests(requesting_team_id, requested_team_id, status);
+
+CREATE TABLE subscriptions (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    provider VARCHAR(40) NOT NULL DEFAULT 'stripe',
+    provider_customer_id VARCHAR(190),
+    provider_subscription_id VARCHAR(190),
+    status ENUM('active','cancelled','pending','expired') NOT NULL DEFAULT 'pending',
+    starts_at DATETIME,
+    ends_at DATETIME,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_subscriptions_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE INDEX idx_subscriptions_user_status ON subscriptions(user_id, status);
+
+INSERT INTO fields (name, city, address, surface, capacity, hourly_rate, latitude, longitude, maps_url, description) VALUES
+  ('Campo Federativo Jose Benoliel', 'Ceuta', 'Avenida de Africa, Ceuta', 'sintÃ©tico', 22, 0, 35.8898000, -5.3262000, 'https://www.google.com/maps/search/?api=1&query=Campo+Federativo+Jose+Benoliel+Ceuta', 'Campo federativo de futbol en Ceuta.'),
+  ('Polideportivo La Libertad', 'Ceuta', 'Avenida de Lisboa, Ceuta', 'sintÃ©tico', 14, 0, 35.8844000, -5.3441000, 'https://www.google.com/maps/search/?api=1&query=Polideportivo+La+Libertad+Ceuta', 'Instalacion polideportiva para entrenamientos y partidos.'),
+  ('Complejo Deportivo Diaz-Flor', 'Ceuta', 'Avenida de Otero, Ceuta', 'cÃ©sped', 22, 0, 35.8871000, -5.3073000, 'https://www.google.com/maps/search/?api=1&query=Complejo+Deportivo+Diaz+Flor+Ceuta', 'Complejo deportivo municipal en Ceuta.');

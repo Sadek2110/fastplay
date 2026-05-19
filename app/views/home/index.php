@@ -64,7 +64,7 @@ unset($_l);
     <section class="scroll-section scroll-section--right" id="section-1">
       <div class="scroll-section__inner scroll-section__inner--wide">
         <div class="scroll-stagger">
-          <div class="scroll-eyebrow" style="--i:0">📊 Comunidad</div>
+          <div class="scroll-eyebrow" style="--i:0"><i class="bi bi-bar-chart"></i> Comunidad</div>
           <h2 class="scroll-title scroll-title--sm" style="--i:1">
             La comunidad <span class="fp-gradient-text">crece</span>
           </h2>
@@ -101,14 +101,14 @@ unset($_l);
           <div class="scroll-features" style="--i:3">
             <?php
             $features = [
-                ['icon' => '⚽', 'title' => 'Gestión de equipos', 'desc' => 'Crea tu equipo, gestiona la plantilla y define alineaciones fácilmente.'],
-                ['icon' => '🏟️', 'title' => 'Campos reales',     'desc' => 'Reserva con un clic. Calendario integrado y notificaciones automáticas.'],
-                ['icon' => '🎯', 'title' => 'Matchmaking inteligente', 'desc' => 'Emparejamiento automático por nivel, posición y localidad.'],
-                ['icon' => '📊', 'title' => 'Estadísticas Pro',  'desc' => 'Datos detallados de cada partido: goles, asistencias, MVP y más.'],
+                ['icon' => 'bi-shield', 'title' => 'Gestión de equipos', 'desc' => 'Crea tu equipo, gestiona la plantilla y define alineaciones fácilmente.'],
+                ['icon' => 'bi-geo-alt', 'title' => 'Campos reales',     'desc' => 'Reserva con un clic. Calendario integrado y notificaciones automáticas.'],
+                ['icon' => 'bi-bullseye', 'title' => 'Matchmaking inteligente', 'desc' => 'Emparejamiento automático por nivel, posición y localidad.'],
+                ['icon' => 'bi-bar-chart', 'title' => 'Estadísticas Pro',  'desc' => 'Datos detallados de cada partido: goles, asistencias, MVP y más.'],
             ];
             foreach ($features as $i => $f): ?>
               <div class="scroll-feature-item" style="transition-delay: <?= 240 + $i * 80 ?>ms;">
-                <span class="scroll-feature-item__icon" aria-hidden="true"><?= $f['icon'] ?></span>
+                <span class="scroll-feature-item__icon" aria-hidden="true"><i class="bi <?= e($f['icon']) ?>"></i></span>
                 <div>
                   <h3 class="scroll-feature-item__title"><?= e($f['title']) ?></h3>
                   <p class="scroll-feature-item__desc"><?= e($f['desc']) ?></p>
@@ -124,14 +124,14 @@ unset($_l);
     <section class="scroll-section scroll-section--right" id="section-3">
       <div class="scroll-section__inner scroll-section__inner--wide">
         <div class="scroll-stagger">
-          <div class="scroll-eyebrow scroll-eyebrow--gold" style="--i:0">🏆 Compite</div>
+          <div class="scroll-eyebrow scroll-eyebrow--gold" style="--i:0"><i class="bi bi-trophy"></i> Compite</div>
           <h2 class="scroll-title scroll-title--sm" style="--i:1">
             Ligas <span class="fp-gradient-text">activas</span>
           </h2>
           <div class="scroll-league-list" style="--i:2">
             <?php foreach ($leagues as $l): $st = $l['_status']; ?>
               <a href="<?= url('leagues') ?>" class="scroll-league-item">
-                <span class="scroll-league-item__icon" aria-hidden="true"><?= $l['pro'] ? '🏆' : '⚽' ?></span>
+                <span class="scroll-league-item__icon" aria-hidden="true"><i class="bi <?= $l['pro'] ? 'bi-trophy' : 'bi-shield' ?>"></i></span>
                 <span class="scroll-league-item__info">
                   <div class="scroll-league-item__name">
                     <?= e($l['name']) ?>
@@ -140,12 +140,12 @@ unset($_l);
                     </span>
                   </div>
                   <div class="scroll-league-item__meta">
-                    <span>📍 <?= e($l['city']) ?></span>
-                    <span>📅 <?= e($l['start']) ?> – <?= e($l['end']) ?></span>
+                    <span><i class="bi bi-geo-alt"></i> <?= e($l['city']) ?></span>
+                    <span><i class="bi bi-calendar2"></i> <?= e($l['start']) ?> – <?= e($l['end']) ?></span>
                   </div>
                 </span>
                 <?php if (!empty($l['prize'])): ?>
-                  <span class="scroll-league-item__prize">💰 <?= number_format($l['prize'], 0, ',', '.') ?>€</span>
+                  <span class="scroll-league-item__prize"><i class="bi bi-cash-coin"></i> <?= number_format($l['prize'], 0, ',', '.') ?>€</span>
                 <?php endif; ?>
                 <span class="scroll-league-item__arrow" aria-hidden="true">→</span>
               </a>
@@ -155,7 +155,7 @@ unset($_l);
           <p style="--i:3;font-size:13px;color:#9ca3af;margin:0 0 14px;">Elige tu nivel de competición:</p>
           <div class="scroll-pricing" style="--i:4">
             <div class="scroll-pricing__option">
-              <div class="scroll-pricing__icon">🤝</div>
+              <div class="scroll-pricing__icon"><i class="bi bi-people"></i></div>
               <div class="scroll-pricing__name">Liga Amistosa</div>
               <div class="scroll-pricing__price scroll-pricing__price--free">Gratis</div>
               <div class="scroll-pricing__period">Sin compromisos</div>
@@ -169,7 +169,7 @@ unset($_l);
               <div class="scroll-pricing__badge">
                 <span class="fp-pro-badge" style="font-size:10px;">MÁS POPULAR</span>
               </div>
-              <div class="scroll-pricing__icon">🏆</div>
+              <div class="scroll-pricing__icon"><i class="bi bi-trophy"></i></div>
               <div class="scroll-pricing__name">Liga Pro</div>
               <div class="scroll-pricing__price">20€</div>
               <div class="scroll-pricing__period">/temporada · equipo</div>
@@ -189,7 +189,7 @@ unset($_l);
     <section class="scroll-section scroll-section--center" id="section-4">
       <div class="scroll-section__inner">
         <div class="scroll-stagger" style="text-align:center;">
-          <div class="scroll-eyebrow" style="--i:0;margin-left:auto;margin-right:auto;background:rgba(34,197,94,.14);border-color:rgba(34,197,94,.28);">🚀 Únete ahora</div>
+          <div class="scroll-eyebrow" style="--i:0;margin-left:auto;margin-right:auto;background:rgba(34,197,94,.14);border-color:rgba(34,197,94,.28);"><i class="bi bi-rocket-takeoff"></i> Únete ahora</div>
           <h2 class="scroll-title" style="--i:1;font-size:clamp(32px,6vw,56px);text-align:center;">
             ¿Listo para <span class="fp-gradient-text">jugar?</span>
           </h2>

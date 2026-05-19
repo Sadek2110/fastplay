@@ -1,36 +1,59 @@
 <main class="fp-fade fp-page">
     <div class="fp-page-head">
         <div>
-            <p class="fp-eyebrow">Directorio</p>
-            <h1 class="fp-h1">Equipos</h1>
+            <p class="fp-eyebrow">Equipo</p>
+            <h1 class="fp-h1"><?= !empty($myTeam) ? 'Mi equipo' : 'Buscar equipo' ?></h1>
         </div>
-        <?php if (is_auth()): ?>
-            <a href="<?= url('teams/create') ?>" class="fp-btn fp-btn-primary fp-btn-glow">+ Crear equipo</a>
-        <?php endif; ?>
+        <div class="fp-actions-row">
+            <a href="<?= url('teams/all') ?>" class="fp-btn fp-btn-ghost"><i class="bi bi-table"></i><span>Ver todos los equipos</span></a>
+            <?php if (is_auth() && empty($myTeam)): ?>
+                <a href="<?= url('teams/create') ?>" class="fp-btn fp-btn-primary"><i class="bi bi-plus-lg"></i><span>Crear equipo</span></a>
+            <?php endif; ?>
+        </div>
     </div>
 
-    <?php if (empty($teams)): ?>
-        <div class="fp-empty">⚽ Aún no hay equipos. ¡Sé el primero en crear uno!</div>
+    <?php if (!empty($myTeam)): ?>
+        <section class="fp-glass fp-panel">
+            <div class="fp-team-summary">
+                <div class="fp-team-badge large"><?= e($myTeam['badge'] ?? 'FP') ?></div>
+                <div>
+                    <h2><?= e($myTeam['name']) ?></h2>
+                    <p><i class="bi bi-geo-alt"></i> <?= e($myTeam['city']) ?></p>
+                </div>
+            </div>
+            <div class="fp-actions-row">
+                <a href="<?= url('teams/show/' . (int) $myTeam['id']) ?>" class="fp-btn fp-btn-primary">Gestionar equipo</a>
+                <a href="<?= url('chat/team/' . (int) $myTeam['id']) ?>" class="fp-btn fp-btn-ghost"><i class="bi bi-chat-dots"></i><span>Chat interno</span></a>
+            </div>
+        </section>
     <?php else: ?>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-            <?php foreach ($teams as $t): ?>
-                <a href="<?= url('teams/show/' . (int) $t['id']) ?>" class="fp-glass fp-match-row fp-card-link" style="text-decoration:none;color:#fff;">
-                    <div class="fp-glass fp-glass-green" style="width:64px;height:64px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;">
-                        <?= e($t['badge'] ?? '🛡️') ?>
-                    </div>
-                    <div style="width:1px;height:44px;background:rgba(255,255,255,.10);"></div>
-                    <div style="flex:1;min-width:0;">
-                        <div style="font-size:18px;font-weight:900;letter-spacing:-.01em;"><?= e($t['name']) ?></div>
-                        <div style="font-size:12px;color:#9ca3af;margin-top:4px;">📍 <?= e($t['city']) ?></div>
-                    </div>
-                    <div style="min-width:180px;text-align:right;">
-                        <div style="font-size:11px;color:#6b7280;">🛡️ Capitán: <span style="color:#d1d5db;font-weight:600;"><?= e($t['captain_name']) ?></span></div>
-                        <div style="margin-top:8px;">
-                            <span class="fp-status fp-status-confirmed"><?= (int) $t['players'] ?> jugadores</span>
-                        </div>
-                    </div>
-                </a>
-            <?php endforeach; ?>
-        </div>
+        <section class="fp-glass fp-panel">
+            <h2 class="fp-h2">Solicita unirte a un equipo</h2>
+            <p class="fp-muted">El capitán revisará tu solicitud antes de aceptarte. No puedes pertenecer a más de un equipo al mismo tiempo.</p>
+        </section>
+
+        <?php if (empty($teams)): ?>
+            <?php $this->partial('empty-state', ['icon' => 'bi-shield-plus', 'title' => 'Aún no hay equipos', 'description' => 'Crea el primer equipo de la plataforma.', 'ctaUrl' => 'teams/create', 'ctaLabel' => 'Crear equipo']); ?>
+        <?php else: ?>
+            <div class="fp-team-list">
+                <?php foreach ($teams as $t): ?>
+                    <article class="fp-glass fp-team-row">
+                        <a href="<?= url('teams/show/' . (int) $t['id']) ?>" class="fp-team-row-main">
+                            <span class="fp-team-badge"><?= e($t['badge'] ?? 'FP') ?></span>
+                            <span><strong><?= e($t['name']) ?></strong><small><i class="bi bi-geo-alt"></i> <?= e($t['city']) ?> · Capitán: <?= e($t['captain_name']) ?></small></span>
+                        </a>
+                        <?php if (is_auth()): ?>
+                            <form method="post" action="<?= url('team-join-request/create') ?>">
+                                <?= csrf_field() ?>
+                                <input type="hidden" name="team_id" value="<?= (int) $t['id'] ?>">
+                                <button class="fp-btn fp-btn-primary">Solicitar unirse</button>
+                            </form>
+                        <?php else: ?>
+                            <a href="<?= url('auth/login') ?>" class="fp-btn fp-btn-ghost">Inicia sesión</a>
+                        <?php endif; ?>
+                    </article>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
     <?php endif; ?>
 </main>

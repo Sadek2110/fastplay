@@ -5,12 +5,12 @@ if (empty($_flash)) return; ?>
     <?php foreach ($_flash as $f):
         $type = $f['type'] ?? 'ok';
         $cls = 'fp-flash-ok';
-        $icon = '✓';
-        if ($type === 'warn') { $cls = 'fp-flash-warn'; $icon = '⚠'; }
-        if ($type === 'err')  { $cls = 'fp-flash-err';  $icon = '✕'; }
+        $icon = 'bi-check-circle';
+        if ($type === 'warn') { $cls = 'fp-flash-warn'; $icon = 'bi-exclamation-triangle'; }
+        if ($type === 'err')  { $cls = 'fp-flash-err';  $icon = 'bi-x-circle'; }
     ?>
         <div class="fp-flash <?= $cls ?>">
-            <span class="fp-flash-icon"><?= $icon ?></span>
+            <i class="fp-flash-icon bi <?= e($icon) ?>"></i>
             <span><?= e($f['msg']) ?></span>
         </div>
     <?php endforeach; ?>

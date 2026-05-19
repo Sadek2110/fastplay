@@ -15,7 +15,7 @@
                     <tr>
                         <td><?= (int) $l['id'] ?></td>
                         <td><?= e($l['name']) ?></td>
-                        <td><?= $l['pro'] ? '🏆 Pro' : '🤝 Amistosa' ?></td>
+                    <td><i class="bi <?= $l['pro'] ? 'bi-trophy' : 'bi-people' ?>"></i> <?= $l['pro'] ? 'Pro' : 'Amistosa' ?></td>
                         <td><?= e($l['city']) ?></td>
                         <td><?= (int) ($l['team_count'] ?? 0) ?>/<?= (int) $l['max_teams'] ?></td>
                         <td style="color:#9ca3af;"><?= e($l['start']) ?> – <?= e($l['end']) ?></td>

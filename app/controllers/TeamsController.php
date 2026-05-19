@@ -1,15 +1,30 @@
 <?php
-// FastPlay · equipos
 
 class TeamsController extends Controller
 {
     public function index(): void
     {
         $equipo = $this->model('Equipo');
+        $user = current_user();
+        $myTeam = $user ? $equipo->mine((int) $user['id']) : null;
+
         $this->view('teams/index', [
             'active' => 'teams',
-            'teams'  => $equipo->all(),
-            'title'  => 'Equipos — FastPlay',
+            'teams' => $myTeam ? [] : $equipo->all(),
+            'myTeam' => $myTeam,
+            'title' => 'Equipos - FastPlay',
+        ]);
+    }
+
+    public function all(): void
+    {
+        $equipo = $this->model('Equipo');
+        $this->view('teams/all', [
+            'active' => 'teams',
+            'teams' => $equipo->allFiltered(trim((string) ($_GET['q'] ?? '')), (string) ($_GET['sort'] ?? 'name')),
+            'q' => trim((string) ($_GET['q'] ?? '')),
+            'sort' => (string) ($_GET['sort'] ?? 'name'),
+            'title' => 'Todos los equipos - FastPlay',
         ]);
     }
 
@@ -23,18 +38,16 @@ class TeamsController extends Controller
         $user = current_user();
         $isMember = false;
         if ($user) {
-            $isMember = (bool) Database::value(
-                'SELECT 1 FROM team_members WHERE team_id=? AND user_id=?',
-                [$id, (int) $user['id']]
-            );
+            $isMember = (bool) Database::value('SELECT 1 FROM team_members WHERE team_id=? AND user_id=?', [$id, (int) $user['id']]);
         }
 
         $this->view('teams/show', [
-            'active'   => 'teams',
-            'team'     => $team,
-            'members'  => $equipo->members($id),
+            'active' => 'teams',
+            'team' => $team,
+            'members' => $equipo->members($id),
             'isMember' => $isMember,
-            'title'    => $team['name'] . ' — FastPlay',
+            'pendingRequests' => $user && (int) $team['captain_id'] === (int) $user['id'] ? $this->model('TeamJoinRequest')->pendingForTeam($id) : [],
+            'title' => $team['name'] . ' - FastPlay',
         ]);
     }
 
@@ -42,11 +55,19 @@ class TeamsController extends Controller
     {
         $this->requireAuth();
         $errors = [];
+        $userId = (int) current_user()['id'];
+
+        if (!Usuario::isPremium($userId)) {
+            $this->view('subscription/upgrade_required', [
+                'active' => 'teams',
+                'title' => 'Crear equipo requiere Premium - FastPlay',
+            ]);
+            return;
+        }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             require_csrf();
-            $equipo = $this->model('Equipo');
-            [$team, $errors] = $equipo->create((int) current_user()['id'], $_POST);
+            [$team, $errors] = $this->model('Equipo')->create($userId, $_POST);
             if ($team) {
                 flash('ok', 'Equipo creado: ' . $team['name']);
                 redirect('teams/show/' . $team['id']);
@@ -57,7 +78,7 @@ class TeamsController extends Controller
         $this->view('teams/create', [
             'active' => 'teams',
             'errors' => $errors,
-            'title'  => 'Crear equipo — FastPlay',
+            'title' => 'Crear equipo - FastPlay',
         ]);
     }
 
@@ -65,15 +86,8 @@ class TeamsController extends Controller
     {
         $this->requireAuth();
         $this->requirePost();
-        $id = (int) $id;
-
-        $equipo = $this->model('Equipo');
-        if ($equipo->join($id, (int) current_user()['id'])) {
-            flash('ok', '¡Te has unido al equipo!');
-        } else {
-            flash('warn', 'Ya formas parte de ese equipo.');
-        }
-        redirect('teams/show/' . $id);
+        flash('warn', 'La union directa esta deshabilitada. Envia una solicitud al capitan.');
+        redirect('teams/show/' . (int) $id);
     }
 
     public function leave(string $id = ''): void
@@ -81,12 +95,10 @@ class TeamsController extends Controller
         $this->requireAuth();
         $this->requirePost();
         $id = (int) $id;
-
-        $equipo = $this->model('Equipo');
-        if ($equipo->leave($id, (int) current_user()['id'])) {
+        if ($this->model('Equipo')->leave($id, (int) current_user()['id'])) {
             flash('ok', 'Has salido del equipo.');
         } else {
-            flash('warn', 'No puedes salir del equipo siendo capitán. Transfiere la capitanía o elimina el equipo.');
+            flash('warn', 'No puedes salir del equipo siendo capitan.');
         }
         redirect('teams/show/' . $id);
     }
@@ -99,7 +111,7 @@ class TeamsController extends Controller
 
         $equipo = $this->model('Equipo');
         if (!is_admin() && !$equipo->isCaptain($id, (int) current_user()['id'])) {
-            flash('warn', 'Sólo el capitán o un admin pueden eliminar el equipo.');
+            flash('warn', 'Solo el capitan o un admin pueden eliminar el equipo.');
             redirect('teams');
             return;
         }

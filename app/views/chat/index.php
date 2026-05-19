@@ -7,7 +7,7 @@
         <?php foreach ($rooms as $r): ?>
             <a href="<?= url('chat/room/' . (int) $r['id']) ?>" class="fp-glass fp-card-link" style="border-radius:14px;padding:18px;display:flex;gap:14px;align-items:center;text-decoration:none;color:#fff;">
                 <span style="width:44px;height:44px;border-radius:9999px;background:rgba(22,163,74,.20);display:inline-flex;align-items:center;justify-content:center;font-size:20px;">
-                    <?= $r['type'] === 'match_negotiation' ? '🤝' : '💬' ?>
+                    <i class="bi <?= $r['type'] === 'match_negotiation' ? 'bi-people' : 'bi-chat-dots' ?>"></i>
                 </span>
                 <div style="flex:1;min-width:0;">
                     <div style="font-weight:700;font-size:15px;"><?= e($r['name']) ?></div>

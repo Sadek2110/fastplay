@@ -447,3 +447,84 @@ LEFT JOIN fields  f ON f.id = m.field_id
 LEFT JOIN leagues l ON l.id = m.league_id
 WHERE   m.status IN ('pending', 'confirmed', 'in_progress')
 ORDER BY m.scheduled_at;
+
+-- ----------------------------------------------------------------------------
+-- 7. EXTENSIONES FUNCIONALES 2026-05-19 (notificaciones, solicitudes, premium)
+-- ----------------------------------------------------------------------------
+ALTER TABLE users ADD COLUMN is_premium BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE users ADD COLUMN current_team_id BIGINT;
+ALTER TABLE teams ADD COLUMN shield TEXT;
+ALTER TABLE team_members ADD COLUMN role VARCHAR(20) NOT NULL DEFAULT 'player';
+ALTER TABLE fields
+  ADD COLUMN latitude NUMERIC(10,7),
+  ADD COLUMN longitude NUMERIC(10,7),
+  ADD COLUMN maps_url TEXT,
+  ADD COLUMN image TEXT,
+  ADD COLUMN description TEXT;
+ALTER TABLE matches
+  ADD COLUMN local_captain_id BIGINT,
+  ADD COLUMN visitor_captain_id BIGINT,
+  ADD COLUMN match_time TIME,
+  ADD COLUMN location VARCHAR(200);
+ALTER TABLE chat_rooms
+  ADD COLUMN team_id BIGINT,
+  ADD COLUMN match_request_id BIGINT;
+
+CREATE TABLE notifications (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    type VARCHAR(80) NOT NULL,
+    message TEXT NOT NULL,
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    action_url TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX idx_notifications_user_read ON notifications(user_id, is_read, created_at);
+
+CREATE TABLE team_join_requests (
+    id BIGSERIAL PRIMARY KEY,
+    team_id BIGINT NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    captain_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','accepted','rejected','cancelled')),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX idx_tjr_team_user_status ON team_join_requests(team_id, user_id, status);
+
+CREATE TABLE match_requests (
+    id BIGSERIAL PRIMARY KEY,
+    requesting_team_id BIGINT NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+    requested_team_id BIGINT NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+    requesting_captain_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    requested_captain_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','accepted','accepted_final','rejected','cancelled')),
+    proposed_date DATE,
+    proposed_time TIME,
+    location VARCHAR(200),
+    requesting_confirmed BOOLEAN NOT NULL DEFAULT FALSE,
+    requested_confirmed BOOLEAN NOT NULL DEFAULT FALSE,
+    match_id BIGINT REFERENCES matches(id) ON DELETE SET NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX idx_mr_teams_status ON match_requests(requesting_team_id, requested_team_id, status);
+
+CREATE TABLE subscriptions (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    provider VARCHAR(40) NOT NULL DEFAULT 'stripe',
+    provider_customer_id VARCHAR(190),
+    provider_subscription_id VARCHAR(190),
+    status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('active','cancelled','pending','expired')),
+    starts_at TIMESTAMPTZ,
+    ends_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX idx_subscriptions_user_status ON subscriptions(user_id, status);
+
+INSERT INTO fields (name, city, address, surface, capacity, hourly_rate, latitude, longitude, maps_url, description) VALUES
+  ('Campo Federativo Jose Benoliel', 'Ceuta', 'Avenida de Africa, Ceuta', 'sintÃ©tico', 22, 0, 35.8898000, -5.3262000, 'https://www.google.com/maps/search/?api=1&query=Campo+Federativo+Jose+Benoliel+Ceuta', 'Campo federativo de futbol en Ceuta.'),
+  ('Polideportivo La Libertad', 'Ceuta', 'Avenida de Lisboa, Ceuta', 'sintÃ©tico', 14, 0, 35.8844000, -5.3441000, 'https://www.google.com/maps/search/?api=1&query=Polideportivo+La+Libertad+Ceuta', 'Instalacion polideportiva para entrenamientos y partidos.'),
+  ('Complejo Deportivo Diaz-Flor', 'Ceuta', 'Avenida de Otero, Ceuta', 'cÃ©sped', 22, 0, 35.8871000, -5.3073000, 'https://www.google.com/maps/search/?api=1&query=Complejo+Deportivo+Diaz+Flor+Ceuta', 'Complejo deportivo municipal en Ceuta.');

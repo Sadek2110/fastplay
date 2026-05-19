@@ -149,7 +149,7 @@ function test_reset(): void
 {
     $pdo = Database::pdo();
     $pdo->exec('PRAGMA foreign_keys = OFF');
-    $tables = ['user_achievements','chat_messages','chat_rooms','matches','league_teams','leagues','team_members','teams','fields','achievements','login_attempts','users'];
+    $tables = ['notifications','team_join_requests','match_requests','subscriptions','user_achievements','chat_messages','chat_rooms','matches','league_teams','leagues','team_members','teams','fields','achievements','login_attempts','users'];
     foreach ($tables as $t) {
         $pdo->exec("DELETE FROM \"$t\"");
     }

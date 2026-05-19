@@ -33,8 +33,8 @@
                 <label>
                     <span class="fp-label">Tier</span>
                     <select name="pro" class="fp-input">
-                        <option value="0">🤝 Amistosa (gratis)</option>
-                        <option value="1">🏆 Pro (con premio)</option>
+                        <option value="0">Amistosa (gratis)</option>
+                        <option value="1">Pro (con premio)</option>
                     </select>
                 </label>
                 <label>

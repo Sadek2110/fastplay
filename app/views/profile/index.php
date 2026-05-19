@@ -29,7 +29,7 @@
                 <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px;">
                     <?php foreach ($teams as $t): ?>
                         <li><a href="<?= url('teams/show/' . (int) $t['id']) ?>" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;font-size:13px;">
-                            <span><?= e($t['badge'] ?? '🛡️') ?></span>
+                    <span><?= e($t['badge'] ?? 'FP') ?></span>
                             <span><?= e($t['name']) ?> <small style="color:#6b7280;">· <?= e($t['city']) ?></small></span>
                         </a></li>
                     <?php endforeach; ?>

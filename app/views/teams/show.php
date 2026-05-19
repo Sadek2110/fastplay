@@ -1,48 +1,63 @@
 <main class="fp-fade fp-page">
-    <p class="fp-eyebrow">Equipo</p>
-    <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
-        <div class="fp-glass fp-glass-green" style="width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:32px;">
-            <?= e($team['badge'] ?? '🛡️') ?>
+    <?php $this->partial('back-button', ['href' => url('teams')]); ?>
+    <section class="fp-team-header fp-glass">
+        <div class="fp-team-badge large"><?= e($team['badge'] ?? 'FP') ?></div>
+        <div>
+            <p class="fp-eyebrow">Equipo</p>
+            <h1 class="fp-h1"><?= e($team['name']) ?></h1>
+            <p class="fp-muted"><i class="bi bi-geo-alt"></i> <?= e($team['city']) ?> · <i class="bi bi-shield-check"></i> Capitán: <?= e($team['captain_name']) ?></p>
         </div>
-        <div style="flex:1;min-width:240px;">
-            <h1 class="fp-h1" style="margin:0;"><?= e($team['name']) ?></h1>
-            <p style="margin:6px 0 0;color:#9ca3af;font-size:14px;">📍 <?= e($team['city']) ?> · 🛡️ Capitán: <?= e($team['captain_name']) ?></p>
-        </div>
-        <?php if (is_auth()): ?>
-            <?php if (!$isMember): ?>
-                <form method="post" action="<?= url('teams/join/' . (int) $team['id']) ?>" style="margin:0;">
+        <div class="fp-actions-row">
+            <?php if (is_auth() && !$isMember): ?>
+                <form method="post" action="<?= url('team-join-request/create') ?>">
                     <?= csrf_field() ?>
-                    <button class="fp-btn fp-btn-primary fp-btn-glow">Unirme al equipo →</button>
+                    <input type="hidden" name="team_id" value="<?= (int) $team['id'] ?>">
+                    <button class="fp-btn fp-btn-primary">Solicitar unirse</button>
                 </form>
-            <?php elseif ((int) $team['captain_id'] !== (int) current_user()['id']): ?>
-                <form method="post" action="<?= url('teams/leave/' . (int) $team['id']) ?>" style="margin:0;" onsubmit="return confirm('¿Seguro que quieres dejar el equipo?');">
+            <?php endif; ?>
+            <?php if ($isMember): ?>
+                <a href="<?= url('chat/team/' . (int) $team['id']) ?>" class="fp-btn fp-btn-ghost"><i class="bi bi-chat-dots"></i><span>Chat interno</span></a>
+            <?php endif; ?>
+            <?php if (is_auth() && (int) $team['captain_id'] !== (int) current_user()['id'] && $isMember): ?>
+                <form method="post" action="<?= url('teams/leave/' . (int) $team['id']) ?>" onsubmit="return confirm('¿Seguro que quieres dejar el equipo?');">
                     <?= csrf_field() ?>
                     <button class="fp-btn fp-btn-ghost">Dejar equipo</button>
                 </form>
             <?php endif; ?>
-            <?php if ((int) $team['captain_id'] === (int) current_user()['id'] || is_admin()): ?>
-                <form method="post" action="<?= url('teams/delete/' . (int) $team['id']) ?>" style="margin:0;" onsubmit="return confirm('¿Eliminar el equipo? Esta acción es permanente.');">
-                    <?= csrf_field() ?>
-                    <button class="fp-btn fp-btn-ghost" style="color:#f87171;">Eliminar</button>
-                </form>
-            <?php endif; ?>
-        <?php endif; ?>
-    </div>
+        </div>
+    </section>
 
-    <section style="margin-top:32px;">
+    <?php if (!empty($pendingRequests)): ?>
+        <section class="fp-glass fp-panel">
+            <h2 class="fp-h2">Solicitudes pendientes</h2>
+            <div class="fp-list">
+                <?php foreach ($pendingRequests as $r): ?>
+                    <div class="fp-list-item">
+                        <i class="bi bi-person-plus"></i>
+                        <span><strong><?= e($r['user_name']) ?></strong><small><?= e($r['user_email']) ?></small></span>
+                        <form method="post" action="<?= url('team-join-request/accept/' . (int) $r['id']) ?>"><?= csrf_field() ?><button class="fp-btn fp-btn-primary">Aceptar</button></form>
+                        <form method="post" action="<?= url('team-join-request/reject/' . (int) $r['id']) ?>"><?= csrf_field() ?><button class="fp-btn fp-btn-ghost">Rechazar</button></form>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </section>
+    <?php endif; ?>
+
+    <section class="fp-panel">
         <h2 class="fp-h2">Plantilla (<?= count($members) ?>)</h2>
         <?php if (empty($members)): ?>
-            <div class="fp-empty">Aún no hay miembros.</div>
+            <?php $this->partial('empty-state', ['icon' => 'bi-people', 'title' => 'Sin jugadores', 'description' => 'Todavía no hay miembros en el equipo.']); ?>
         <?php else: ?>
             <div class="fp-grid-3">
                 <?php foreach ($members as $m): ?>
-                    <div class="fp-glass" style="border-radius:14px;padding:18px;display:flex;align-items:center;gap:14px;">
-                        <span style="width:42px;height:42px;border-radius:9999px;background:#16a34a;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;"><?= e(mb_substr($m['name'], 0, 1)) ?></span>
-                        <div style="flex:1;">
-                            <div style="font-weight:700;font-size:14px;"><?= e($m['name']) ?> <?php if ((int) $m['is_captain'] === 1): ?><span style="color:#fbbf24;font-size:11px;">★ capitán</span><?php endif; ?></div>
-                            <div style="font-size:11px;color:#6b7280;"><?= e($m['position'] ?? 'Sin posición') ?> · <?= e($m['city'] ?? '—') ?></div>
+                    <article class="fp-glass fp-member-card">
+                        <span class="fp-avatar-initial"><?= e(mb_substr($m['name'], 0, 1)) ?></span>
+                        <div>
+                            <strong><?= e($m['name']) ?></strong>
+                            <?php if ((int) $m['is_captain'] === 1): ?><small class="fp-gold-text">Capitán</small><?php endif; ?>
+                            <small><?= e($m['position'] ?? 'Sin posición') ?> · <?= e($m['city'] ?? 'N/D') ?></small>
                         </div>
-                    </div>
+                    </article>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>

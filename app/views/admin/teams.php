@@ -9,7 +9,7 @@
                 <?php foreach ($teams as $t): ?>
                     <tr>
                         <td><?= (int) $t['id'] ?></td>
-                        <td><?= e($t['badge'] ?? '🛡️') ?> <?= e($t['name']) ?></td>
+                    <td><span class="fp-team-badge small"><?= e($t['badge'] ?? 'FP') ?></span> <?= e($t['name']) ?></td>
                         <td><?= e($t['city']) ?></td>
                         <td><?= e($t['captain_name']) ?></td>
                         <td><?= (int) $t['players'] ?></td>

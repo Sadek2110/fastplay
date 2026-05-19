@@ -1,29 +1,35 @@
 <main class="fp-fade fp-page">
     <div class="fp-page-head">
         <div>
-            <p class="fp-eyebrow">Campos</p>
-            <h1 class="fp-h1">Reserva tu cancha</h1>
+            <p class="fp-eyebrow">Ceuta</p>
+            <h1 class="fp-h1">Campos deportivos</h1>
         </div>
         <?php if (is_admin()): ?>
-            <a href="<?= url('campos/create') ?>" class="fp-btn fp-btn-primary fp-btn-glow">+ Nuevo campo</a>
+            <a href="<?= url('campos/create') ?>" class="fp-btn fp-btn-primary"><i class="bi bi-plus-lg"></i><span>Nuevo campo</span></a>
         <?php endif; ?>
     </div>
 
     <?php if (empty($fields)): ?>
-        <div class="fp-empty">⏳ Todavía no hay campos disponibles.</div>
+        <?php $this->partial('empty-state', ['icon' => 'bi-geo-alt', 'title' => 'Sin campos disponibles', 'description' => 'Todavía no hay campos registrados.']); ?>
     <?php else: ?>
-        <div class="fp-grid-3">
-            <?php foreach ($fields as $f): ?>
-                <a href="<?= url('campos/show/' . (int) $f['id']) ?>" class="fp-glass fp-card-link" style="border-radius:18px;padding:22px;text-decoration:none;color:#fff;display:block;">
-                    <div style="font-size:30px;">🏟️</div>
-                    <h3 style="font-size:16px;font-weight:900;margin:10px 0 4px;"><?= e($f['name']) ?></h3>
-                    <p style="font-size:12px;color:#6b7280;margin:0 0 12px;">📍 <?= e($f['city']) ?> · <?= e($f['surface']) ?></p>
-                    <div style="display:flex;justify-content:space-between;font-size:12px;color:#9ca3af;">
-                        <span>👥 <?= (int) $f['capacity'] ?></span>
-                        <span>💶 <?= number_format((float) $f['hourly_rate'], 2, ',', '.') ?> €/h</span>
-                    </div>
-                </a>
-            <?php endforeach; ?>
-        </div>
+        <section class="fp-fields-layout">
+            <div id="fp-fields-map" class="fp-fields-map" data-fields='<?= e(json_encode($fields, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) ?>'></div>
+            <aside class="fp-fields-list">
+                <?php foreach ($fields as $f): ?>
+                    <article class="fp-glass fp-field-card">
+                        <div class="fp-field-img" style="background-image:url('<?= e(!empty($f['image']) ? asset($f['image']) : asset('images/hero-pitch.png')) ?>')"></div>
+                        <div>
+                            <h3><?= e($f['name']) ?></h3>
+                            <p><i class="bi bi-geo-alt"></i> <?= e($f['address'] ?? $f['city']) ?></p>
+                            <small><?= e($f['description'] ?? ($f['surface'] . ' · ' . (int) $f['capacity'] . ' jugadores')) ?></small>
+                            <div class="fp-actions-row">
+                                <a href="<?= url('campos/show/' . (int) $f['id']) ?>" class="fp-btn fp-btn-ghost">Detalles</a>
+                                <?php if (!empty($f['maps_url'])): ?><a href="<?= e($f['maps_url']) ?>" class="fp-btn fp-btn-ghost" target="_blank" rel="noopener">Google Maps</a><?php endif; ?>
+                            </div>
+                        </div>
+                    </article>
+                <?php endforeach; ?>
+            </aside>
+        </section>
     <?php endif; ?>
 </main>

@@ -2,135 +2,114 @@
 $positionShort = static function (string $p): string {
     return match ($p) {
         'Portero', 'Portera' => 'POR',
-        'Defensa'            => 'DEF',
-        'Mediocampo'         => 'MED',
-        'Delantero'          => 'DEL',
-        default              => '—',
+        'Defensa' => 'DEF',
+        'Mediocampo' => 'MED',
+        'Delantero' => 'DEL',
+        default => 'N/D',
     };
 };
 $card = $card ?? [];
-$dorsalLabel = isset($card['dorsal']) && $card['dorsal'] !== null
-    ? str_pad((string) (int) $card['dorsal'], 2, '0', STR_PAD_LEFT)
-    : '—';
-$heightLabel = isset($card['height_cm']) && $card['height_cm'] !== null
-    ? number_format(((int) $card['height_cm']) / 100, 2, '.', '') . 'm'
-    : '—';
+$dorsalLabel = isset($card['dorsal']) && $card['dorsal'] !== null ? str_pad((string) (int) $card['dorsal'], 2, '0', STR_PAD_LEFT) : 'N/D';
+$heightLabel = isset($card['height_cm']) && $card['height_cm'] !== null ? number_format(((int) $card['height_cm']) / 100, 2, '.', '') . 'm' : 'N/D';
 $avatarSrc = !empty($card['avatar']) ? asset($card['avatar']) : asset('images/default-avatar.svg');
 $teamLabel = !empty($card['team']['name']) ? $card['team']['name'] : 'Sin equipo';
-$posShort  = $positionShort((string) ($card['position'] ?? ''));
+$posShort = $positionShort((string) ($card['position'] ?? ''));
 ?>
-<main class="fp-fade" style="max-width:1280px;margin:0 auto;padding:96px 24px 80px;">
-
-    <div style="margin-bottom:36px;">
-        <p style="color:#6b7280;font-size:13px;margin-bottom:4px;">Bienvenido de vuelta</p>
-        <h1 style="font-size:30px;font-weight:900;margin:0;">Hola, <span class="fp-gradient-text"><?= e($user['name']) ?></span> 👋</h1>
+<main class="fp-fade fp-page">
+    <div class="fp-page-head">
+        <div>
+            <p class="fp-eyebrow">Dashboard</p>
+            <h1 class="fp-h1">Hola, <span class="fp-gradient-text"><?= e($user['name']) ?></span></h1>
+        </div>
+        <a href="<?= url('profile/edit') ?>" class="fp-btn fp-btn-ghost"><i class="bi bi-person-gear"></i><span>Editar perfil</span></a>
     </div>
 
-    <!-- Hero: carta FIFA + stats -->
-    <section class="fp-hero-card" style="margin-bottom:36px;">
+    <section class="fp-hero-card">
         <div class="fp-card-fifa-wrap">
-            <article class="fp-card-fifa" aria-label="Carta de jugador">
+            <article class="fp-card-fifa <?= Usuario::isPremium((int) $user['id']) ? 'premium' : '' ?>" aria-label="Carta de jugador">
                 <div class="fp-card-fifa-shine" aria-hidden="true"></div>
                 <header class="fp-card-fifa-head">
                     <div class="fp-card-fifa-rating">
                         <span class="fp-card-fifa-num"><?= e($dorsalLabel) ?></span>
                         <span class="fp-card-fifa-pos"><?= e($posShort) ?></span>
                     </div>
-                    <div class="fp-card-fifa-team" title="<?= e($teamLabel) ?>">
-                        <?php if (!empty($card['team'])): ?>
-                            <span class="fp-card-fifa-team-badge"><?= e($card['team']['badge'] ?? '🛡️') ?></span>
-                        <?php endif; ?>
-                    </div>
+                    <i class="bi bi-shield-fill-check fp-card-fifa-icon"></i>
                 </header>
-                <div class="fp-card-fifa-photo">
-                    <img src="<?= e($avatarSrc) ?>" alt="<?= e($card['name'] ?? $user['name']) ?>" loading="lazy">
-                </div>
+                <div class="fp-card-fifa-photo"><img src="<?= e($avatarSrc) ?>" alt="<?= e($card['name'] ?? $user['name']) ?>" loading="lazy"></div>
                 <div class="fp-card-fifa-name"><?= e(mb_strtoupper($card['name'] ?? $user['name'])) ?></div>
                 <div class="fp-card-fifa-stats">
-                    <div class="fp-card-fifa-stat"><b><?= (int) ($card['played']   ?? 0) ?></b><span>PAR</span></div>
-                    <div class="fp-card-fifa-stat"><b><?= (int) ($card['goals']    ?? 0) ?></b><span>GOL</span></div>
-                    <div class="fp-card-fifa-stat"><b><?= (int) ($card['assists']  ?? 0) ?></b><span>ASI</span></div>
-                    <div class="fp-card-fifa-stat"><b><?= e($heightLabel) ?></b><span>ALT</span></div>
-                    <div class="fp-card-fifa-stat"><b><?= e($posShort) ?></b><span>POS</span></div>
-                    <div class="fp-card-fifa-stat"><b><?= e($dorsalLabel) ?></b><span>DOR</span></div>
+                    <div class="fp-card-fifa-stat"><i class="bi bi-calendar2-check"></i><b><?= (int) ($card['played'] ?? 0) ?></b><span>PJ</span></div>
+                    <div class="fp-card-fifa-stat"><i class="bi bi-bullseye"></i><b><?= (int) ($card['goals'] ?? 0) ?></b><span>GOL</span></div>
+                    <div class="fp-card-fifa-stat"><i class="bi bi-crosshair"></i><b><?= (int) ($card['assists'] ?? 0) ?></b><span>ASI</span></div>
+                    <div class="fp-card-fifa-stat"><i class="bi bi-rulers"></i><b><?= e($heightLabel) ?></b><span>ALT</span></div>
                 </div>
-                <footer class="fp-card-fifa-foot">
-                    <span class="fp-card-fifa-club"><?= e($teamLabel) ?></span>
-                </footer>
+                <footer class="fp-card-fifa-foot"><span class="fp-card-fifa-club"><?= e($teamLabel) ?></span></footer>
             </article>
-            <a href="<?= url('profile/edit') ?>" class="fp-btn fp-btn-ghost fp-card-fifa-edit">Editar mi carta →</a>
         </div>
 
         <div class="fp-hero-stats">
-            <div class="fp-grid-4" style="gap:14px;">
+            <div class="fp-grid-3">
                 <?php foreach ($stats as $s): ?>
-                    <div class="fp-glass" style="border-radius:18px;padding:20px;">
-                        <div style="font-size:22px;margin-bottom:10px;"><?= e($s['i']) ?></div>
-                        <div style="font-size:30px;font-weight:900;color:<?= e($s['c']) ?>;letter-spacing:-.02em;line-height:1;"><?= (int) $s['v'] ?></div>
-                        <div style="font-size:11px;color:#6b7280;margin-top:6px;font-weight:500;"><?= e($s['l']) ?></div>
+                    <div class="fp-glass fp-stat-card">
+                        <i class="bi <?= e($s['i']) ?>" style="color:<?= e($s['c']) ?>"></i>
+                        <strong><?= (int) $s['v'] ?></strong>
+                        <span><?= e($s['l']) ?></span>
                     </div>
                 <?php endforeach; ?>
             </div>
         </div>
     </section>
 
-    <div class="fp-grid-3">
-        <!-- Mi equipo -->
-        <div class="fp-glass" style="border-radius:18px;padding:24px;">
-            <h2 style="font-size:16px;font-weight:900;margin-bottom:18px;">Mi equipo</h2>
+    <div class="fp-grid-3 fp-dashboard-grid">
+        <section class="fp-glass fp-panel">
+            <h2 class="fp-h2">Mi equipo</h2>
             <?php if (!empty($team)): ?>
-                <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px;">
-                    <div class="fp-glass fp-glass-green" style="width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;"><?= e($team['badge'] ?? '🛡️') ?></div>
-                    <div>
-                        <div style="font-weight:700;"><?= e($team['name']) ?></div>
-                        <div style="font-size:13px;color:#9ca3af;">📍 <?= e($team['city']) ?></div>
-                    </div>
+                <div class="fp-team-mini">
+                    <div class="fp-team-badge"><?= e($team['badge'] ?? 'FP') ?></div>
+                    <div><strong><?= e($team['name']) ?></strong><span><?= e($team['city']) ?></span></div>
                 </div>
-                <a href="<?= url('teams/show/' . (int) $team['id']) ?>" class="fp-btn fp-btn-ghost" style="width:100%;justify-content:center;padding:10px 0;font-size:13px;">Ver equipo →</a>
+                <div class="fp-actions-row">
+                    <a href="<?= url('teams/show/' . (int) $team['id']) ?>" class="fp-btn fp-btn-ghost">Ver equipo</a>
+                    <a href="<?= url('chat/team/' . (int) $team['id']) ?>" class="fp-btn fp-btn-ghost"><i class="bi bi-chat-dots"></i><span>Chat</span></a>
+                </div>
             <?php else: ?>
-                <p style="font-size:13px;color:#9ca3af;margin:0 0 14px;">Aún no tienes equipo. ¡Únete a uno o crea el tuyo!</p>
-                <div style="display:flex;flex-direction:column;gap:8px;">
-                    <a href="<?= url('teams') ?>" class="fp-btn fp-btn-primary fp-btn-glow" style="width:100%;justify-content:center;padding:10px 0;font-size:13px;">Unirse a un equipo →</a>
-                    <a href="<?= url('teams/create') ?>" class="fp-btn fp-btn-gold" style="width:100%;justify-content:center;padding:10px 0;font-size:13px;">+ Crear equipo</a>
-                </div>
+                <?php $this->partial('empty-state', ['icon' => 'bi-shield-plus', 'title' => 'Aun no tienes equipo', 'description' => 'Solicita unirte a un equipo o crea uno si tienes premium.', 'ctaUrl' => 'teams', 'ctaLabel' => 'Buscar equipo']); ?>
             <?php endif; ?>
-        </div>
+        </section>
 
-        <!-- Próximos partidos -->
-        <div class="fp-glass" style="border-radius:18px;padding:24px;">
-            <h2 style="font-size:16px;font-weight:900;margin-bottom:18px;">Próximos partidos</h2>
-            <div style="display:flex;flex-direction:column;gap:10px;">
-                <?php foreach ($upcoming as $m): ?>
-                    <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:12px;">
-                        <span style="width:8px;height:8px;border-radius:9999px;background:#4ade80;flex-shrink:0;"></span>
-                        <div style="flex:1;">
-                            <div style="font-size:12px;font-weight:600;"><?= e($m['home']) ?> vs <?= e($m['away']) ?></div>
-                            <div style="font-size:11px;color:#6b7280;"><?= e($m['when']) ?></div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-
-        <!-- Logros -->
-        <div class="fp-glass" style="border-radius:18px;padding:24px;">
-            <h2 style="font-size:16px;font-weight:900;margin-bottom:18px;">Logros recientes</h2>
-            <?php if (empty($achievements)): ?>
-                <p style="font-size:13px;color:#9ca3af;margin:0;">Aún sin logros. ¡Juega tu primer partido para empezar a sumar!</p>
+        <section class="fp-glass fp-panel">
+            <h2 class="fp-h2">Próximos partidos</h2>
+            <?php if (empty($upcoming)): ?>
+                <?php $this->partial('empty-state', ['icon' => 'bi-calendar-x', 'title' => 'Sin partidos', 'description' => 'Cuando tengas equipo podrás solicitar un partido.', 'ctaUrl' => 'matches/create', 'ctaLabel' => 'Solicitar partido']); ?>
             <?php else: ?>
-                <div style="display:flex;flex-direction:column;gap:10px;">
-                    <?php foreach ($achievements as $a): ?>
-                        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:12px;background:rgba(255,255,255,.05);">
-                            <span style="font-size:22px;"><?= e($a['i']) ?></span>
-                            <div>
-                                <div style="font-size:12px;font-weight:600;"><?= e($a['n']) ?></div>
-                                <div style="font-size:11px;color:#6b7280;"><?= e($a['d']) ?></div>
-                            </div>
-                        </div>
+                <div class="fp-list">
+                    <?php foreach ($upcoming as $m): ?>
+                        <a href="<?= url('matches/show/' . (int) $m['id']) ?>" class="fp-list-item">
+                            <i class="bi bi-calendar2-event"></i>
+                            <span><strong><?= e($m['home']) ?> vs <?= e($m['away']) ?></strong><small><?= e($m['when']) ?></small></span>
+                        </a>
                     <?php endforeach; ?>
                 </div>
             <?php endif; ?>
-        </div>
-    </div>
+        </section>
 
+        <section class="fp-glass fp-panel">
+            <div class="fp-section-title-row">
+                <h2 class="fp-h2">Notificaciones</h2>
+                <a href="<?= url('notification') ?>">Ver todas</a>
+            </div>
+            <?php if (empty($notifications)): ?>
+                <?php $this->partial('empty-state', ['icon' => 'bi-bell', 'title' => 'Sin notificaciones', 'description' => 'Aqui veras solicitudes y avisos importantes.']); ?>
+            <?php else: ?>
+                <div class="fp-list">
+                    <?php foreach ($notifications as $n): ?>
+                        <a href="<?= !empty($n['action_url']) ? url($n['action_url']) : url('notification') ?>" class="fp-list-item <?= (int) $n['is_read'] === 0 ? 'unread' : '' ?>">
+                            <i class="bi bi-bell"></i>
+                            <span><strong><?= e($n['message']) ?></strong><small><?= e(date('d/m/Y H:i', strtotime($n['created_at']))) ?></small></span>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </section>
+    </div>
 </main>

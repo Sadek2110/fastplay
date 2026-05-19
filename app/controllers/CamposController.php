@@ -1,29 +1,26 @@
 <?php
-// FastPlay · campos (catálogo)
 
 class CamposController extends Controller
 {
     public function index(): void
     {
-        $campo = $this->model('Campo');
         $this->view('campos/index', [
             'active' => 'campos',
-            'fields' => $campo->all(),
-            'title'  => 'Campos — FastPlay',
+            'fields' => $this->model('Campo')->all(),
+            'head' => '<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">',
+            'scripts' => '<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="' . asset('js/campos-map.js') . '" defer></script>',
+            'title' => 'Campos - FastPlay',
         ]);
     }
 
     public function show(string $id = ''): void
     {
-        $id = (int) $id;
-        $campo = $this->model('Campo');
-        $field = $campo->find($id);
+        $field = $this->model('Campo')->find((int) $id);
         if (!$field) { Router::notFound(); return; }
-
         $this->view('campos/show', [
             'active' => 'campos',
-            'field'  => $field,
-            'title'  => $field['name'] . ' — FastPlay',
+            'field' => $field,
+            'title' => $field['name'] . ' - FastPlay',
         ]);
     }
 
@@ -33,8 +30,7 @@ class CamposController extends Controller
         $errors = [];
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             require_csrf();
-            $campo = $this->model('Campo');
-            [$field, $errors] = $campo->create($_POST);
+            [$field, $errors] = $this->model('Campo')->create($_POST);
             if ($field) {
                 flash('ok', 'Campo registrado.');
                 redirect('campos/show/' . $field['id']);
@@ -44,7 +40,7 @@ class CamposController extends Controller
         $this->view('campos/create', [
             'active' => 'campos',
             'errors' => $errors,
-            'title'  => 'Nuevo campo — FastPlay',
+            'title' => 'Nuevo campo - FastPlay',
         ]);
     }
 }

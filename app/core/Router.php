@@ -12,12 +12,12 @@ class Router
         $action = $segments[1] ?? 'index';
         $params = array_slice($segments, 2);
 
-        if (!preg_match('/^[a-zA-Z0-9_]+$/', $controllerSlug) || !preg_match('/^[a-zA-Z0-9_]+$/', $action)) {
+        if (!preg_match('/^[a-zA-Z0-9_-]+$/', $controllerSlug) || !preg_match('/^[a-zA-Z0-9_]+$/', $action)) {
             self::notFound();
             return;
         }
 
-        $controllerClass = ucfirst(strtolower($controllerSlug)) . 'Controller';
+        $controllerClass = str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', strtolower($controllerSlug)))) . 'Controller';
         $controllerFile = APP_PATH . '/controllers/' . $controllerClass . '.php';
 
         if (!file_exists($controllerFile)) {

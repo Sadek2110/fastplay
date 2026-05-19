@@ -7,6 +7,7 @@ class Equipo
     {
         return Database::all(
             "SELECT t.id, t.name, t.city, t.badge,
+                    COALESCE((SELECT SUM(points) FROM league_teams WHERE team_id = t.id), 0) AS points,
                     (SELECT COUNT(*) FROM team_members WHERE team_id = t.id) AS players,
                     u.name AS captain_name
              FROM teams t
@@ -63,8 +64,15 @@ class Equipo
         $badge = trim((string) ($data['badge'] ?? '🛡️'));
         if (!v_required($name) || mb_strlen($name) < 3) $errors['name'] = 'Nombre mínimo de 3 caracteres.';
         if (!v_required($city))                         $errors['city'] = 'Ciudad obligatoria.';
-        if ($badge !== '' && mb_strlen($badge) > 4)      $errors['badge'] = 'El badge debe ser un solo emoji.';
+        if ($badge !== '' && mb_strlen($badge) > 4)      $errors['badge'] = 'El escudo debe ser breve.';
         if ($errors) return [null, $errors];
+
+        if (Database::value('SELECT 1 FROM team_members WHERE user_id=?', [$captainId])) {
+            return [null, ['name' => 'Ya perteneces a un equipo.']];
+        }
+        if (Database::value('SELECT 1 FROM teams WHERE captain_id=?', [$captainId])) {
+            return [null, ['name' => 'Ya eres capitán de un equipo.']];
+        }
 
         $exists = Database::value('SELECT 1 FROM teams WHERE name = ? AND city = ?', [$name, $city]);
         if ($exists) {
@@ -73,7 +81,8 @@ class Equipo
 
         Database::run('INSERT INTO teams (name,city,badge,captain_id) VALUES (?,?,?,?)', [$name, $city, $badge, $captainId]);
         $id = Database::insertId();
-        Database::run('INSERT INTO team_members (team_id,user_id) VALUES (?,?)', [$id, $captainId]);
+        Database::run('INSERT INTO team_members (team_id,user_id,role) VALUES (?,?,?)', [$id, $captainId, 'captain']);
+        Database::run('UPDATE users SET current_team_id=? WHERE id=?', [$id, $captainId]);
         return [$this->find($id), []];
     }
 
@@ -81,7 +90,9 @@ class Equipo
     {
         $exists = Database::value('SELECT 1 FROM team_members WHERE team_id=? AND user_id=?', [$teamId, $userId]);
         if ($exists) return false;
-        Database::run('INSERT INTO team_members (team_id,user_id) VALUES (?,?)', [$teamId, $userId]);
+        if (Database::value('SELECT 1 FROM team_members WHERE user_id=?', [$userId])) return false;
+        Database::run('INSERT INTO team_members (team_id,user_id,role) VALUES (?,?,?)', [$teamId, $userId, 'player']);
+        Database::run('UPDATE users SET current_team_id=? WHERE id=?', [$teamId, $userId]);
         return true;
     }
 
@@ -92,12 +103,40 @@ class Equipo
             return false;
         }
         Database::run('DELETE FROM team_members WHERE team_id=? AND user_id=?', [$teamId, $userId]);
+        Database::run('UPDATE users SET current_team_id=NULL WHERE id=?', [$userId]);
         return true;
     }
 
     public function delete(int $id): void
     {
         Database::run('DELETE FROM teams WHERE id=?', [$id]);
+    }
+
+    public function allFiltered(string $search = '', string $sort = 'name'): array
+    {
+        $order = match ($sort) {
+            'points' => 'points DESC, t.name ASC',
+            'created' => 't.created_at DESC',
+            default => 't.name ASC',
+        };
+        $params = [];
+        $where = '';
+        if ($search !== '') {
+            $where = 'WHERE t.name LIKE ? OR t.city LIKE ? OR u.name LIKE ?';
+            $like = '%' . $search . '%';
+            $params = [$like, $like, $like];
+        }
+        return Database::all(
+            "SELECT t.id, t.name, t.city, t.badge, t.created_at,
+                    COALESCE((SELECT SUM(points) FROM league_teams WHERE team_id = t.id), 0) AS points,
+                    (SELECT COUNT(*) FROM team_members WHERE team_id = t.id) AS players,
+                    u.name AS captain_name
+             FROM teams t
+             JOIN users u ON u.id = t.captain_id
+             {$where}
+             ORDER BY {$order}",
+            $params
+        );
     }
 
     public function deletionBlocker(int $id): ?string

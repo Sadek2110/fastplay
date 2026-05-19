@@ -1,18 +1,42 @@
 <?php
-// FastPlay · chat (salas + mensajes)
 
 class ChatController extends Controller
 {
     public function index(): void
     {
         $this->requireAuth();
-        $chat = $this->model('Chat');
-        $userId = (int) current_user()['id'];
-        $this->view('chat/index', [
-            'active' => 'chat',
-            'rooms'  => $chat->rooms($userId, is_admin()),
-            'title'  => 'Chat — FastPlay',
-        ]);
+        flash('warn', 'El chat solo esta disponible dentro de un equipo o una negociacion de partido.');
+        redirect('teams');
+    }
+
+    public function team(string $teamId = ''): void
+    {
+        $this->requireAuth();
+        $teamId = (int) $teamId;
+        if (!is_admin() && !Database::value('SELECT 1 FROM team_members WHERE team_id=? AND user_id=?', [$teamId, (int) current_user()['id']])) {
+            flash('warn', 'No tienes acceso al chat de este equipo.');
+            redirect('teams');
+            return;
+        }
+        $roomId = (int) Database::value("SELECT id FROM chat_rooms WHERE type='team' AND team_id=?", [$teamId]);
+        if (!$roomId) {
+            $teamName = (string) Database::value('SELECT name FROM teams WHERE id=?', [$teamId]);
+            $roomId = $this->model('Chat')->createRoom('Equipo: ' . $teamName, 'team', $teamId);
+        }
+        redirect('chat/room/' . $roomId);
+    }
+
+    public function matchNegotiation(string $matchRequestId = ''): void
+    {
+        $this->requireAuth();
+        $matchRequestId = (int) $matchRequestId;
+        $roomId = (int) Database::value("SELECT id FROM chat_rooms WHERE type='match_negotiation' AND match_request_id=?", [$matchRequestId]);
+        if (!$roomId) {
+            flash('warn', 'El chat se habilita cuando se acepta la solicitud.');
+            redirect('match-request/show/' . $matchRequestId);
+            return;
+        }
+        redirect('chat/room/' . $roomId);
     }
 
     public function room(string $id = ''): void
@@ -24,17 +48,15 @@ class ChatController extends Controller
         if (!$room) { Router::notFound(); return; }
         if (!$chat->canAccessRoom($room, (int) current_user()['id'], is_admin())) {
             flash('warn', 'No tienes acceso a esta sala.');
-            redirect('chat');
+            redirect('teams');
             return;
         }
-
         $msgs = array_reverse($chat->messages($id));
         $this->view('chat/room', [
-            'active'   => 'chat',
-            'room'     => $room,
+            'active' => 'chat',
+            'room' => $room,
             'messages' => $msgs,
-            'rooms'    => $chat->rooms((int) current_user()['id'], is_admin()),
-            'title'    => $room['name'] . ' — Chat — FastPlay',
+            'title' => $room['name'] . ' - Chat - FastPlay',
         ]);
     }
 
@@ -43,8 +65,7 @@ class ChatController extends Controller
         $this->requireAuth();
         $this->requirePost();
         $id = (int) $id;
-        $chat = $this->model('Chat');
-        $res = $chat->send($id, (int) current_user()['id'], (string) ($_POST['body'] ?? ''), is_admin());
+        $res = $this->model('Chat')->send($id, (int) current_user()['id'], (string) ($_POST['body'] ?? ''), is_admin());
         if (!empty($res['error'])) {
             flash('warn', $res['error']);
         }
@@ -65,31 +86,14 @@ class ChatController extends Controller
         }
         header('Content-Type: application/json');
         $msgs = array_reverse($chat->messages($id));
-        echo json_encode(array_map(function ($m) {
+        echo json_encode(array_map(static function ($m) {
             return [
-                'id'         => (int) $m['id'],
-                'user_name'  => $m['user_name'],
-                'body'       => $m['body'],
+                'id' => (int) $m['id'],
+                'user_name' => $m['user_name'],
+                'body' => $m['body'],
                 'created_at' => date('d/m H:i', strtotime($m['created_at'])),
-                'own'        => (int) $m['user_id'] === (int) current_user()['id'],
+                'own' => (int) $m['user_id'] === (int) current_user()['id'],
             ];
         }, $msgs));
-    }
-
-    public function createRoom(): void
-    {
-        $this->requireAdmin();
-        $this->requirePost();
-        $name = trim((string) ($_POST['name'] ?? ''));
-        $type = (string) ($_POST['type'] ?? 'group');
-        if ($name === '') {
-            flash('warn', 'Indica un nombre para la sala.');
-            redirect('chat');
-            return;
-        }
-        $chat = $this->model('Chat');
-        $newId = $chat->createRoom($name, $type);
-        flash('ok', 'Sala creada.');
-        redirect('chat/room/' . $newId);
     }
 }

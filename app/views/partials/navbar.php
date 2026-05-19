@@ -1,11 +1,15 @@
 <?php
 $links = [
-    ['id' => 'teams',   'label' => 'Equipos',  'url' => 'teams'],
-    ['id' => 'matches', 'label' => 'Partidos', 'url' => 'matches'],
-    ['id' => 'leagues', 'label' => 'Ligas',    'url' => 'leagues'],
-    ['id' => 'campos',  'label' => 'Campos',   'url' => 'campos'],
+    ['id' => 'teams', 'label' => 'Equipos', 'url' => 'teams', 'icon' => 'bi-shield'],
+    ['id' => 'matches', 'label' => 'Partidos', 'url' => 'matches', 'icon' => 'bi-calendar2-week'],
+    ['id' => 'leagues', 'label' => 'Ligas', 'url' => 'leagues', 'icon' => 'bi-trophy'],
+    ['id' => 'campos', 'label' => 'Campos', 'url' => 'campos', 'icon' => 'bi-geo-alt'],
 ];
 $user = current_user();
+$unread = 0;
+if ($user) {
+    try { $unread = (int) Database::value('SELECT COUNT(*) FROM notifications WHERE user_id=? AND is_read=0', [(int) $user['id']]); } catch (Throwable $e) { $unread = 0; }
+}
 ?>
 <nav class="fp-navbar">
     <div class="fp-navbar-inner">
@@ -13,35 +17,50 @@ $user = current_user();
             <img src="<?= asset('images/logo.png') ?>" alt="" class="fp-logo-icon">
             <img src="<?= asset('images/logo-nombre.png') ?>" alt="FastPlay" class="fp-logo-word">
         </a>
-        <div class="fp-nav-links">
-            <?php foreach ($links as $l): ?>
-                <a href="<?= url($l['url']) ?>" class="fp-nav-link <?= ($active ?? '') === $l['id'] ? 'active' : '' ?>"><?= e($l['label']) ?></a>
-            <?php endforeach; ?>
-            <?php if ($user): ?>
-                <a href="<?= url('chat') ?>" class="fp-nav-link <?= ($active ?? '') === 'chat' ? 'active' : '' ?>">Chat</a>
-                <?php if (is_admin()): ?>
-                    <a href="<?= url('admin') ?>" class="fp-nav-link <?= ($active ?? '') === 'admin' ? 'active' : '' ?>">Admin</a>
-                <?php endif; ?>
-            <?php endif; ?>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;">
-            <?php if ($user): ?>
-                <a href="<?= url('dashboard') ?>" class="fp-glass" style="border-radius:9999px;padding:5px 14px 5px 6px;display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;text-decoration:none;color:#fff;">
-                    <?php if (!empty($user['avatar'])): ?>
-                        <img src="<?= asset($user['avatar']) ?>" alt="" style="width:26px;height:26px;border-radius:9999px;object-fit:cover;display:block;">
-                    <?php else: ?>
-                        <span style="width:26px;height:26px;border-radius:9999px;background:#16a34a;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;"><?= e(mb_substr($user['name'], 0, 1)) ?></span>
+
+        <button class="fp-nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-label="Abrir menu">
+            <i class="bi bi-list"></i>
+        </button>
+
+        <div class="fp-nav-menu" data-nav-menu>
+            <div class="fp-nav-links">
+                <?php foreach ($links as $l): ?>
+                    <a href="<?= url($l['url']) ?>" class="fp-nav-link <?= ($active ?? '') === $l['id'] ? 'active' : '' ?>">
+                        <i class="bi <?= e($l['icon']) ?>"></i><span><?= e($l['label']) ?></span>
+                    </a>
+                <?php endforeach; ?>
+                <?php if ($user): ?>
+                    <a href="<?= url('dashboard') ?>" class="fp-nav-link <?= ($active ?? '') === 'dashboard' ? 'active' : '' ?>"><i class="bi bi-grid"></i><span>Dashboard</span></a>
+                    <?php if (is_admin()): ?>
+                        <a href="<?= url('admin') ?>" class="fp-nav-link <?= ($active ?? '') === 'admin' ? 'active' : '' ?>"><i class="bi bi-sliders"></i><span>Admin</span></a>
                     <?php endif; ?>
-                    <?= e($user['name']) ?>
-                </a>
-                <form method="post" action="<?= url('auth/logout') ?>" style="margin:0;">
-                    <?= csrf_field() ?>
-                    <button type="submit" style="background:none;border:0;color:#9ca3af;font-size:13px;cursor:pointer;padding:0;font-family:inherit;">Salir</button>
-                </form>
-            <?php else: ?>
-                <a href="<?= url('auth/login') ?>" style="color:#9ca3af;font-size:14px;font-weight:500;text-decoration:none;">Entrar</a>
-                <a href="<?= url('auth/register') ?>" style="background:#16a34a;color:#fff;font-weight:700;padding:10px 20px;border-radius:9999px;font-size:13px;text-decoration:none;">Registrarse</a>
-            <?php endif; ?>
+                <?php endif; ?>
+            </div>
+
+            <div class="fp-nav-actions">
+                <button class="fp-icon-btn" type="button" data-theme-toggle aria-label="Cambiar tema"><i class="bi bi-moon"></i></button>
+                <?php if ($user): ?>
+                    <a href="<?= url('notification') ?>" class="fp-icon-btn fp-notification-link <?= ($active ?? '') === 'notification' ? 'active' : '' ?>" aria-label="Notificaciones">
+                        <i class="bi bi-bell"></i>
+                        <span class="fp-badge" data-notification-badge <?= $unread > 0 ? '' : 'hidden' ?>><?= (int) $unread ?></span>
+                    </a>
+                    <a href="<?= url('profile/edit') ?>" class="fp-user-pill">
+                        <?php if (!empty($user['avatar'])): ?>
+                            <img src="<?= asset($user['avatar']) ?>" alt="">
+                        <?php else: ?>
+                            <span><?= e(mb_substr($user['name'], 0, 1)) ?></span>
+                        <?php endif; ?>
+                        <strong><?= e($user['name']) ?></strong>
+                    </a>
+                    <form method="post" action="<?= url('auth/logout') ?>" class="fp-logout-form">
+                        <?= csrf_field() ?>
+                        <button type="submit" class="fp-logout">Salir</button>
+                    </form>
+                <?php else: ?>
+                    <a href="<?= url('auth/login') ?>" class="fp-login">Entrar</a>
+                    <a href="<?= url('auth/register') ?>" class="fp-btn fp-btn-primary">Registrarse</a>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 </nav>

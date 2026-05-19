@@ -1,23 +1,20 @@
 <?php
-// FastPlay · partidos
 
 class MatchesController extends Controller
 {
     public function index(): void
     {
-        $partido = $this->model('Partido');
         $this->view('matches/index', [
-            'active'  => 'matches',
-            'matches' => $partido->all(),
-            'title'   => 'Partidos — FastPlay',
+            'active' => 'matches',
+            'matches' => $this->model('Partido')->all(),
+            'title' => 'Partidos - FastPlay',
         ]);
     }
 
     public function show(string $id = ''): void
     {
         $id = (int) $id;
-        $partido = $this->model('Partido');
-        $match = $partido->find($id);
+        $match = $this->model('Partido')->find($id);
         if (!$match) { Router::notFound(); return; }
 
         $isManager = false;
@@ -30,58 +27,30 @@ class MatchesController extends Controller
         }
 
         $this->view('matches/show', [
-            'active'    => 'matches',
-            'match'     => $match,
+            'active' => 'matches',
+            'match' => $match,
             'isManager' => $isManager,
-            'title'     => $match['home_name'] . ' vs ' . $match['away_name'],
+            'title' => $match['home_name'] . ' vs ' . $match['away_name'],
         ]);
     }
 
     public function create(): void
     {
         $this->requireAuth();
-        $errors = [];
         $equipo = $this->model('Equipo');
         $userId = (int) current_user()['id'];
-        $teams  = $equipo->ofUser($userId);
-        $allTeams = $equipo->all();
-        $fields = $this->model('Campo')->all();
-        $leagues = $this->model('Liga')->all();
-
-        if (!$teams && !is_admin()) {
-            flash('warn', 'Necesitas pertenecer a un equipo para crear un partido.');
-        }
-
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            require_csrf();
-            $home = (int) ($_POST['home_team_id'] ?? 0);
-            $away = (int) ($_POST['away_team_id'] ?? 0);
-
-            if (!is_admin() && !$equipo->isCaptain($home, $userId) && !$equipo->isCaptain($away, $userId)) {
-                flash('warn', 'Sólo puedes programar partidos como capitán de uno de los equipos.');
-                flash_old($_POST);
-                redirect('matches/create');
-                return;
-            }
-
-            $partido = $this->model('Partido');
-            [$match, $errors] = $partido->create($userId, $_POST);
-            if ($match) {
-                flash('ok', 'Partido creado, esperando confirmación del rival.');
-                redirect('matches/show/' . $match['id']);
-                return;
-            }
-            flash_old($_POST);
-        }
+        $myTeam = $equipo->mine($userId);
+        $captainTeams = Database::all('SELECT * FROM teams WHERE captain_id=? ORDER BY name', [$userId]);
+        $teams = array_values(array_filter($equipo->all(), static function (array $team) use ($myTeam) {
+            return !$myTeam || (int) $team['id'] !== (int) $myTeam['id'];
+        }));
 
         $this->view('matches/create', [
-            'active'   => 'matches',
-            'errors'   => $errors,
-            'myTeams'  => $teams,
-            'teams'    => $allTeams,
-            'fields'   => $fields,
-            'leagues'  => $leagues,
-            'title'    => 'Crear partido — FastPlay',
+            'active' => 'matches',
+            'myTeam' => $myTeam,
+            'captainTeams' => $captainTeams,
+            'teams' => $teams,
+            'title' => 'Solicitar partido - FastPlay',
         ]);
     }
 
@@ -92,11 +61,7 @@ class MatchesController extends Controller
         $id = (int) $id;
         $partido = $this->model('Partido');
         if (!$this->canManageMatch($partido, $id)) { return; }
-        if ($partido->setStatus($id, 'confirmed')) {
-            flash('ok', 'Partido confirmado.');
-        } else {
-            flash('warn', 'No se puede confirmar un partido en este estado.');
-        }
+        flash($partido->setStatus($id, 'confirmed') ? 'ok' : 'warn', 'Partido actualizado.');
         redirect('matches/show/' . $id);
     }
 
@@ -107,11 +72,7 @@ class MatchesController extends Controller
         $id = (int) $id;
         $partido = $this->model('Partido');
         if (!$this->canManageMatch($partido, $id)) { return; }
-        if ($partido->setStatus($id, 'cancelled')) {
-            flash('ok', 'Partido cancelado.');
-        } else {
-            flash('warn', 'No se puede cancelar un partido en este estado.');
-        }
+        flash($partido->setStatus($id, 'cancelled') ? 'ok' : 'warn', 'Partido actualizado.');
         redirect('matches/show/' . $id);
     }
 
@@ -120,10 +81,7 @@ class MatchesController extends Controller
         $this->requireAuth();
         $this->requirePost();
         $id = (int) $id;
-        $partido = $this->model('Partido');
-        $equipo  = $this->model('Equipo');
-        $userId  = (int) current_user()['id'];
-        if (!$partido->deleteIfAllowed($id, $userId, is_admin(), $equipo)) {
+        if (!$this->model('Partido')->deleteIfAllowed($id, (int) current_user()['id'], is_admin(), $this->model('Equipo'))) {
             flash('warn', 'No tienes permisos para borrar ese partido.');
             redirect('matches/show/' . $id);
             return;
@@ -139,20 +97,14 @@ class MatchesController extends Controller
         $id = (int) $id;
         $partido = $this->model('Partido');
         if (!$this->canManageMatch($partido, $id)) { return; }
-        $hs = isset($_POST['home_score']) ? (int) $_POST['home_score'] : 0;
-        $as = isset($_POST['away_score']) ? (int) $_POST['away_score'] : 0;
-        $hs = min(99, max(0, $hs));
-        $as = min(99, max(0, $as));
+        $hs = min(99, max(0, (int) ($_POST['home_score'] ?? 0)));
+        $as = min(99, max(0, (int) ($_POST['away_score'] ?? 0)));
         if ($hs === 0 && $as === 0) {
             flash('warn', 'Indica un marcador real para finalizar el partido.');
             redirect('matches/show/' . $id);
             return;
         }
-        if ($partido->setStatus($id, 'finished', $hs, $as)) {
-            flash('ok', 'Partido finalizado, marcador registrado.');
-        } else {
-            flash('warn', 'No se puede finalizar un partido en este estado.');
-        }
+        flash($partido->setStatus($id, 'finished', $hs, $as) ? 'ok' : 'warn', 'Partido actualizado.');
         redirect('matches/show/' . $id);
     }
 
@@ -163,9 +115,7 @@ class MatchesController extends Controller
         if (is_admin()) { return true; }
         $equipo = $this->model('Equipo');
         $userId = (int) current_user()['id'];
-        $home = (int) $match['home_team_id'];
-        $away = (int) $match['away_team_id'];
-        if ($equipo->isCaptain($home, $userId) || $equipo->isCaptain($away, $userId)) {
+        if ($equipo->isCaptain((int) $match['home_team_id'], $userId) || $equipo->isCaptain((int) $match['away_team_id'], $userId)) {
             return true;
         }
         flash('warn', 'No tienes permisos sobre este partido.');

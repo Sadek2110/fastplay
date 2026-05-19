@@ -1,56 +1,39 @@
 <main class="fp-fade fp-page" style="max-width:920px;">
+    <?php $this->partial('back-button', ['href' => url('matches')]); ?>
     <p class="fp-eyebrow">Partido</p>
-    <h1 class="fp-h1"><?= e($match['home_name']) ?> <span style="color:#6b7280;">vs</span> <?= e($match['away_name']) ?></h1>
+    <h1 class="fp-h1"><?= e($match['home_name']) ?> <span class="fp-muted">vs</span> <?= e($match['away_name']) ?></h1>
 
-    <div class="fp-glass" style="border-radius:18px;padding:28px;margin-top:20px;">
-        <div style="display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;">
-            <div style="text-align:center;flex:1;min-width:160px;">
-                <div style="font-size:18px;font-weight:900;"><?= e($match['home_name']) ?></div>
-                <div style="font-size:11px;color:#6b7280;">LOCAL</div>
-            </div>
-            <div style="font-size:48px;font-weight:900;line-height:1;letter-spacing:-.02em;">
-                <?= e($match['s']) ?>
-            </div>
-            <div style="text-align:center;flex:1;min-width:160px;">
-                <div style="font-size:18px;font-weight:900;"><?= e($match['away_name']) ?></div>
-                <div style="font-size:11px;color:#6b7280;">VISITANTE</div>
-            </div>
+    <section class="fp-glass fp-panel">
+        <div class="fp-scoreboard">
+            <div><strong><?= e($match['home_name']) ?></strong><small>Local</small></div>
+            <b><?= e($match['s']) ?></b>
+            <div><strong><?= e($match['away_name']) ?></strong><small>Visitante</small></div>
         </div>
-
-        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-top:24px;font-size:13px;color:#9ca3af;">
-            <div>📅 <?= e(date('d/m/Y H:i', strtotime($match['scheduled_at']))) ?></div>
-            <div>🏟️ <?= e($match['field_name'] ?? 'Campo a confirmar') ?></div>
-            <?php if (!empty($match['league_name'])): ?>
-                <div>🏆 <?= e($match['league_name']) ?></div>
-            <?php endif; ?>
+        <div class="fp-actions-row fp-match-details">
+            <span><i class="bi bi-calendar2-event"></i> <?= e(date('d/m/Y H:i', strtotime($match['scheduled_at']))) ?></span>
+            <span><i class="bi bi-geo-alt"></i> <?= e($match['location'] ?? $match['field_name'] ?? 'Campo a confirmar') ?></span>
+            <?php if (!empty($match['league_name'])): ?><span><i class="bi bi-trophy"></i> <?= e($match['league_name']) ?></span><?php endif; ?>
             <span class="fp-status fp-status-<?= e($match['st']) ?>"><?= e($match['lbl']) ?></span>
         </div>
-    </div>
+    </section>
 
     <?php if ($isManager && $match['st'] !== 'finished' && $match['st'] !== 'cancelled'): ?>
-        <section style="margin-top:24px;display:flex;gap:10px;flex-wrap:wrap;">
+        <section class="fp-actions-row" style="margin-top:24px;">
             <?php if ($match['st'] === 'pending'): ?>
-                <form method="post" action="<?= url('matches/confirm/' . (int) $match['id']) ?>" style="margin:0;">
-                    <?= csrf_field() ?>
-                    <button class="fp-btn fp-btn-primary fp-btn-glow">Confirmar partido →</button>
-                </form>
+                <form method="post" action="<?= url('matches/confirm/' . (int) $match['id']) ?>"><?= csrf_field() ?><button class="fp-btn fp-btn-primary">Confirmar partido</button></form>
             <?php endif; ?>
-            <form method="post" action="<?= url('matches/cancel/' . (int) $match['id']) ?>" style="margin:0;" onsubmit="return confirm('¿Cancelar el partido?');">
-                <?= csrf_field() ?>
-                <button class="fp-btn fp-btn-ghost" style="color:#f87171;">Cancelar</button>
-            </form>
-            <?php if ($match['st'] === 'confirmed'): ?>
-            <details class="fp-glass" style="border-radius:14px;padding:14px 16px;">
-                <summary style="cursor:pointer;font-weight:600;font-size:13px;">Cerrar resultado</summary>
-                <form method="post" action="<?= url('matches/finish/' . (int) $match['id']) ?>" style="display:flex;gap:10px;align-items:center;margin-top:12px;">
-                    <?= csrf_field() ?>
-                    <input type="number" name="home_score" min="0" max="99" placeholder="Local" class="fp-input" style="width:100px;">
-                    <span style="color:#6b7280;">–</span>
-                    <input type="number" name="away_score" min="0" max="99" placeholder="Visit." class="fp-input" style="width:100px;">
-                    <button class="fp-btn fp-btn-primary">Finalizar →</button>
-                </form>
-            </details>
-            <?php endif; ?>
+            <form method="post" action="<?= url('matches/cancel/' . (int) $match['id']) ?>" onsubmit="return confirm('¿Cancelar el partido?');"><?= csrf_field() ?><button class="fp-btn fp-btn-ghost">Cancelar</button></form>
         </section>
+        <?php if ($match['st'] === 'confirmed'): ?>
+            <section class="fp-glass fp-panel">
+                <h2 class="fp-h2">Cerrar resultado</h2>
+                <form method="post" action="<?= url('matches/finish/' . (int) $match['id']) ?>" class="fp-actions-row">
+                    <?= csrf_field() ?>
+                    <input type="number" name="home_score" min="0" max="99" placeholder="Local" class="fp-input" style="width:120px;">
+                    <input type="number" name="away_score" min="0" max="99" placeholder="Visitante" class="fp-input" style="width:120px;">
+                    <button class="fp-btn fp-btn-primary">Finalizar</button>
+                </form>
+            </section>
+        <?php endif; ?>
     <?php endif; ?>
 </main>

@@ -51,11 +51,11 @@ class Chat
         return ['ok' => true, 'id' => Database::insertId()];
     }
 
-    public function createRoom(string $name, string $type = 'group'): int
+    public function createRoom(string $name, string $type = 'group', ?int $teamId = null, ?int $matchRequestId = null): int
     {
         $name = trim($name) ?: 'Sala';
         if (!in_array($type, ['general','group','match_negotiation','team'], true)) $type = 'group';
-        Database::run('INSERT INTO chat_rooms (name,type) VALUES (?,?)', [$name, $type]);
+        Database::run('INSERT INTO chat_rooms (name,type,team_id,match_request_id) VALUES (?,?,?,?)', [$name, $type, $teamId, $matchRequestId]);
         return Database::insertId();
     }
 
@@ -64,7 +64,18 @@ class Chat
         if ($isAdmin) {
             return true;
         }
+        if (($room['type'] ?? 'group') === 'team') {
+            $teamId = (int) ($room['team_id'] ?? 0);
+            return $teamId > 0 && (bool) Database::value('SELECT 1 FROM team_members WHERE team_id=? AND user_id=?', [$teamId, $userId]);
+        }
         if (($room['type'] ?? 'group') === 'match_negotiation') {
+            $matchRequestId = (int) ($room['match_request_id'] ?? 0);
+            if ($matchRequestId > 0) {
+                return (bool) Database::value(
+                    "SELECT 1 FROM match_requests WHERE id=? AND (requesting_captain_id=? OR requested_captain_id=?) AND status IN ('accepted','accepted_final')",
+                    [$matchRequestId, $userId, $userId]
+                );
+            }
             return (bool) Database::value('SELECT 1 FROM teams WHERE captain_id=?', [$userId]);
         }
         return true;

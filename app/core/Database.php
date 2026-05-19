@@ -26,13 +26,13 @@ class Database
         } else {
             // Las instalaciones MySQL/PostgreSQL no ejecutan la migración SQLite,
             // pero las columnas añadidas a posteriori sí deben aparecer también allí.
-            self::ensurePlayerCardColumns($pdo, $driver);
+            self::ensureRuntimeColumns($pdo, $driver);
         }
         return $pdo;
     }
 
     /** Añade en caliente las columnas de la carta-jugador en MySQL/PostgreSQL si faltan. */
-    private static function ensurePlayerCardColumns(PDO $pdo, string $driver): void
+    private static function ensureRuntimeColumns(PDO $pdo, string $driver): void
     {
         try {
             if ($driver === 'mysql') {
@@ -46,16 +46,29 @@ class Database
                 if (!isset($existing['height_cm'])) $pdo->exec("ALTER TABLE users ADD COLUMN height_cm SMALLINT NULL");
                 if (!isset($existing['goals']))     $pdo->exec("ALTER TABLE users ADD COLUMN goals INT NOT NULL DEFAULT 0");
                 if (!isset($existing['assists']))   $pdo->exec("ALTER TABLE users ADD COLUMN assists INT NOT NULL DEFAULT 0");
+                if (!isset($existing['is_premium'])) $pdo->exec("ALTER TABLE users ADD COLUMN is_premium TINYINT(1) NOT NULL DEFAULT 0");
+                if (!isset($existing['current_team_id'])) $pdo->exec("ALTER TABLE users ADD COLUMN current_team_id BIGINT UNSIGNED NULL");
+
+                $teamCols = [];
+                $rows = $pdo->query(
+                    "SELECT COLUMN_NAME FROM information_schema.COLUMNS
+                     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'teams'"
+                );
+                foreach ($rows as $r) { $teamCols[$r['COLUMN_NAME']] = true; }
+                if (!isset($teamCols['shield'])) $pdo->exec("ALTER TABLE teams ADD COLUMN shield TEXT NULL");
             } elseif ($driver === 'pgsql') {
                 $pdo->exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS dorsal SMALLINT");
                 $pdo->exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS height_cm SMALLINT");
                 $pdo->exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS goals INTEGER NOT NULL DEFAULT 0");
                 $pdo->exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS assists INTEGER NOT NULL DEFAULT 0");
+                $pdo->exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_premium BOOLEAN NOT NULL DEFAULT FALSE");
+                $pdo->exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS current_team_id BIGINT");
+                $pdo->exec("ALTER TABLE teams ADD COLUMN IF NOT EXISTS shield TEXT");
             }
         } catch (Throwable $e) {
             // No bloqueamos el arranque si el usuario de BD no tiene permisos DDL;
             // los queries que dependen de estas columnas fallarán con un error claro.
-            error_log('[FastPlay] ensurePlayerCardColumns: ' . $e->getMessage());
+            error_log('[FastPlay] ensureRuntimeColumns: ' . $e->getMessage());
         }
     }
 
@@ -102,6 +115,8 @@ class Database
             password_hash TEXT NOT NULL,
             role TEXT NOT NULL DEFAULT 'player',
             avatar TEXT,
+            current_team_id INTEGER,
+            is_premium INTEGER NOT NULL DEFAULT 0,
             created_at TEXT NOT NULL DEFAULT (datetime('now'))
         )");
 
@@ -110,6 +125,7 @@ class Database
             name TEXT NOT NULL,
             city TEXT NOT NULL,
             badge TEXT DEFAULT '🛡️',
+            shield TEXT,
             captain_id INTEGER NOT NULL,
             created_at TEXT NOT NULL DEFAULT (datetime('now')),
             FOREIGN KEY (captain_id) REFERENCES users(id) ON DELETE RESTRICT
@@ -131,11 +147,12 @@ class Database
                 name TEXT NOT NULL,
                 city TEXT NOT NULL,
                 badge TEXT DEFAULT '🛡️',
+                shield TEXT,
                 captain_id INTEGER NOT NULL,
                 created_at TEXT NOT NULL DEFAULT (datetime('now')),
                 FOREIGN KEY (captain_id) REFERENCES users(id) ON DELETE RESTRICT
             )");
-            $pdo->exec("INSERT INTO teams_new SELECT * FROM teams");
+            $pdo->exec("INSERT INTO teams_new (id,name,city,badge,captain_id,created_at) SELECT id,name,city,badge,captain_id,created_at FROM teams");
             $pdo->exec("DROP TABLE teams");
             $pdo->exec("ALTER TABLE teams_new RENAME TO teams");
             $pdo->exec('COMMIT');
@@ -160,10 +177,25 @@ class Database
         if (!isset($userCols['assists'])) {
             $pdo->exec("ALTER TABLE users ADD COLUMN assists INTEGER NOT NULL DEFAULT 0");
         }
+        if (!isset($userCols['is_premium'])) {
+            $pdo->exec("ALTER TABLE users ADD COLUMN is_premium INTEGER NOT NULL DEFAULT 0");
+        }
+        if (!isset($userCols['current_team_id'])) {
+            $pdo->exec("ALTER TABLE users ADD COLUMN current_team_id INTEGER");
+        }
+
+        $teamCols = [];
+        foreach ($pdo->query("PRAGMA table_info('teams')") as $col) {
+            $teamCols[$col['name']] = true;
+        }
+        if (!isset($teamCols['shield'])) {
+            $pdo->exec("ALTER TABLE teams ADD COLUMN shield TEXT");
+        }
 
         $pdo->exec("CREATE TABLE IF NOT EXISTS team_members (
             team_id INTEGER NOT NULL,
             user_id INTEGER NOT NULL,
+            role TEXT NOT NULL DEFAULT 'player',
             joined_at TEXT NOT NULL DEFAULT (datetime('now')),
             PRIMARY KEY (team_id, user_id),
             FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
@@ -206,7 +238,12 @@ class Database
             address TEXT,
             surface TEXT NOT NULL DEFAULT 'césped',
             capacity INTEGER NOT NULL DEFAULT 22,
-            hourly_rate REAL NOT NULL DEFAULT 0
+            hourly_rate REAL NOT NULL DEFAULT 0,
+            latitude REAL,
+            longitude REAL,
+            maps_url TEXT,
+            image TEXT,
+            description TEXT
         )");
 
         $pdo->exec("CREATE TABLE IF NOT EXISTS matches (
@@ -217,6 +254,10 @@ class Database
             field_id INTEGER,
             scheduled_at TEXT NOT NULL,
             status TEXT NOT NULL DEFAULT 'pending',
+            local_captain_id INTEGER,
+            visitor_captain_id INTEGER,
+            match_time TEXT,
+            location TEXT,
             home_score INTEGER,
             away_score INTEGER,
             created_by INTEGER NOT NULL,
@@ -231,6 +272,8 @@ class Database
         $pdo->exec("CREATE TABLE IF NOT EXISTS chat_rooms (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             type TEXT NOT NULL DEFAULT 'group',
+            team_id INTEGER,
+            match_request_id INTEGER,
             name TEXT NOT NULL,
             created_at TEXT NOT NULL DEFAULT (datetime('now'))
         )");
@@ -244,6 +287,92 @@ class Database
             FOREIGN KEY (room_id) REFERENCES chat_rooms(id) ON DELETE CASCADE,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )");
+
+        $teamMemberCols = [];
+        foreach ($pdo->query("PRAGMA table_info('team_members')") as $col) { $teamMemberCols[$col['name']] = true; }
+        if (!isset($teamMemberCols['role'])) $pdo->exec("ALTER TABLE team_members ADD COLUMN role TEXT NOT NULL DEFAULT 'player'");
+
+        $fieldCols = [];
+        foreach ($pdo->query("PRAGMA table_info('fields')") as $col) { $fieldCols[$col['name']] = true; }
+        foreach (['latitude' => 'REAL', 'longitude' => 'REAL', 'maps_url' => 'TEXT', 'image' => 'TEXT', 'description' => 'TEXT'] as $name => $type) {
+            if (!isset($fieldCols[$name])) $pdo->exec("ALTER TABLE fields ADD COLUMN {$name} {$type}");
+        }
+
+        $matchCols = [];
+        foreach ($pdo->query("PRAGMA table_info('matches')") as $col) { $matchCols[$col['name']] = true; }
+        foreach (['local_captain_id' => 'INTEGER', 'visitor_captain_id' => 'INTEGER', 'match_time' => 'TEXT', 'location' => 'TEXT'] as $name => $type) {
+            if (!isset($matchCols[$name])) $pdo->exec("ALTER TABLE matches ADD COLUMN {$name} {$type}");
+        }
+
+        $roomCols = [];
+        foreach ($pdo->query("PRAGMA table_info('chat_rooms')") as $col) { $roomCols[$col['name']] = true; }
+        foreach (['team_id' => 'INTEGER', 'match_request_id' => 'INTEGER'] as $name => $type) {
+            if (!isset($roomCols[$name])) $pdo->exec("ALTER TABLE chat_rooms ADD COLUMN {$name} {$type}");
+        }
+
+        $pdo->exec("CREATE TABLE IF NOT EXISTS notifications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            type TEXT NOT NULL,
+            message TEXT NOT NULL,
+            is_read INTEGER NOT NULL DEFAULT 0,
+            action_url TEXT,
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )");
+        $pdo->exec('CREATE INDEX IF NOT EXISTS idx_notifications_user_read ON notifications(user_id, is_read, created_at)');
+
+        $pdo->exec("CREATE TABLE IF NOT EXISTS team_join_requests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            team_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            captain_id INTEGER NOT NULL,
+            status TEXT NOT NULL DEFAULT 'pending',
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+            FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (captain_id) REFERENCES users(id) ON DELETE CASCADE
+        )");
+        $pdo->exec('CREATE INDEX IF NOT EXISTS idx_tjr_team_user_status ON team_join_requests(team_id, user_id, status)');
+
+        $pdo->exec("CREATE TABLE IF NOT EXISTS match_requests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            requesting_team_id INTEGER NOT NULL,
+            requested_team_id INTEGER NOT NULL,
+            requesting_captain_id INTEGER NOT NULL,
+            requested_captain_id INTEGER NOT NULL,
+            status TEXT NOT NULL DEFAULT 'pending',
+            proposed_date TEXT,
+            proposed_time TEXT,
+            location TEXT,
+            requesting_confirmed INTEGER NOT NULL DEFAULT 0,
+            requested_confirmed INTEGER NOT NULL DEFAULT 0,
+            match_id INTEGER,
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+            FOREIGN KEY (requesting_team_id) REFERENCES teams(id) ON DELETE CASCADE,
+            FOREIGN KEY (requested_team_id) REFERENCES teams(id) ON DELETE CASCADE,
+            FOREIGN KEY (requesting_captain_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (requested_captain_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE SET NULL
+        )");
+        $pdo->exec('CREATE INDEX IF NOT EXISTS idx_mr_teams_status ON match_requests(requesting_team_id, requested_team_id, status)');
+
+        $pdo->exec("CREATE TABLE IF NOT EXISTS subscriptions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            provider TEXT NOT NULL DEFAULT 'stripe',
+            provider_customer_id TEXT,
+            provider_subscription_id TEXT,
+            status TEXT NOT NULL DEFAULT 'pending',
+            starts_at TEXT,
+            ends_at TEXT,
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )");
+        $pdo->exec('CREATE INDEX IF NOT EXISTS idx_subscriptions_user_status ON subscriptions(user_id, status)');
 
         $pdo->exec("CREATE TABLE IF NOT EXISTS achievements (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -385,6 +514,16 @@ class Database
         $fieldIds = [];
         foreach ($fields as $f) {
             $stF->execute($f);
+            $fieldIds[] = (int) $pdo->lastInsertId();
+        }
+        $ceutaFields = [
+            ['Campo Federativo Jose Benoliel', 'Ceuta', 'Avenida de Africa, Ceuta', 'sintÃ©tico', 22, 0, 35.8898, -5.3262, 'https://www.google.com/maps/search/?api=1&query=Campo+Federativo+Jose+Benoliel+Ceuta', 'Campo federativo de futbol en Ceuta.'],
+            ['Polideportivo La Libertad', 'Ceuta', 'Avenida de Lisboa, Ceuta', 'sintÃ©tico', 14, 0, 35.8844, -5.3441, 'https://www.google.com/maps/search/?api=1&query=Polideportivo+La+Libertad+Ceuta', 'Instalacion polideportiva para entrenamientos y partidos.'],
+            ['Complejo Deportivo Diaz-Flor', 'Ceuta', 'Avenida de Otero, Ceuta', 'cÃ©sped', 22, 0, 35.8871, -5.3073, 'https://www.google.com/maps/search/?api=1&query=Complejo+Deportivo+Diaz+Flor+Ceuta', 'Complejo deportivo municipal en Ceuta.'],
+        ];
+        $stFCeuta = $pdo->prepare("INSERT INTO fields (name,city,address,surface,capacity,hourly_rate,latitude,longitude,maps_url,description) VALUES (?,?,?,?,?,?,?,?,?,?)");
+        foreach ($ceutaFields as $f) {
+            $stFCeuta->execute($f);
             $fieldIds[] = (int) $pdo->lastInsertId();
         }
 

@@ -9,6 +9,7 @@
 <title><?= e($title ?? 'FastPlay') ?></title>
 <link rel="icon" type="image/x-icon" href="<?= asset('images/icono-pag.ico') ?>">
 <link rel="apple-touch-icon" href="<?= asset('apple-touch-icon.png') ?>">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <link rel="stylesheet" href="<?= asset('css/app.css') ?>">
 <?= $head ?? '' ?>
 </head>
@@ -24,5 +25,9 @@
 
 <?php $this->partial('footer'); ?>
 
+<script src="<?= asset('js/theme.js') ?>" defer></script>
+<script src="<?= asset('js/nav.js') ?>" defer></script>
+<script src="<?= asset('js/fifa-card.js') ?>" defer></script>
+<?= $scripts ?? '' ?>
 </body>
 </html>
