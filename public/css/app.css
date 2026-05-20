@@ -2509,3 +2509,101 @@ body {
   font-size: 20px;
   font-weight: 800;
 }
+
+/* --- Light mode definitive contrast pass --- */
+[data-theme="light"] body,
+[data-theme="light"] main,
+[data-theme="light"] .fp-auth-container,
+[data-theme="light"] .fp-auth-card,
+[data-theme="light"] .fp-page,
+[data-theme="light"] .fp-section,
+[data-theme="light"] .fp-glass,
+[data-theme="light"] .fp-panel,
+[data-theme="light"] .fp-table,
+[data-theme="light"] .fp-list-item,
+[data-theme="light"] .fp-member-card,
+[data-theme="light"] .fp-field-card,
+[data-theme="light"] .fp-empty,
+[data-theme="light"] .fp-empty-state,
+[data-theme="light"] .matches-calendar {
+  color: var(--color-text-main);
+}
+
+[data-theme="light"] .fp-gradient-text {
+  background: none !important;
+  color: var(--color-text-main) !important;
+  -webkit-text-fill-color: var(--color-text-main) !important;
+}
+
+[data-theme="light"] main :where(h1, h2, h3, h4, h5, h6, strong, b),
+[data-theme="light"] main :where(.fp-h1, .fp-h2, .fp-team-name, .fp-scoreboard-team-name, .fp-notif-body strong, .fp-empty-state h3),
+[data-theme="light"] :where(.fp-auth-title, .fp-auth-card h1, .fp-auth-card h2),
+[data-theme="light"] main :where(a:not(.fp-btn):not(.fp-tab):not(.fp-filter):not(.fp-card-fifa-club)) {
+  color: var(--color-text-main);
+}
+
+[data-theme="light"] main :where(p, li, td, th, small, .fp-muted, .fp-label, .fp-empty, .fp-empty-state, .fp-list-item small, .fp-member-card small, .fp-field-card small, .fp-team-row small, .fp-match-meta small, .fp-match-date small, .calendar-match small, .fp-notif-body small, .fp-avatar-upload-label small) {
+  color: var(--color-text-muted);
+}
+
+[data-theme="light"] :where(.fp-eyebrow) {
+  color: var(--color-gold-hover);
+}
+
+[data-theme="light"] :where(.fp-auth-header p, .fp-auth-footer, .fp-auth-divider, .fp-auth-card .fp-label, .fp-auth-card small) {
+  color: var(--color-text-muted);
+}
+
+[data-theme="light"] main [style*="color:#fff"],
+[data-theme="light"] main [style*="color: #fff"],
+[data-theme="light"] main [style*="color:#ffffff"],
+[data-theme="light"] main [style*="color: #ffffff"],
+[data-theme="light"] main [style*="color:white"],
+[data-theme="light"] main [style*="color: white"] {
+  color: var(--color-text-main) !important;
+}
+
+[data-theme="light"] main [style*="color:#9ca3af"],
+[data-theme="light"] main [style*="color: #9ca3af"],
+[data-theme="light"] main [style*="color:#d1d5db"],
+[data-theme="light"] main [style*="color: #d1d5db"],
+[data-theme="light"] main [style*="color:#e5e7eb"],
+[data-theme="light"] main [style*="color: #e5e7eb"] {
+  color: var(--color-text-muted) !important;
+}
+
+[data-theme="light"] main [style*="color:var(--fp-fg)"],
+[data-theme="light"] main [style*="color: var(--fp-fg)"] {
+  color: var(--color-text-main) !important;
+}
+
+[data-theme="light"] main [style*="color:var(--fp-fg-muted)"],
+[data-theme="light"] main [style*="color: var(--fp-fg-muted)"],
+[data-theme="light"] main [style*="color:var(--fp-fg-subtle)"],
+[data-theme="light"] main [style*="color: var(--fp-fg-subtle)"] {
+  color: var(--color-text-muted) !important;
+}
+
+[data-theme="light"] main :where(.fp-btn-primary, .fp-btn-primary *, .fp-filter.active, .fp-filter.active *, .fp-tab.active, .fp-tab.active *, .fp-team-badge, .fp-team-badge *, .fp-avatar-initial, .fp-avatar-initial *, .fp-badge, .fp-badge *) {
+  color: #fff;
+}
+
+[data-theme="light"] main :where(.fp-btn-gold, .fp-btn-gold *, .fp-btn-cta, .fp-btn-cta *, .btn-cta, .btn-cta *) {
+  color: #1f2a24;
+}
+
+[data-theme="light"] main .fp-card-fifa {
+  color: #064e3b;
+}
+
+[data-theme="light"] main .fp-card-fifa :where(.fp-card-fifa-pos, .fp-card-fifa-foot) {
+  color: #4b2d04;
+}
+
+[data-theme="light"] main .fp-card-fifa .fp-card-fifa-stat {
+  color: #2b1f04;
+}
+
+[data-theme="light"] main .fp-card-fifa .fp-card-fifa-stat span {
+  color: #6b4304;
+}

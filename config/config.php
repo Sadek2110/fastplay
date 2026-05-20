@@ -117,10 +117,10 @@ function security_headers(): void
     header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
     header(
         "Content-Security-Policy: default-src 'self'; "
-        . "img-src 'self' data: https://maps.gstatic.com https://maps.googleapis.com https://*.googleusercontent.com; "
+        . "img-src 'self' data: https://maps.gstatic.com https://maps.googleapis.com https://*.googleusercontent.com https://*.tile.openstreetmap.org; "
         . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://unpkg.com; "
         . "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; "
-        . "script-src 'self' 'unsafe-inline' https://unpkg.com https://maps.googleapis.com https://maps.gstatic.com; "
+        . "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://maps.googleapis.com https://maps.gstatic.com; "
         . "connect-src 'self' https://maps.googleapis.com https://maps.gstatic.com; "
         . "frame-ancestors 'self'"
     );
