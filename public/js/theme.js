@@ -1,5 +1,11 @@
 (function () {
   var root = document.documentElement;
+
+  if (root.classList.contains('fp-landing-page')) {
+    root.setAttribute('data-theme', 'dark');
+    return;
+  }
+
   var stored = localStorage.getItem('theme');
   var initial = stored || 'dark';
   root.setAttribute('data-theme', initial);

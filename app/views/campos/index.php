@@ -21,16 +21,26 @@
             ></div>
             <aside class="fp-fields-list">
                 <?php foreach ($fields as $f): ?>
+                    <?php
+                        $desc = $f['description'] ?? '';
+                        $isPublic = $desc !== '' && (str_contains($desc, 'Barriada') || str_contains($desc, 'Pública'));
+                    ?>
                     <article class="fp-glass fp-field-card" data-field-card="<?= (int) $f['id'] ?>">
                         <div class="fp-field-img" style="background-image:url('<?= e(!empty($f['image']) ? asset($f['image']) : asset('images/hero-pitch.png')) ?>')"></div>
-                        <div>
+                        <div class="fp-field-card-body">
+                            <?php if ($desc !== ''): ?>
+                                <span class="fp-field-tag<?= $isPublic ? ' fp-field-tag--public' : '' ?>"><?= e($desc) ?></span>
+                            <?php endif; ?>
                             <h3><?= e($f['name']) ?></h3>
                             <p><i class="bi bi-geo-alt"></i> <?= e($f['address'] ?? $f['city']) ?></p>
-                            <small><?= e($f['description'] ?? ($f['surface'] . ' - ' . (int) $f['capacity'] . ' jugadores')) ?></small>
+                            <div class="fp-field-meta">
+                                <span><i class="bi bi-people"></i> <?= (int) $f['capacity'] ?> jugadores</span>
+                                <span><?= e($f['surface']) ?></span>
+                            </div>
                             <div class="fp-actions-row">
                                 <a href="<?= url('campos/show/' . (int) $f['id']) ?>" class="fp-btn fp-btn-ghost">Detalles</a>
                                 <?php if (!empty($f['maps_url'])): ?>
-                                    <a href="<?= e($f['maps_url']) ?>" class="fp-btn fp-btn-gold" target="_blank" rel="noopener">Google Maps</a>
+                                    <a href="<?= e($f['maps_url']) ?>" class="fp-btn fp-btn-gold" target="_blank" rel="noopener">Maps</a>
                                 <?php endif; ?>
                             </div>
                         </div>

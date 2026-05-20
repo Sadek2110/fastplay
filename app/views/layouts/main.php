@@ -17,13 +17,14 @@
 <div class="fp-bg-glow"></div>
 
 <?php $this->partial('navbar', ['active' => $active ?? '']); ?>
-<?php $this->partial('flash', ['_flash' => $_flash ?? []]); ?>
 
-<div id="app">
-    <?= $content ?>
+<div class="fp-main-content">
+    <?php $this->partial('flash', ['_flash' => $_flash ?? []]); ?>
+    <div id="app">
+        <?= $content ?>
+    </div>
+    <?php $this->partial('footer'); ?>
 </div>
-
-<?php $this->partial('footer'); ?>
 
 <script src="<?= asset('js/theme.js') ?>" defer></script>
 <script src="<?= asset('js/nav.js') ?>" defer></script>

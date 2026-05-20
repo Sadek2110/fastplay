@@ -277,28 +277,10 @@ html.fp-scroll-anim-page body::-webkit-scrollbar {
   }
 }
 
-/* ====== Navbar fusionado con el fondo (landing) ====== */
-.fp-navbar {
-  z-index: 60 !important;
-  background: transparent !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  border-bottom: 0 !important;
-  box-shadow: none !important;
-}
-.fp-navbar::before {
-  content: '';
-  position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(180deg, rgba(6,13,9,.82) 0%, rgba(6,13,9,.55) 55%, rgba(6,13,9,0) 100%);
-  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 45%, transparent 100%);
-          mask-image: linear-gradient(180deg, #000 0%, #000 45%, transparent 100%);
-  z-index: -1; transition: background .4s, backdrop-filter .4s;
-}
-.fp-navbar.scrolled::before {
-  background: linear-gradient(180deg, rgba(6,13,9,.92) 0%, rgba(6,13,9,.70) 55%, rgba(6,13,9,0) 100%);
-  backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
-}
+/* ====== Sidebar hidden on landing page ====== */
+.fp-sidebar { display: none !important; }
+.fp-sidebar-toggle { display: none !important; }
+.fp-main-content { margin-left: 0 !important; }
 .fp-footer, .fp-bg-glow { display: none !important; }
 
 /* ====== Leagues ====== */

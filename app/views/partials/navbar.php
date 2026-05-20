@@ -10,65 +10,82 @@ $unread = 0;
 if ($user) {
     try { $unread = (int) Database::value('SELECT COUNT(*) FROM notifications WHERE user_id=? AND is_read=0', [(int) $user['id']]); } catch (Throwable $e) { $unread = 0; }
 }
-// Las páginas internas (equipos, partidos, ligas, campos) y el selector de tema
-// solo aparecen cuando el usuario está autenticado Y no estamos en el landing.
-// En el landing público (active === 'home') la navbar queda minimalista: logo +
-// botones de entrar / registrarse.
 $onLanding = (($active ?? '') === 'home');
 $showInternalLinks = (bool) $user;
+
+$iconColors = [
+    'teams'   => '#4ade80',
+    'matches' => '#f59e0b',
+    'leagues' => '#a855f7',
+    'campos'  => '#f472b6',
+];
 ?>
-<nav class="fp-navbar">
-    <div class="fp-navbar-inner">
-        <a href="<?= $user ? url('dashboard') : url('') ?>" class="fp-logo">
-            <img src="<?= asset('images/logo.png') ?>" alt="" class="fp-logo-icon">
-            <img src="<?= asset('images/logo-nombre.png') ?>" alt="FastPlay" class="fp-logo-word">
+<nav class="fp-sidebar" id="fpSidebar">
+    <button class="fp-sidebar-toggle" type="button" data-nav-toggle aria-expanded="false" aria-label="Abrir menú">
+        <i class="bi bi-list"></i>
+    </button>
+
+    <div class="fp-sidebar-logo">
+        <a href="<?= $user ? url('dashboard') : url('') ?>">
+            <img src="<?= asset('images/logo.png') ?>" alt="FastPlay" class="fp-sidebar-logo-img">
         </a>
+    </div>
 
-        <button class="fp-nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-label="Abrir menu">
-            <i class="bi bi-list"></i>
-        </button>
+    <div class="fp-sidebar-nav" data-nav-menu>
+        <?php if ($showInternalLinks): ?>
+            <a href="<?= url('dashboard') ?>" class="fp-sidebar-link <?= ($active ?? '') === 'dashboard' ? 'active' : '' ?>" title="Inicio">
+                <i class="bi bi-house-door" style="color:#60a5fa;"></i>
+                <span>Inicio</span>
+            </a>
+            <?php foreach ($links as $l): ?>
+                <a href="<?= url($l['url']) ?>" class="fp-sidebar-link <?= ($active ?? '') === $l['id'] ? 'active' : '' ?>" title="<?= e($l['label']) ?>">
+                    <i class="bi <?= e($l['icon']) ?>" style="color:<?= $iconColors[$l['id']] ?? 'var(--fp-fg)' ?>;"></i>
+                    <span><?= e($l['label']) ?></span>
+                </a>
+            <?php endforeach; ?>
+            <?php if (is_admin()): ?>
+                <a href="<?= url('admin') ?>" class="fp-sidebar-link <?= ($active ?? '') === 'admin' ? 'active' : '' ?>" title="Admin">
+                    <i class="bi bi-sliders" style="color:#fb923c;"></i>
+                    <span>Admin</span>
+                </a>
+            <?php endif; ?>
+        <?php endif; ?>
+    </div>
 
-        <div class="fp-nav-menu" data-nav-menu>
-            <div class="fp-nav-links">
-                <?php if ($showInternalLinks): ?>
-                    <?php foreach ($links as $l): ?>
-                        <a href="<?= url($l['url']) ?>" class="fp-nav-link <?= ($active ?? '') === $l['id'] ? 'active' : '' ?>">
-                            <i class="bi <?= e($l['icon']) ?>"></i><span><?= e($l['label']) ?></span>
-                        </a>
-                    <?php endforeach; ?>
-                    <a href="<?= url('dashboard') ?>" class="fp-nav-link <?= ($active ?? '') === 'dashboard' ? 'active' : '' ?>"><i class="bi bi-house-door"></i><span>Inicio</span></a>
-                    <?php if (is_admin()): ?>
-                        <a href="<?= url('admin') ?>" class="fp-nav-link <?= ($active ?? '') === 'admin' ? 'active' : '' ?>"><i class="bi bi-sliders"></i><span>Admin</span></a>
-                    <?php endif; ?>
-                <?php endif; ?>
-            </div>
-
-            <div class="fp-nav-actions">
-                <?php if ($showInternalLinks): ?>
-                    <button class="fp-icon-btn" type="button" data-theme-toggle aria-label="Cambiar tema"><i class="bi bi-moon"></i></button>
-                <?php endif; ?>
-                <?php if ($user): ?>
-                    <a href="<?= url('notification') ?>" class="fp-icon-btn fp-notification-link <?= ($active ?? '') === 'notification' ? 'active' : '' ?>" aria-label="Notificaciones">
-                        <i class="bi bi-bell"></i>
-                        <span class="fp-badge" data-notification-badge <?= $unread > 0 ? '' : 'hidden' ?>><?= (int) $unread ?></span>
-                    </a>
-                    <a href="<?= url('profile/edit') ?>" class="fp-user-pill">
-                        <?php if (!empty($user['avatar'])): ?>
-                            <img src="<?= asset($user['avatar']) ?>" alt="">
-                        <?php else: ?>
-                            <span><?= e(mb_substr($user['name'], 0, 1)) ?></span>
-                        <?php endif; ?>
-                        <strong><?= e($user['name']) ?></strong>
-                    </a>
-                    <form method="post" action="<?= url('auth/logout') ?>" class="fp-logout-form">
-                        <?= csrf_field() ?>
-                        <button type="submit" class="fp-logout">Salir</button>
-                    </form>
+    <div class="fp-sidebar-bottom">
+        <?php if ($showInternalLinks): ?>
+            <button class="fp-sidebar-link" type="button" data-theme-toggle aria-label="Cambiar tema" title="Cambiar tema">
+                <i class="bi bi-moon" style="color:#fbbf24;"></i>
+                <span>Tema</span>
+            </button>
+        <?php endif; ?>
+        <?php if ($user): ?>
+            <a href="<?= url('notification') ?>" class="fp-sidebar-link <?= ($active ?? '') === 'notification' ? 'active' : '' ?>" title="Notificaciones">
+                <i class="bi bi-bell" style="color:#38bdf8;"></i>
+                <span>Avisos</span>
+                <span class="fp-badge" data-notification-badge <?= $unread > 0 ? '' : 'hidden' ?>><?= (int) $unread ?></span>
+            </a>
+            <a href="<?= url('profile/edit') ?>" class="fp-sidebar-link fp-sidebar-user" title="Mi perfil">
+                <?php if (!empty($user['avatar'])): ?>
+                    <img src="<?= asset($user['avatar']) ?>" alt="" class="fp-sidebar-avatar">
                 <?php else: ?>
-                    <a href="<?= url('auth/login') ?>" class="fp-login">Entrar</a>
-                    <a href="<?= url('auth/register') ?>" class="fp-btn fp-btn-primary">Registrarse</a>
+                    <span class="fp-sidebar-avatar fp-sidebar-avatar--initial"><?= e(mb_substr($user['name'], 0, 1)) ?></span>
                 <?php endif; ?>
-            </div>
-        </div>
+                <span><?= e($user['name']) ?></span>
+            </a>
+            <form method="post" action="<?= url('auth/logout') ?>" class="fp-logout-form">
+                <?= csrf_field() ?>
+                <button type="submit" class="fp-sidebar-link fp-sidebar-link--danger" title="Salir">
+                    <i class="bi bi-box-arrow-left" style="color:#f87171;"></i>
+                    <span>Salir</span>
+                </button>
+            </form>
+        <?php else: ?>
+            <a href="<?= url('auth/login') ?>" class="fp-sidebar-link" title="Entrar">
+                <i class="bi bi-box-arrow-in-right" style="color:#4ade80;"></i>
+                <span>Entrar</span>
+            </a>
+            <a href="<?= url('auth/register') ?>" class="fp-btn fp-btn-primary fp-sidebar-cta">Registrarse</a>
+        <?php endif; ?>
     </div>
 </nav>

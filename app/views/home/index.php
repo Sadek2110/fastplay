@@ -14,6 +14,8 @@ unset($_l);
 ?>
 
 <script>
+  document.documentElement.classList.add('fp-landing-page');
+  document.body.classList.add('fp-landing-page');
   document.documentElement.setAttribute('data-theme', 'dark');
 </script>
 

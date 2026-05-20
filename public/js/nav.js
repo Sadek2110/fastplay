@@ -1,19 +1,37 @@
 (function () {
   document.addEventListener('DOMContentLoaded', function () {
+    var sidebar = document.getElementById('fpSidebar');
     var toggle = document.querySelector('[data-nav-toggle]');
-    var menu = document.querySelector('[data-nav-menu]');
-    if (!toggle || !menu) return;
-    toggle.addEventListener('click', function () {
-      var open = menu.classList.toggle('open');
+    if (!sidebar || !toggle) return;
+
+    // Toggle sidebar on mobile
+    toggle.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var open = sidebar.classList.toggle('open');
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
-    menu.querySelectorAll('a').forEach(function (link) {
-      link.addEventListener('click', function () {
-        menu.classList.remove('open');
-        toggle.setAttribute('aria-expanded', 'false');
+
+    // Close sidebar when clicking a link (mobile)
+    sidebar.querySelectorAll('a, button[type="submit"]').forEach(function (el) {
+      el.addEventListener('click', function () {
+        if (window.innerWidth < 1024) {
+          sidebar.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+        }
       });
     });
 
+    // Close sidebar when clicking outside (mobile)
+    document.addEventListener('click', function (e) {
+      if (window.innerWidth < 1024 && sidebar.classList.contains('open')) {
+        if (!sidebar.contains(e.target)) {
+          sidebar.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+        }
+      }
+    });
+
+    // Notification badge polling
     var badge = document.querySelector('[data-notification-badge]');
     if (badge) {
       setInterval(function () {
