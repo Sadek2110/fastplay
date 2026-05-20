@@ -40,8 +40,3 @@
         </section>
     <?php endif; ?>
 </main>
-<?php ob_start(); ?>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css" />
-<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
-<script src="<?= asset('js/campos-map.js') ?>"></script>
-<?php $this->viewData['scripts'] = ob_get_clean(); ?>

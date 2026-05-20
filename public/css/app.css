@@ -719,16 +719,16 @@ body {
   aspect-ratio: 3 / 4.4;
   padding: 22px 22px 24px;
   border-radius: 24px;
-  color: #ffffff;
+  color: #f6fff8;
   font-family: inherit;
   background:
-    radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.15) 0%, transparent 60%),
-    linear-gradient(135deg, #0d2818 0%, #05100a 100%);
-  border: 1px solid rgba(16, 185, 129, 0.35);
+    radial-gradient(ellipse at 50% 0%, rgba(187,247,208,0.28) 0%, transparent 58%),
+    linear-gradient(135deg, #23945a 0%, #166534 50%, #0f3f25 100%);
+  border: 1px solid rgba(134, 239, 172, 0.58);
   box-shadow:
-    0 20px 48px rgba(16, 185, 129, 0.15),
-    0 6px 20px rgba(0,0,0,0.5),
-    inset 0 0 0 1px rgba(255,255,255,0.06);
+    0 20px 48px rgba(34, 197, 94, 0.22),
+    0 6px 20px rgba(0,0,0,0.42),
+    inset 0 0 0 1px rgba(255,255,255,0.12);
   overflow: hidden;
   isolation: isolate;
   transition: transform .45s cubic-bezier(.175,.885,.32,1.275), box-shadow .45s, border-color .45s;
@@ -752,8 +752,8 @@ body {
   border-radius: inherit;
   pointer-events: none;
   background:
-    linear-gradient(180deg, transparent 50%, rgba(6, 78, 59, 0.4) 100%),
-    repeating-linear-gradient(135deg, rgba(16, 185, 129, 0.04) 0 2px, transparent 2px 6px);
+    linear-gradient(180deg, transparent 45%, rgba(4, 32, 18, 0.22) 100%),
+    repeating-linear-gradient(135deg, rgba(220, 252, 231, 0.07) 0 2px, transparent 2px 6px);
 }
 
 [data-theme="light"] .fp-card-fifa::before {
@@ -813,14 +813,15 @@ body {
   font-size: 44px;
   font-weight: 900;
   letter-spacing: -.04em;
-  text-shadow: 0 1px 0 rgba(255,255,255,.45);
+  text-shadow: 0 2px 10px rgba(0,0,0,.28);
 }
 .fp-card-fifa-pos {
   font-size: 13px;
   font-weight: 800;
   letter-spacing: .14em;
   margin-top: 4px;
-  color: #4b2d04;
+  color: #bbf7d0;
+  text-shadow: 0 1px 8px rgba(0,0,0,.24);
 }
 .fp-card-fifa-team {
   display: flex;
@@ -868,8 +869,8 @@ body {
   letter-spacing: .04em;
   margin: 4px 0 10px;
   padding-bottom: 8px;
-  border-bottom: 1px solid rgba(120,53,15,.35);
-  text-shadow: 0 1px 0 rgba(255,255,255,.4);
+  border-bottom: 1px solid rgba(220,252,231,.35);
+  text-shadow: 0 2px 10px rgba(0,0,0,.24);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -889,7 +890,8 @@ body {
   display: flex;
   align-items: baseline;
   gap: 6px;
-  color: #2b1f04;
+  color: #f0fdf4;
+  text-shadow: 0 1px 8px rgba(0,0,0,.22);
 }
 .fp-card-fifa-stat b {
   font-size: 16px;
@@ -901,7 +903,7 @@ body {
   font-size: 11px;
   font-weight: 800;
   letter-spacing: .14em;
-  color: #6b4304;
+  color: #bbf7d0;
 }
 
 .fp-card-fifa-foot {
@@ -913,15 +915,39 @@ body {
   font-size: 11px;
   font-weight: 800;
   letter-spacing: .18em;
-  color: #4b2d04;
+  color: #dcfce7;
   text-transform: uppercase;
 }
 .fp-card-fifa-foot .fp-card-fifa-club {
   display: inline-block;
   padding: 4px 12px;
   border-radius: 9999px;
+  background: rgba(255,255,255,.16);
+  border: 1px solid rgba(220,252,231,.28);
+}
+
+[data-theme="light"] .fp-card-fifa-num {
+  text-shadow: 0 1px 0 rgba(255,255,255,.45);
+}
+[data-theme="light"] .fp-card-fifa-pos,
+[data-theme="light"] .fp-card-fifa-foot {
+  color: #4b2d04;
+  text-shadow: none;
+}
+[data-theme="light"] .fp-card-fifa-name {
+  border-bottom-color: rgba(120,53,15,.35);
+  text-shadow: 0 1px 0 rgba(255,255,255,.4);
+}
+[data-theme="light"] .fp-card-fifa-stat {
+  color: #2b1f04;
+  text-shadow: none;
+}
+[data-theme="light"] .fp-card-fifa-stat span {
+  color: #6b4304;
+}
+[data-theme="light"] .fp-card-fifa-foot .fp-card-fifa-club {
   background: rgba(255,255,255,.4);
-  border: 1px solid rgba(120,53,15,.25);
+  border-color: rgba(120,53,15,.25);
 }
 
 @media (max-width: 480px) {
@@ -1901,6 +1927,48 @@ body {
 }
 
 /* --- Corrección texto blanco en modo claro --- */
+[data-theme="light"] main,
+[data-theme="light"] .fp-page,
+[data-theme="light"] .fp-section,
+[data-theme="light"] .fp-panel,
+[data-theme="light"] .fp-glass,
+[data-theme="light"] .fp-table,
+[data-theme="light"] .fp-empty,
+[data-theme="light"] .fp-list-item,
+[data-theme="light"] .fp-detail {
+  color: var(--color-text-main);
+}
+[data-theme="light"] main [style*="color:#fff"],
+[data-theme="light"] main [style*="color: #fff"],
+[data-theme="light"] main [style*="color:#ffffff"],
+[data-theme="light"] main [style*="color: #ffffff"] {
+  color: var(--color-text-main) !important;
+}
+[data-theme="light"] main [style*="color:#9ca3af"],
+[data-theme="light"] main [style*="color: #9ca3af"],
+[data-theme="light"] main [style*="color:#d1d5db"],
+[data-theme="light"] main [style*="color: #d1d5db"] {
+  color: var(--color-text-muted) !important;
+}
+[data-theme="light"] main h1,
+[data-theme="light"] main h2,
+[data-theme="light"] main h3,
+[data-theme="light"] main h4,
+[data-theme="light"] main strong,
+[data-theme="light"] .fp-h1,
+[data-theme="light"] .fp-h2 {
+  color: var(--color-text-main);
+}
+[data-theme="light"] main p,
+[data-theme="light"] main li,
+[data-theme="light"] main td,
+[data-theme="light"] main th,
+[data-theme="light"] .fp-list-item small,
+[data-theme="light"] .fp-member-card small,
+[data-theme="light"] .fp-field-card small,
+[data-theme="light"] .fp-empty {
+  color: var(--color-text-muted);
+}
 [data-theme="light"] .fp-detail li strong { color: var(--color-text-main); }
 [data-theme="light"] .fp-detail li span   { color: var(--color-text-muted); }
 [data-theme="light"] .fp-err             { color: #b91c1c; }

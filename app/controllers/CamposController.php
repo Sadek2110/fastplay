@@ -5,7 +5,7 @@ class CamposController extends Controller
     public function index(): void
     {
         $googleMapsKey = getenv('GOOGLE_MAPS_API_KEY') ?: '';
-        $mapScripts = '<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>';
+        $mapScripts = '<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js" defer></script>';
         if ($googleMapsKey !== '') {
             $mapScripts .= '<script async defer src="https://maps.googleapis.com/maps/api/js?key=' . rawurlencode($googleMapsKey) . '&callback=initCeutaMap"></script>';
         }
@@ -15,7 +15,7 @@ class CamposController extends Controller
             'active' => 'campos',
             'fields' => $this->model('Campo')->ceuta(),
             'googleMapsEnabled' => $googleMapsKey !== '',
-            'head' => '<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">',
+            'head' => '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css">',
             'scripts' => $mapScripts,
             'title' => 'Campos de Ceuta - FastPlay',
         ]);
