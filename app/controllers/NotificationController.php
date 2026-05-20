@@ -7,12 +7,21 @@ class NotificationController extends Controller
         $this->requireAuth();
         $filter = ($_GET['filter'] ?? 'all') === 'unread' ? 'unread' : 'all';
         $model = $this->model('Notification');
+        $userId = (int) current_user()['id'];
+        $joinRequests = [];
+        try {
+            $raw = $this->model('TeamJoinRequest')->pendingForCaptain($userId);
+            foreach ($raw as $r) {
+                $joinRequests[(int) $r['id']] = $r;
+            }
+        } catch (Throwable $e) { /* not captain or table missing */ }
         $this->view('notifications/index', [
-            'active' => 'notification',
-            'filter' => $filter,
-            'notifications' => $model->forUser((int) current_user()['id'], $filter),
-            'unread' => $model->unreadCount((int) current_user()['id']),
-            'title' => 'Notificaciones - FastPlay',
+            'active'       => 'notification',
+            'filter'       => $filter,
+            'notifications' => $model->forUser($userId, $filter),
+            'unread'       => $model->unreadCount($userId),
+            'joinRequests' => $joinRequests,
+            'title'        => 'Notificaciones - FastPlay',
         ]);
     }
 

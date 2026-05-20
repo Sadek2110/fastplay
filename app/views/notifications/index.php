@@ -20,22 +20,50 @@
     <?php else: ?>
         <div class="fp-list fp-notification-list">
             <?php foreach ($notifications as $n): ?>
-                <article class="fp-glass fp-notification <?= (int) $n['is_read'] === 0 ? 'unread' : '' ?>">
-                    <i class="bi bi-bell"></i>
-                    <div>
+                <?php
+                $typeIcons = [
+                    'team_join_request'  => 'bi-person-plus',
+                    'team_join_accepted' => 'bi-person-check',
+                    'team_join_rejected' => 'bi-person-x',
+                    'match'              => 'bi-calendar2-event',
+                    'premium'            => 'bi-star',
+                ];
+                $icon = $typeIcons[$n['type']] ?? 'bi-bell';
+                $joinReqId = null;
+                if ($n['type'] === 'team_join_request' && preg_match('#team-join-request/show/(\d+)#', (string) $n['action_url'], $m)) {
+                    $joinReqId = (int) $m[1];
+                }
+                $joinReq = ($joinReqId && isset($joinRequests[$joinReqId])) ? $joinRequests[$joinReqId] : null;
+                ?>
+                <article class="fp-glass fp-notification fp-notification-card <?= (int) $n['is_read'] === 0 ? 'unread' : '' ?>">
+                    <div class="fp-notif-icon-wrap"><i class="bi <?= e($icon) ?>"></i></div>
+                    <div class="fp-notif-body">
                         <strong><?= e($n['message']) ?></strong>
-                        <small><?= e($n['type']) ?> · <?= e(date('d/m/Y H:i', strtotime($n['created_at']))) ?></small>
-                        <div class="fp-actions-row">
-                            <?php if (!empty($n['action_url'])): ?>
-                                <a class="fp-btn fp-btn-ghost" href="<?= url($n['action_url']) ?>">Abrir</a>
-                            <?php endif; ?>
-                            <?php if ((int) $n['is_read'] === 0): ?>
-                                <form method="post" action="<?= url('notification/markRead/' . (int) $n['id']) ?>">
+                        <small><?= e(date('d/m/Y H:i', strtotime($n['created_at']))) ?></small>
+                        <?php if ($joinReq): ?>
+                            <div class="fp-actions-row fp-notif-actions">
+                                <form method="post" action="<?= url('team-join-request/accept/' . (int) $joinReq['id']) ?>">
                                     <?= csrf_field() ?>
-                                    <button class="fp-btn fp-btn-ghost">Marcar leída</button>
+                                    <button class="fp-btn fp-btn-primary fp-btn-sm"><i class="bi bi-check-lg"></i> Aceptar</button>
                                 </form>
-                            <?php endif; ?>
-                        </div>
+                                <form method="post" action="<?= url('team-join-request/reject/' . (int) $joinReq['id']) ?>">
+                                    <?= csrf_field() ?>
+                                    <button class="fp-btn fp-btn-ghost fp-btn-sm"><i class="bi bi-x-lg"></i> Rechazar</button>
+                                </form>
+                            </div>
+                        <?php else: ?>
+                            <div class="fp-actions-row fp-notif-actions">
+                                <?php if (!empty($n['action_url']) && $n['action_url'] !== 'notification'): ?>
+                                    <a class="fp-btn fp-btn-ghost fp-btn-sm" href="<?= url($n['action_url']) ?>">Ver</a>
+                                <?php endif; ?>
+                                <?php if ((int) $n['is_read'] === 0): ?>
+                                    <form method="post" action="<?= url('notification/markRead/' . (int) $n['id']) ?>">
+                                        <?= csrf_field() ?>
+                                        <button class="fp-btn fp-btn-ghost fp-btn-sm">Marcar leída</button>
+                                    </form>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </article>
             <?php endforeach; ?>

@@ -14,7 +14,7 @@ class TeamJoinService
         }
         [$request, $errors] = (new TeamJoinRequest())->create($teamId, $userId, (int) $team['captain_id']);
         if ($request) {
-            NotificationService::create((int) $team['captain_id'], 'team_join_request', $request['user_name'] . ' quiere unirse a ' . $team['name'] . '.', 'notification');
+            NotificationService::create((int) $team['captain_id'], 'team_join_request', $request['user_name'] . ' quiere unirse a ' . $team['name'] . '.', 'team-join-request/show/' . $request['id']);
             MailService::send((string) $team['captain_email'], 'Nueva solicitud de equipo', 'solicitud_equipo', ['request' => $request, 'url' => url('notification')]);
         }
         return [$request, $errors];

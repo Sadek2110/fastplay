@@ -19,7 +19,7 @@ $showInternalLinks = (bool) $user && !$onLanding;
 ?>
 <nav class="fp-navbar">
     <div class="fp-navbar-inner">
-        <a href="<?= url('') ?>" class="fp-logo">
+        <a href="<?= $user ? url('dashboard') : url('') ?>" class="fp-logo">
             <img src="<?= asset('images/logo.png') ?>" alt="" class="fp-logo-icon">
             <img src="<?= asset('images/logo-nombre.png') ?>" alt="FastPlay" class="fp-logo-word">
         </a>
@@ -36,7 +36,7 @@ $showInternalLinks = (bool) $user && !$onLanding;
                             <i class="bi <?= e($l['icon']) ?>"></i><span><?= e($l['label']) ?></span>
                         </a>
                     <?php endforeach; ?>
-                    <a href="<?= url('dashboard') ?>" class="fp-nav-link <?= ($active ?? '') === 'dashboard' ? 'active' : '' ?>"><i class="bi bi-grid"></i><span>Dashboard</span></a>
+                    <a href="<?= url('dashboard') ?>" class="fp-nav-link <?= ($active ?? '') === 'dashboard' ? 'active' : '' ?>"><i class="bi bi-house-door"></i><span>Inicio</span></a>
                     <?php if (is_admin()): ?>
                         <a href="<?= url('admin') ?>" class="fp-nav-link <?= ($active ?? '') === 'admin' ? 'active' : '' ?>"><i class="bi bi-sliders"></i><span>Admin</span></a>
                     <?php endif; ?>

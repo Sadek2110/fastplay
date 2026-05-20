@@ -15,6 +15,19 @@ class TeamJoinRequest
         );
     }
 
+    public function pendingForCaptain(int $captainId): array
+    {
+        return Database::all(
+            "SELECT r.*, u.name AS user_name, u.email AS user_email, t.name AS team_name
+             FROM team_join_requests r
+             JOIN users u ON u.id = r.user_id
+             JOIN teams t ON t.id = r.team_id
+             WHERE r.captain_id=? AND r.status='pending'
+             ORDER BY r.created_at DESC",
+            [$captainId]
+        );
+    }
+
     public function find(int $id): ?array
     {
         return Database::one(
@@ -50,12 +63,12 @@ class TeamJoinRequest
             return [null, 'Solicitud no disponible.'];
         }
         if (Database::value('SELECT 1 FROM team_members WHERE user_id=?', [(int) $request['user_id']])) {
-            Database::run("UPDATE team_join_requests SET status='rejected', updated_at=datetime('now') WHERE id=?", [$id]);
+            Database::run("UPDATE team_join_requests SET status='rejected', updated_at=NOW() WHERE id=?", [$id]);
             return [null, 'El usuario ya pertenece a un equipo.'];
         }
         Database::run('INSERT INTO team_members (team_id,user_id,role) VALUES (?,?,?)', [(int) $request['team_id'], (int) $request['user_id'], 'player']);
         Database::run('UPDATE users SET current_team_id=? WHERE id=?', [(int) $request['team_id'], (int) $request['user_id']]);
-        Database::run("UPDATE team_join_requests SET status='accepted', updated_at=datetime('now') WHERE id=?", [$id]);
+        Database::run("UPDATE team_join_requests SET status='accepted', updated_at=NOW() WHERE id=?", [$id]);
         return [$this->find($id), null];
     }
 
@@ -65,7 +78,7 @@ class TeamJoinRequest
         if (!$request || (int) $request['captain_id'] !== $captainId || $request['status'] !== 'pending') {
             return [null, 'Solicitud no disponible.'];
         }
-        Database::run("UPDATE team_join_requests SET status='rejected', updated_at=datetime('now') WHERE id=?", [$id]);
+        Database::run("UPDATE team_join_requests SET status='rejected', updated_at=NOW() WHERE id=?", [$id]);
         return [$this->find($id), null];
     }
 }

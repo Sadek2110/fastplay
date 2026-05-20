@@ -18,7 +18,7 @@ $posShort = $positionShort((string) ($card['position'] ?? ''));
 <main class="fp-fade fp-page">
     <div class="fp-page-head">
         <div>
-            <p class="fp-eyebrow">Dashboard</p>
+            <p class="fp-eyebrow">Inicio</p>
             <h1 class="fp-h1">Hola, <span class="fp-gradient-text"><?= e($user['name']) ?></span></h1>
         </div>
         <a href="<?= url('profile/edit') ?>" class="fp-btn fp-btn-ghost"><i class="bi bi-person-gear"></i><span>Editar perfil</span></a>

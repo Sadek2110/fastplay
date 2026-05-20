@@ -4,6 +4,21 @@ require_once APP_PATH . '/services/TeamJoinService.php';
 
 class TeamJoinRequestController extends Controller
 {
+    public function show(string $id = ''): void
+    {
+        $this->requireAuth();
+        $request = (new TeamJoinRequest())->find((int) $id);
+        if (!$request || (int) $request['captain_id'] !== (int) current_user()['id']) {
+            flash('warn', 'Solicitud no encontrada.');
+            redirect('notification');
+        }
+        $this->view('team-join-request/show', [
+            'active'  => 'notification',
+            'request' => $request,
+            'title'   => 'Solicitud de equipo - FastPlay',
+        ]);
+    }
+
     public function create(): void
     {
         $this->requireAuth();
