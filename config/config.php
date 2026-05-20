@@ -52,34 +52,28 @@ if (!is_dir(SESSIONS_PATH)) {
     }
 }
 
-// Conexión a BD: SQLite por defecto (dev), MySQL/PostgreSQL vía env vars (prod).
-// Variables soportadas: DB_DRIVER (sqlite|mysql|pgsql), DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS.
-$dbDriver = getenv('DB_DRIVER') ?: 'sqlite';
+// Conexión a BD: MySQL por defecto. Configura en .env o variables de entorno.
+// Variables: DB_DRIVER (mysql|pgsql), DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS.
+$dbDriver = getenv('DB_DRIVER') ?: 'mysql';
 define('DB_DRIVER', $dbDriver);
 
-if ($dbDriver === 'mysql') {
-    define('DB_DSN', sprintf(
-        'mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4',
-        getenv('DB_HOST') ?: 'localhost',
-        getenv('DB_PORT') ?: '3306',
-        getenv('DB_NAME') ?: 'fastplay'
-    ));
-    define('DB_USER', getenv('DB_USER') ?: '');
-    define('DB_PASS', getenv('DB_PASS') ?: '');
-} elseif ($dbDriver === 'pgsql') {
+if ($dbDriver === 'pgsql') {
     define('DB_DSN', sprintf(
         'pgsql:host=%s;port=%s;dbname=%s',
         getenv('DB_HOST') ?: 'localhost',
         getenv('DB_PORT') ?: '5432',
         getenv('DB_NAME') ?: 'fastplay'
     ));
-    define('DB_USER', getenv('DB_USER') ?: '');
-    define('DB_PASS', getenv('DB_PASS') ?: '');
 } else {
-    define('DB_DSN', 'sqlite:' . STORAGE_PATH . DIRECTORY_SEPARATOR . 'fastplay.sqlite');
-    define('DB_USER', null);
-    define('DB_PASS', null);
+    define('DB_DSN', sprintf(
+        'mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4',
+        getenv('DB_HOST') ?: 'localhost',
+        getenv('DB_PORT') ?: '3306',
+        getenv('DB_NAME') ?: 'fastplay'
+    ));
 }
+define('DB_USER', getenv('DB_USER') ?: 'root');
+define('DB_PASS', getenv('DB_PASS') ?: '');
 
 // BASE_URL detecta automáticamente la ruta de instalación bajo XAMPP
 $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
