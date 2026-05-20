@@ -1311,13 +1311,6 @@ body {
 .fp-check-list { list-style: none; padding: 0; margin: 18px 0 0; display: grid; gap: 8px; }
 .fp-check-list li { display: flex; align-items: center; gap: 8px; color: var(--fp-fg-3); }
 .fp-check-list i { color: var(--fp-green-400); }
-.fp-page--campos {
-  max-width: none;
-  padding-inline: 0;
-}
-.fp-page--campos .fp-page-head {
-  padding-inline: 32px;
-}
 .fp-fields-layout {
   display: grid;
   grid-template-columns: 1fr 400px;
@@ -1769,6 +1762,18 @@ body {
   margin-bottom: var(--space-xl);
 }
 .fp-page { padding: 48px 36px 112px; }
+
+/* Campos page — full-width override (must come AFTER all .fp-page rules) */
+.fp-page--campos {
+  max-width: none;
+  width: 100%;
+  margin-inline: 0;
+  padding-inline: 0;
+  box-sizing: border-box;
+}
+.fp-page--campos .fp-page-head {
+  padding-inline: 32px;
+}
 
 /* Las filas de acciones respiran un poco más. */
 .fp-actions-row { gap: 14px; }
