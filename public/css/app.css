@@ -4543,3 +4543,70 @@ input[type="file"].fp-input::-webkit-file-upload-button:hover {
 .fp-captain-tag { color: #facc15 !important; }
 [data-theme="light"] .fp-captain-tag { color: #9b7616 !important; }
 
+/* ============================================================
+   CAMPOS — Rediseño: mapa compacto arriba + grid de tarjetas
+   ============================================================ */
+
+/* Layout: columna única — mapa arriba, tarjetas abajo */
+.fp-fields-layout {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 28px !important;
+}
+
+/* Mapa compacto con altura fija */
+.fp-fields-map {
+  height: 360px !important;
+  min-height: 300px !important;
+  max-height: 380px !important;
+  width: 100% !important;
+  border-radius: 20px !important;
+  border: 1px solid var(--fp-glass-border) !important;
+  border-left: 1px solid var(--fp-glass-border) !important;
+  position: relative !important;
+  top: unset !important;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, .22) !important;
+}
+[data-theme="light"] .fp-fields-map {
+  box-shadow: 0 8px 32px rgba(31, 42, 36, .12) !important;
+}
+
+/* Grid de tarjetas: 3 columnas */
+.fp-fields-list {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 22px !important;
+  padding: 0 !important;
+}
+
+/* Foto del campo con altura generosa */
+.fp-field-img {
+  height: 195px !important;
+}
+
+/* Marcador SVG personalizado de Leaflet */
+.fp-map-marker {
+  background: none !important;
+  border: none !important;
+}
+.fp-map-marker svg {
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, .45));
+  display: block;
+}
+
+@media (max-width: 1100px) {
+  .fp-fields-list {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+@media (max-width: 640px) {
+  .fp-fields-list {
+    grid-template-columns: 1fr !important;
+  }
+  .fp-fields-map {
+    height: 280px !important;
+    min-height: 240px !important;
+    border-radius: 16px !important;
+  }
+}
+
