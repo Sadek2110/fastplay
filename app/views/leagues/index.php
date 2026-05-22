@@ -9,14 +9,19 @@
     <?php else: ?>
         <div class="fp-grid-2">
             <?php foreach ($leagues as $l): ?>
-                <a href="<?= url('leagues/show/' . (int) $l['id']) ?>" class="fp-glass fp-card-link fp-panel" style="text-decoration:none;color:var(--fp-fg);">
-                    <h3 style="margin:0 0 8px;"><?= e($l['name']) ?></h3>
-                    <p class="fp-muted"><i class="bi bi-geo-alt"></i> <?= e($l['city']) ?> · <i class="bi bi-people"></i> <?= (int) ($l['team_count'] ?? 0) ?>/<?= (int) $l['max_teams'] ?> equipos</p>
-                    <div class="fp-actions-row" style="justify-content:space-between;">
-                        <small class="fp-muted"><?= e($l['start']) ?> - <?= e($l['end']) ?></small>
+                <a href="<?= url('leagues/show/' . (int) $l['id']) ?>" class="fp-glass fp-card-link fp-panel fp-league-card">
+                    <h3 class="fp-league-card-title"><?= e($l['name']) ?></h3>
+                    <div class="fp-league-card-meta">
+                        <span><i class="bi bi-geo-alt"></i> <?= e($l['city']) ?></span>
+                        <span><i class="bi bi-people"></i> <?= (int) ($l['team_count'] ?? 0) ?>/<?= (int) $l['max_teams'] ?> equipos</span>
+                    </div>
+                    <div class="fp-league-card-footer">
+                        <span class="fp-league-card-dates"><i class="bi bi-calendar3"></i> <?= e($l['start']) ?> – <?= e($l['end']) ?></span>
                         <?php if ($l['pro']): ?><span class="fp-pro-badge">PRO</span><?php endif; ?>
                     </div>
-                    <?php if (!empty($l['prize'])): ?><p class="fp-gold-text"><i class="bi bi-cash-coin"></i> Premio: <?= number_format((float) $l['prize'], 2, ',', '.') ?> EUR</p><?php endif; ?>
+                    <?php if (!empty($l['prize'])): ?>
+                        <span class="fp-league-prize"><i class="bi bi-cash-coin"></i> Premio: <?= number_format((float) $l['prize'], 2, ',', '.') ?> EUR</span>
+                    <?php endif; ?>
                 </a>
             <?php endforeach; ?>
         </div>

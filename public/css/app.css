@@ -2710,31 +2710,7 @@ html:not(.fp-landing-page)[data-theme="light"] .fp-tabs {
   background: rgba(255, 253, 246, .96);
 }
 
-html:not(.fp-landing-page)[data-theme="dark"] #app *,
-html:not(.fp-landing-page)[data-theme="dark"] .fp-navbar *,
-html:not(.fp-landing-page)[data-theme="dark"] .fp-footer *,
-html:not(.fp-landing-page)[data-theme="dark"] #app [style*="color"],
-html:not(.fp-landing-page)[data-theme="dark"] .fp-navbar [style*="color"],
-html:not(.fp-landing-page)[data-theme="dark"] .fp-footer [style*="color"] {
-  color: #f8fafc !important;
-  -webkit-text-fill-color: #f8fafc !important;
-}
-
-html:not(.fp-landing-page)[data-theme="light"] #app *,
-html:not(.fp-landing-page)[data-theme="light"] .fp-navbar *,
-html:not(.fp-landing-page)[data-theme="light"] .fp-footer *,
-html:not(.fp-landing-page)[data-theme="light"] #app [style*="color"],
-html:not(.fp-landing-page)[data-theme="light"] .fp-navbar [style*="color"],
-html:not(.fp-landing-page)[data-theme="light"] .fp-footer [style*="color"] {
-  color: #1f2a24 !important;
-  -webkit-text-fill-color: #1f2a24 !important;
-}
-
-html:not(.fp-landing-page)[data-theme] #app .fp-gradient-text,
-html:not(.fp-landing-page)[data-theme] .fp-navbar .fp-gradient-text,
-html:not(.fp-landing-page)[data-theme] .fp-footer .fp-gradient-text {
-  background: none !important;
-}
+/* Gradient text restored — works in both themes via CSS variables */
 
 html:not(.fp-landing-page)[data-theme="dark"] #app input::placeholder,
 html:not(.fp-landing-page)[data-theme="dark"] #app textarea::placeholder,
@@ -2763,7 +2739,7 @@ html:not(.fp-landing-page)[data-theme="light"] .fp-footer textarea::placeholder 
 }
 
 html.fp-landing-page .fp-main-content {
-  margin-left: 280px;
+  margin-left: 0;
   padding-top: 0;
 }
 
@@ -4248,4 +4224,322 @@ html[data-theme="light"] .fp-floating-nav .fp-sidebar-link.active::before {
   background: rgba(250,204,21,.06);
   border-color: rgba(250,204,21,.2);
 }
+
+
+/* ============================================================
+   MEJORAS UI — Selects, Footer, Ligas, Animaciones, A11y
+   ============================================================ */
+
+/* --- Select inputs personalizados --- */
+select.fp-input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%239ca3af' stroke-width='1.8' d='M3 6l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 14px;
+  padding-right: 40px;
+  cursor: pointer;
+}
+[data-theme="light"] select.fp-input {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%2365766b' stroke-width='1.8' d='M3 6l5 5 5-5'/%3E%3C/svg%3E");
+}
+select.fp-input option { background: #0d1810; color: #f8fafc; }
+[data-theme="light"] select.fp-input option { background: #fffdf6; color: #1f2a24; }
+
+/* --- Textarea --- */
+textarea.fp-input { resize: vertical; min-height: 96px; line-height: 1.6; }
+
+/* --- File input --- */
+input[type="file"].fp-input { padding: .6rem .9rem; cursor: pointer; }
+input[type="file"].fp-input::file-selector-button,
+input[type="file"].fp-input::-webkit-file-upload-button {
+  background: rgba(22,163,74,.18);
+  color: var(--fp-green-400);
+  border: 1px solid rgba(22,163,74,.28);
+  border-radius: 8px;
+  padding: 4px 12px;
+  margin-right: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .2s;
+}
+input[type="file"].fp-input::file-selector-button:hover,
+input[type="file"].fp-input::-webkit-file-upload-button:hover {
+  background: rgba(22,163,74,.3);
+}
+[data-theme="light"] input[type="file"].fp-input::file-selector-button,
+[data-theme="light"] input[type="file"].fp-input::-webkit-file-upload-button {
+  background: rgba(47,125,70,.12);
+  color: var(--color-primary);
+  border-color: rgba(47,125,70,.25);
+}
+
+/* --- Focus visible para accesibilidad --- */
+:focus-visible {
+  outline: 2px solid var(--fp-green-400);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.fp-btn:focus-visible { outline-offset: 5px; }
+
+/* --- Footer clases CSS --- */
+.fp-footer-tagline {
+  color: var(--fp-fg-subtle);
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 16px 0 18px;
+}
+.fp-footer-social { display: flex; gap: 10px; }
+.fp-footer-social-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 9999px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fp-fg-muted);
+  font-size: 13px;
+  font-weight: 600;
+  user-select: none;
+}
+[data-theme="light"] .fp-footer-tagline { color: rgba(229,240,225,.80); }
+[data-theme="light"] .fp-footer-social-btn {
+  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.12);
+  color: #c5d9c8;
+}
+.fp-footer-col-title {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--fp-fg-subtle);
+  text-transform: uppercase;
+  letter-spacing: .22em;
+  margin: 0 0 16px;
+}
+[data-theme="light"] .fp-footer-col-title { color: rgba(229,240,225,.65); }
+.fp-footer-col-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.fp-footer-link {
+  font-size: 13px;
+  color: var(--fp-fg-muted);
+  text-decoration: none;
+  transition: color .2s;
+}
+.fp-footer-link:hover { color: var(--fp-fg); }
+[data-theme="light"] .fp-footer-link { color: rgba(229,240,225,.75); }
+[data-theme="light"] .fp-footer-link:hover { color: var(--color-gold); }
+
+@media (max-width: 640px) { .fp-footer-inner { grid-template-columns: 1fr 1fr; gap: 28px; } }
+@media (max-width: 400px) { .fp-footer-inner { grid-template-columns: 1fr; } }
+
+/* --- Dashboard right sticky --- */
+@media (min-width: 1101px) {
+  .fp-dashboard-right { position: sticky; top: 112px; }
+}
+
+/* --- League cards --- */
+.fp-league-card {
+  text-decoration: none;
+  color: var(--fp-fg);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.fp-league-card-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -.01em;
+  color: var(--fp-fg);
+}
+.fp-league-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--fp-fg-muted);
+  flex-wrap: wrap;
+}
+.fp-league-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.fp-league-card-dates { font-size: 12px; color: var(--fp-fg-muted); }
+.fp-league-prize {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fp-gold-400);
+  font-weight: 700;
+  font-size: 13px;
+}
+[data-theme="light"] .fp-league-card-title { color: var(--color-text-main); }
+[data-theme="light"] .fp-league-card-meta,
+[data-theme="light"] .fp-league-card-dates { color: var(--color-text-muted); }
+
+/* --- Notification dot pulse --- */
+@keyframes fp-notif-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(250,204,21,.6); transform: scale(1); }
+  50% { box-shadow: 0 0 18px rgba(250,204,21,.9); transform: scale(1.3); }
+}
+.fp-notif-dot { animation: fp-notif-pulse 2s ease-in-out infinite; }
+
+/* --- Empty state mejorado --- */
+.fp-empty-state { padding: 52px 28px; gap: 14px; }
+.fp-empty-state i { font-size: 40px; }
+.fp-empty-state h3 { font-size: 16px; font-weight: 800; margin: 0; color: var(--fp-fg); }
+.fp-empty-state p { font-size: 13px; margin: 0; max-width: 300px; line-height: 1.55; color: var(--fp-fg-muted); }
+[data-theme="light"] .fp-empty-state h3 { color: var(--color-text-main); }
+[data-theme="light"] .fp-empty-state p { color: var(--color-text-muted); }
+
+/* --- Tabla clasificacion: ranking visual --- */
+.fp-table tbody tr:nth-child(1) td:first-child { color: #fbbf24 !important; font-weight: 900; }
+.fp-table tbody tr:nth-child(2) td:first-child { color: #94a3b8 !important; font-weight: 800; }
+.fp-table tbody tr:nth-child(3) td:first-child { color: #cd7f32 !important; font-weight: 800; }
+
+/* --- Back button mejorado --- */
+.fp-back-btn {
+  border-radius: 12px;
+  padding: .5rem 1rem;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: var(--fp-fg-muted);
+  border-color: rgba(255,255,255,.08);
+  background: rgba(255,255,255,.04);
+  transition: background .2s, color .2s, transform .2s cubic-bezier(.22,1,.36,1), border-color .2s;
+}
+.fp-back-btn:hover {
+  color: var(--fp-fg);
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.14);
+  transform: translateX(-3px);
+}
+[data-theme="light"] .fp-back-btn {
+  color: var(--color-text-muted);
+  border-color: var(--color-border-light);
+  background: rgba(255,255,255,.6);
+}
+[data-theme="light"] .fp-back-btn:hover {
+  color: var(--color-text-main);
+  border-color: rgba(47,125,70,.3);
+  background: #fff;
+  transform: translateX(-3px);
+}
+
+/* --- Premium panel mejorado --- */
+.fp-premium-panel { padding: 32px; }
+.fp-premium-panel h2 { font-size: 20px; font-weight: 900; margin: 0 0 8px; }
+.fp-check-list li { font-size: 14px; gap: 10px; }
+.fp-check-list i { font-size: 16px; }
+
+/* --- Auth: sutil fondo decorativo --- */
+.fp-auth-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 80%, rgba(22,163,74,.06), transparent 55%),
+    radial-gradient(ellipse 50% 35% at 80% 15%, rgba(251,191,36,.04), transparent 55%);
+  pointer-events: none;
+}
+@media (max-width: 480px) {
+  .fp-auth-wrapper { max-width: 100%; }
+  .fp-auth-card { padding: 24px !important; border-radius: 20px !important; }
+}
+
+/* --- Page head responsive --- */
+@media (max-width: 640px) {
+  .fp-page-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: var(--space-lg);
+  }
+  .fp-page-head > .fp-actions-row,
+  .fp-page-head > .fp-btn,
+  .fp-page-head > a.fp-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* --- Match card light mode --- */
+[data-theme="light"] .fp-match-team-badge {
+  background: linear-gradient(135deg, rgba(47,125,70,.15), rgba(22,163,74,.10));
+  border-color: rgba(47,125,70,.22);
+  color: var(--color-primary);
+}
+[data-theme="light"] .fp-match-team-badge--away {
+  background: linear-gradient(135deg, rgba(37,99,235,.10), rgba(59,130,246,.08));
+  border-color: rgba(59,130,246,.22);
+  color: #2563eb;
+}
+[data-theme="light"] .fp-match-score-badge {
+  background: rgba(0,0,0,.04);
+  border-color: rgba(0,0,0,.08);
+  color: var(--color-text-main);
+}
+[data-theme="light"] .fp-match-score-badge--confirmed {
+  background: rgba(200,154,46,.12);
+  border-color: rgba(200,154,46,.28);
+  color: #9b7616;
+}
+
+/* --- Floating nav avatar border --- */
+.fp-floating-nav .fp-sidebar-avatar { border: 2px solid rgba(74,222,128,.35); }
+[data-theme="light"] .fp-floating-nav .fp-sidebar-avatar { border-color: rgba(255,255,255,.4); }
+
+/* --- Scroll-anim mobile --- */
+@media (max-width: 640px) {
+  .scroll-section { padding: 60px 4vw; }
+  .scroll-section__inner { padding: 28px 22px; }
+  .scroll-section__inner--wide { max-width: 100%; }
+}
+
+/* --- Gradiente texto restaurado explicitamente --- */
+.fp-gradient-text {
+  background: var(--fp-gradient-text) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+}
+
+/* --- fp-gold-text explicitamente visible en ambos modos --- */
+.fp-gold-text { color: var(--fp-gold-400) !important; font-weight: 700; }
+[data-theme="light"] .fp-gold-text { color: var(--color-gold) !important; }
+
+/* --- Status badges siempre visibles --- */
+.fp-status-confirmed { color: #facc15 !important; }
+.fp-status-pending   { color: #60a5fa !important; }
+.fp-status-finished  { color: #4ade80 !important; }
+.fp-status-cancelled { color: #f87171 !important; }
+[data-theme="light"] .fp-status-confirmed { color: #9b7616 !important; }
+[data-theme="light"] .fp-status-pending   { color: #2563eb !important; }
+[data-theme="light"] .fp-status-finished  { color: #1f5c32 !important; }
+[data-theme="light"] .fp-status-cancelled { color: #b91c1c !important; }
+
+/* --- Pro badge siempre visible --- */
+.fp-pro-badge { color: #000 !important; }
+
+/* --- Captain tag --- */
+.fp-captain-tag { color: #facc15 !important; }
+[data-theme="light"] .fp-captain-tag { color: #9b7616 !important; }
 
