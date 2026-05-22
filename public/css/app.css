@@ -1,4 +1,4 @@
-﻿/* FastPlay · CSS de la app (extiende colors_and_type.css) */
+/* FastPlay · CSS de la app (extiende colors_and_type.css) */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900;1,14..32,400&display=swap');
 
@@ -122,15 +122,24 @@ body {
 }
 
 /* ============= Background glow ============= */
+@keyframes fp-float-glow {
+  0% { transform: translate(0, 0) scale(1); opacity: 0.8; }
+  33% { transform: translate(-4vw, 6vh) scale(1.1); opacity: 1; }
+  66% { transform: translate(5vw, -5vh) scale(0.9); opacity: 0.9; }
+  100% { transform: translate(0, 0) scale(1); opacity: 0.8; }
+}
+
 .fp-bg-glow {
   position: fixed;
-  inset: 0;
+  inset: -15vh -15vw;
   pointer-events: none;
   z-index: 0;
   background:
-    radial-gradient(ellipse at 80% 50%, rgba(22,163,74,.18), transparent 55%),
-    radial-gradient(ellipse at 10% 30%, rgba(22,163,74,.06), transparent 60%);
-  filter: blur(40px);
+    radial-gradient(ellipse at 75% 45%, rgba(22,163,74,.22), transparent 55%),
+    radial-gradient(ellipse at 25% 65%, rgba(214,169,60,.12), transparent 50%),
+    radial-gradient(ellipse at 85% 85%, rgba(22,163,74,.10), transparent 55%);
+  filter: blur(60px);
+  animation: fp-float-glow 22s ease-in-out infinite alternate;
 }
 
 #app {
@@ -145,8 +154,10 @@ body {
 .fp-glass {
   background: var(--fp-glass-bg);
   border: 1px solid var(--fp-glass-border);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(24px) saturate(120%);
+  -webkit-backdrop-filter: blur(24px) saturate(120%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.15);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s, border-color 0.3s;
 }
 .fp-glass.fp-glass-green {
   background: var(--fp-glass-green-bg);
@@ -619,6 +630,13 @@ body {
   display: flex;
   align-items: center;
   gap: 18px;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s, border-color 0.3s, background 0.3s;
+}
+.fp-match-row:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  border-color: rgba(214,169,60,0.3);
+  background: rgba(255,255,255,0.06);
 }
 
 /* ============= Page helpers ============= */
@@ -635,8 +653,8 @@ body {
   margin-bottom: var(--space-lg);
   flex-wrap: wrap;
 }
-.fp-h1 { font-size: 36px; font-weight: 900; margin: 0 0 12px; letter-spacing: -.02em; }
-.fp-h2 { font-size: 22px; font-weight: 900; margin: 0 0 14px; letter-spacing: -.01em; }
+.fp-h1 { font-size: 36px; font-weight: 900; margin: 0 0 12px; letter-spacing: -.03em; text-shadow: 0 4px 12px rgba(0,0,0,.2); }
+.fp-h2 { font-size: 22px; font-weight: 900; margin: 0 0 14px; letter-spacing: -.02em; text-shadow: 0 2px 8px rgba(0,0,0,.15); }
 .fp-label {
   display: block;
   font-size: 13px;
@@ -4076,18 +4094,26 @@ html[data-theme="light"] .fp-floating-nav .fp-sidebar-link.active::before {
 }
 
 /* ---- P11: Button shimmer effect ---- */
-.fp-btn-primary::after {
+@keyframes fp-shimmer-continuous {
+  0% { transform: translateX(-100%); }
+  20% { transform: translateX(100%); }
+  100% { transform: translateX(100%); }
+}
+
+.fp-btn-primary::after, .fp-btn-cta::after, .btn-cta::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.12) 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.25) 50%, transparent 100%);
   transform: translateX(-100%);
-  transition: transform .55s cubic-bezier(.22,1,.36,1);
+  animation: fp-shimmer-continuous 6s infinite;
   border-radius: inherit;
   pointer-events: none;
 }
-.fp-btn-primary:hover::after {
+.fp-btn-primary:hover::after, .fp-btn-cta:hover::after, .btn-cta:hover::after {
+  animation: none;
   transform: translateX(100%);
+  transition: transform .55s cubic-bezier(.22,1,.36,1);
 }
 .fp-btn-gold::after {
   content: '';
