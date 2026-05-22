@@ -201,4 +201,20 @@ class Equipo
     {
         return (bool) Database::value('SELECT 1 FROM teams WHERE id=? AND captain_id=?', [$teamId, $userId]);
     }
+
+    public function stats(int $teamId): ?array
+    {
+        return Database::one(
+            "SELECT
+                COUNT(*) AS matches_played,
+                SUM(CASE WHEN (home_team_id = ? AND home_score > away_score) OR (away_team_id = ? AND away_score > home_score) THEN 1 ELSE 0 END) AS wins,
+                SUM(CASE WHEN home_score = away_score THEN 1 ELSE 0 END) AS draws,
+                SUM(CASE WHEN (home_team_id = ? AND home_score < away_score) OR (away_team_id = ? AND away_score < home_score) THEN 1 ELSE 0 END) AS losses,
+                SUM(CASE WHEN home_team_id = ? THEN home_score ELSE away_score END) AS goals_for,
+                SUM(CASE WHEN home_team_id = ? THEN away_score ELSE home_score END) AS goals_against
+             FROM matches
+             WHERE status = 'finished' AND (home_team_id = ? OR away_team_id = ?)",
+            [$teamId, $teamId, $teamId, $teamId, $teamId, $teamId, $teamId, $teamId]
+        );
+    }
 }

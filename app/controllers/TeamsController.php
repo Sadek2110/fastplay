@@ -51,6 +51,7 @@ class TeamsController extends Controller
             'active' => 'teams',
             'team' => $team,
             'members' => $equipo->members($id),
+            'teamStats' => $equipo->stats($id),
             'isMember' => $isMember,
             'pendingRequests' => $user && (int) $team['captain_id'] === (int) $user['id'] ? $this->model('TeamJoinRequest')->pendingForTeam($id) : [],
             'title' => $team['name'] . ' - FastPlay',

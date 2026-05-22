@@ -27,6 +27,11 @@
                 <input name="address" class="fp-input" value="<?= old('address') ?>">
                 <?php if (!empty($errors['address'])): ?><small class="fp-err"><?= e($errors['address']) ?></small><?php endif; ?>
             </label>
+            <label>
+                <span class="fp-label">Imagen</span>
+                <input name="image" class="fp-input" value="<?= old('image') ?>" placeholder="images/campos/nombre.jpg">
+                <small style="color:var(--fp-fg-muted);font-size:11px">Sin foto: se usará imagen genérica</small>
+            </label>
             <div class="fp-grid-2">
                 <label>
                     <span class="fp-label">Superficie</span>

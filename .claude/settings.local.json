@@ -53,7 +53,8 @@
       "Bash(php -l \"C:/Users/Propietario/Desktop/fastplay/app/views/teams/show.php\")",
       "Bash(php -l \"C:/Users/Propietario/Desktop/fastplay/app/views/partials/navbar.php\")",
       "Bash(php -l \"C:/Users/Propietario/Desktop/fastplay/app/views/home/index.php\")",
-      "Bash(php -l \"C:/Users/Propietario/Desktop/fastplay/app/views/matches/index.php\")"
+      "Bash(php -l \"C:/Users/Propietario/Desktop/fastplay/app/views/matches/index.php\")",
+      "Bash(grep -E \"\\\\.md$\")"
     ]
   }
 }

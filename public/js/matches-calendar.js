@@ -43,7 +43,7 @@
       var list = byDay[key] || [];
       dayTitle.textContent = 'Partidos del ' + key.split('-').reverse().join('/');
       if (!list.length) {
-        dayList.innerHTML = '<p class="fp-muted">No hay partidos programados para este dia.</p>';
+        dayList.innerHTML = '<div class="calendar-no-matches"><i class="bi bi-calendar-x"></i><p>No hay partidos programados para este d&iacute;a</p></div>';
         return;
       }
       dayList.innerHTML = list.map(function (match) {

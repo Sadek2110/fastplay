@@ -118,7 +118,13 @@ $getAreaPlayers = static function(array $posGroups, $key): array {
                 <!-- Jugadores por zona -->
                 <?php foreach ($pitchRows as $row): ?>
                     <?php $areaPlayers = $getAreaPlayers($posGroups, $row['key']); ?>
-                    <div class="fp-pitch-row fp-pitch-row--<?= $row['area'] ?>">
+                    <?php
+                    $hasCapInRow = false;
+                    foreach ($areaPlayers as $pm) {
+                        if ((int) $pm['is_captain'] === 1) { $hasCapInRow = true; break; }
+                    }
+                    ?>
+                    <div class="fp-pitch-row fp-pitch-row--<?= $row['area'] ?><?= $hasCapInRow ? ' fp-pitch-row--captain' : '' ?>">
                         <span class="fp-pitch-area-label"><?= $row['label'] ?></span>
                         <?php if (empty($areaPlayers)): ?>
                             <div class="fp-pitch-empty-slot"><i class="bi bi-person-dash"></i></div>
@@ -163,6 +169,41 @@ $getAreaPlayers = static function(array $posGroups, $key): array {
         <section class="fp-panel">
             <?php $this->partial('empty-state', ['icon' => 'bi-people', 'title' => 'Sin jugadores', 'description' => 'Todavía no hay miembros en el equipo.']); ?>
         </section>
+    <?php endif; ?>
+
+    <?php if (!empty($teamStats)): ?>
+    <section class="fp-team-stats-grid">
+        <div class="fp-stat-item">
+            <i class="bi bi-calendar2-check"></i>
+            <strong><?= (int) ($teamStats['matches_played'] ?? 0) ?></strong>
+            <span>Partidos jugados</span>
+        </div>
+        <div class="fp-stat-item">
+            <i class="bi bi-trophy"></i>
+            <strong><?= (int) ($teamStats['wins'] ?? 0) ?></strong>
+            <span>Victorias</span>
+        </div>
+        <div class="fp-stat-item">
+            <i class="bi bi-circle-half"></i>
+            <strong><?= (int) ($teamStats['draws'] ?? 0) ?></strong>
+            <span>Empates</span>
+        </div>
+        <div class="fp-stat-item">
+            <i class="bi bi-x-circle"></i>
+            <strong><?= (int) ($teamStats['losses'] ?? 0) ?></strong>
+            <span>Derrotas</span>
+        </div>
+        <div class="fp-stat-item">
+            <i class="bi bi-bullseye"></i>
+            <strong><?= (int) ($teamStats['goals_for'] ?? 0) ?></strong>
+            <span>Goles a favor</span>
+        </div>
+        <div class="fp-stat-item">
+            <i class="bi bi-shield"></i>
+            <strong><?= (int) ($teamStats['goals_against'] ?? 0) ?></strong>
+            <span>Goles en contra</span>
+        </div>
+    </section>
     <?php endif; ?>
 </main>
 

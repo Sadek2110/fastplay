@@ -1,4 +1,5 @@
 <main class="fp-fade fp-page fp-edit-container">
+    <?php $this->partial('back-button', ['href' => url('dashboard')]); ?>
     <p class="fp-eyebrow">Editar</p>
     <h1 class="fp-h1">Mi perfil</h1>
 
