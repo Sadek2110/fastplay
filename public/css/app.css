@@ -1,4 +1,4 @@
-/* FastPlay · CSS de la app (extiende colors_and_type.css) */
+﻿/* FastPlay · CSS de la app (extiende colors_and_type.css) */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900;1,14..32,400&display=swap');
 
@@ -3217,11 +3217,11 @@ html[data-theme="light"] .fp-floating-nav .fp-sidebar-link.active::before {
   align-items: center;
   justify-content: space-between;
   padding: 0 32px;
-  background: rgba(8, 20, 12, .78);
-  backdrop-filter: blur(28px) saturate(150%);
-  -webkit-backdrop-filter: blur(28px) saturate(150%);
-  border-bottom: 1px solid rgba(255,255,255,.07);
-  box-shadow: 0 4px 24px rgba(0,0,0,.28);
+  background: rgba(8, 20, 12, .18);
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  box-shadow: 0 2px 12px rgba(0,0,0,.12);
 }
 .fp-landing-topbar-logo {
   display: flex;
@@ -3842,3 +3842,4 @@ html[data-theme="light"] .fp-floating-nav .fp-sidebar-link.active::before {
 [data-theme="light"] .fp-match-card-date { background: linear-gradient(160deg, rgba(47,125,70,.12), rgba(22,163,74,.07)); border-right-color: rgba(47,125,70,.15); }
 [data-theme="light"] .fp-player-detail { background: var(--color-surface-light); border-color: var(--color-border-light); }
 [data-theme="light"] .fp-landing-topbar { background: rgba(8,20,12,.85); }
+
