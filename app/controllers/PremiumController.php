@@ -1,16 +1,7 @@
 <?php
 
-require_once APP_PATH . '/models/Usuario.php';
+require_once APP_PATH . '/controllers/SubscriptionController.php';
 
-class PremiumController extends Controller
+class PremiumController extends SubscriptionController
 {
-    public function index(): void
-    {
-        $this->requireAuth();
-        $this->view('subscription/index', [
-            'active' => 'subscription',
-            'isPremium' => Usuario::isPremium((int) current_user()['id']),
-            'title' => 'Premium - FastPlay',
-        ]);
-    }
 }

@@ -175,6 +175,10 @@ function test_create_user(string $name = 'Test User', string $email = 'test@test
 /** Crea un equipo demo */
 function test_create_team(string $name = 'Test FC', string $city = 'Madrid', int $captainId = 1): array
 {
+    $existing = Database::one('SELECT * FROM teams WHERE name=? AND city=?', [$name, $city]);
+    if ($existing) {
+        return $existing;
+    }
     $captain = Database::value('SELECT 1 FROM users WHERE id=?', [$captainId]);
     if (!$captain) {
         Database::run(
