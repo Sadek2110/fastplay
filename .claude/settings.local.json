@@ -54,7 +54,14 @@
       "Bash(php -l \"C:/Users/Propietario/Desktop/fastplay/app/views/partials/navbar.php\")",
       "Bash(php -l \"C:/Users/Propietario/Desktop/fastplay/app/views/home/index.php\")",
       "Bash(php -l \"C:/Users/Propietario/Desktop/fastplay/app/views/matches/index.php\")",
-      "Bash(grep -E \"\\\\.md$\")"
+      "Bash(grep -E \"\\\\.md$\")",
+      "mcp__plugin_engram_engram__mem_context",
+      "Bash(node -c public/js/dwec-context-panel.js)",
+      "Bash(node -c public/js/chat-room.js)",
+      "Bash(node -c public/js/match-request-form.js)",
+      "Bash(node -c public/js/team-detail.js)",
+      "Bash(node -c public/js/nav.js)",
+      "Bash(php vendor/bin/phpunit --no-coverage)"
     ]
   }
 }

@@ -54,6 +54,9 @@ class MatchesController extends Controller
             'captainTeams' => $captainTeams,
             'teams' => $teams,
             'title' => 'Solicitar partido - FastPlay',
+            'scripts' =>
+                '<script src="' . asset('js/form-validation.js') . '" defer></script>' .
+                '<script src="' . asset('js/match-request-form.js') . '" defer></script>',
         ]);
     }
 

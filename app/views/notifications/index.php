@@ -4,10 +4,18 @@
             <p class="fp-eyebrow">Centro de actividad</p>
             <h1 class="fp-h1">Notificaciones</h1>
         </div>
-        <form method="post" action="<?= url('notification/markAllRead') ?>">
-            <?= csrf_field() ?>
-            <button class="fp-btn fp-btn-ghost"><i class="bi bi-check2-all"></i><span>Marcar todo leído</span></button>
-        </form>
+        <div class="fp-actions-row">
+            <form method="post" action="<?= url('notification/markAllRead') ?>">
+                <?= csrf_field() ?>
+                <button class="fp-btn fp-btn-ghost"><i class="bi bi-check2-all"></i><span>Marcar todo leído</span></button>
+            </form>
+            <form method="post"
+                  action="<?= url('notification/clearRead') ?>"
+                  onsubmit="return confirm('¿Eliminar todas las notificaciones leídas?');">
+                <?= csrf_field() ?>
+                <button class="fp-btn fp-btn-ghost"><i class="bi bi-trash"></i><span>Limpiar leídas</span></button>
+            </form>
+        </div>
     </div>
 
     <div class="fp-filter-row">
@@ -62,6 +70,14 @@
                                         <button class="fp-btn fp-btn-ghost fp-btn-sm">Marcar leída</button>
                                     </form>
                                 <?php endif; ?>
+                                <form method="post"
+                                      action="<?= url('notification/delete/' . (int) $n['id']) ?>"
+                                      onsubmit="return confirm('¿Eliminar esta notificación?');">
+                                    <?= csrf_field() ?>
+                                    <button class="fp-btn fp-btn-ghost fp-btn-sm" title="Eliminar" aria-label="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
                             </div>
                         <?php endif; ?>
                     </div>

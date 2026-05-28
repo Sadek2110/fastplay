@@ -17,19 +17,20 @@
                 <div class="fp-alert fp-alert-err">Revisa los datos del formulario.</div>
             <?php endif; ?>
 
-            <form method="post" action="<?= url('auth/register') ?>" class="fp-form">
+            <form method="post" action="<?= url('auth/register') ?>" class="fp-form" data-fp-validate novalidate>
                 <?= csrf_field() ?>
-                
+
                 <div class="fp-grid-2">
                     <div>
                         <span class="fp-label">Nombre completo</span>
                         <div class="fp-input-icon-group">
                             <i class="bi bi-person"></i>
-                            <input name="name" type="text" placeholder="Tu nombre" class="fp-input" value="<?= old('name') ?>" required>
+                            <input name="name" type="text" placeholder="Tu nombre" class="fp-input" value="<?= old('name') ?>" required
+                                   data-fp-validate-field data-fp-rule="name">
                         </div>
                         <?php if (!empty($errors['name'])): ?><small class="fp-err"><?= e($errors['name']) ?></small><?php endif; ?>
                     </div>
-                    
+
                     <div>
                         <span class="fp-label">Edad</span>
                         <div class="fp-input-icon-group">
@@ -45,11 +46,12 @@
                         <span class="fp-label">Email</span>
                         <div class="fp-input-icon-group">
                             <i class="bi bi-envelope"></i>
-                            <input name="email" type="email" placeholder="tu@email.com" class="fp-input" value="<?= old('email') ?>" required autocomplete="email">
+                            <input name="email" type="email" placeholder="tu@email.com" class="fp-input" value="<?= old('email') ?>" required autocomplete="email"
+                                   data-fp-validate-field data-fp-rule="email">
                         </div>
                         <?php if (!empty($errors['email'])): ?><small class="fp-err"><?= e($errors['email']) ?></small><?php endif; ?>
                     </div>
-                    
+
                     <div>
                         <span class="fp-label">Teléfono (opcional)</span>
                         <div class="fp-input-icon-group">
@@ -65,16 +67,19 @@
                         <span class="fp-label">Contraseña</span>
                         <div class="fp-input-icon-group">
                             <i class="bi bi-lock"></i>
-                            <input name="password" type="password" placeholder="Mínimo 8 caracteres" class="fp-input" minlength="8" required autocomplete="new-password">
+                            <input name="password" type="password" placeholder="Mínimo 8 caracteres" class="fp-input" minlength="8" required autocomplete="new-password"
+                                   data-fp-validate-field data-fp-rule="password-strong">
                         </div>
                         <?php if (!empty($errors['password'])): ?><small class="fp-err"><?= e($errors['password']) ?></small><?php endif; ?>
                     </div>
-                    
+
                     <div>
                         <span class="fp-label">Confirmar contraseña</span>
                         <div class="fp-input-icon-group">
                             <i class="bi bi-lock-fill"></i>
-                            <input name="password_confirm" type="password" placeholder="Repite la contraseña" class="fp-input" minlength="8" required autocomplete="new-password">
+                            <input name="password_confirm" type="password" placeholder="Repite la contraseña" class="fp-input" minlength="8" required autocomplete="new-password"
+                                   data-fp-validate-field data-fp-rule="password-basic"
+                                   data-fp-error="Debes repetir la contrasena (minimo 6 caracteres).">
                         </div>
                         <?php if (!empty($errors['password_confirm'])): ?><small class="fp-err"><?= e($errors['password_confirm']) ?></small><?php endif; ?>
                     </div>

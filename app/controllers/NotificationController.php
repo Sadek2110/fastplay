@@ -47,4 +47,24 @@ class NotificationController extends Controller
         header('Content-Type: application/json');
         echo json_encode(['count' => $this->model('Notification')->unreadCount((int) current_user()['id'])]);
     }
+
+    public function clearRead(): void
+    {
+        $this->requireAuth();
+        $this->requirePost();
+        $deleted = $this->model('Notification')->clearRead((int) current_user()['id']);
+        flash('ok', $deleted > 0
+            ? 'Se han eliminado ' . $deleted . ' notificacion' . ($deleted === 1 ? '' : 'es') . ' leida' . ($deleted === 1 ? '' : 's') . '.'
+            : 'No hay notificaciones leidas que eliminar.');
+        redirect('notification');
+    }
+
+    public function delete(string $id = ''): void
+    {
+        $this->requireAuth();
+        $this->requirePost();
+        $deleted = $this->model('Notification')->delete((int) $id, (int) current_user()['id']);
+        flash($deleted ? 'ok' : 'warn', $deleted ? 'Notificacion eliminada.' : 'No se pudo eliminar.');
+        redirect('notification');
+    }
 }

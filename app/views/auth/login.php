@@ -17,20 +17,23 @@
                 <div class="fp-alert fp-alert-err"><?= e($errors['_']) ?></div>
             <?php endif; ?>
 
-            <form method="post" action="<?= url('auth/login') ?>" class="fp-form">
+            <form method="post" action="<?= url('auth/login') ?>" class="fp-form" data-fp-validate novalidate>
                 <?= csrf_field() ?>
                 <div>
                     <span class="fp-label">Email</span>
                     <div class="fp-input-icon-group">
                         <i class="bi bi-envelope"></i>
-                        <input name="email" type="email" placeholder="tu@email.com" class="fp-input" value="<?= old('email') ?>" required autocomplete="email">
+                        <input name="email" type="email" placeholder="tu@email.com" class="fp-input" value="<?= old('email') ?>" required autocomplete="email"
+                               data-fp-validate-field data-fp-rule="email">
                     </div>
                 </div>
                 <div>
                     <span class="fp-label">Contraseña</span>
                     <div class="fp-input-icon-group">
                         <i class="bi bi-lock"></i>
-                        <input name="password" type="password" placeholder="••••••••" class="fp-input" required autocomplete="current-password">
+                        <input name="password" type="password" placeholder="••••••••" class="fp-input" required autocomplete="current-password"
+                               data-fp-validate-field
+                               data-fp-error="Introduce tu contrasena para entrar.">
                     </div>
                 </div>
                 <button type="submit" class="fp-btn fp-btn-primary fp-btn-glow fp-auth-google-btn">Entrar →</button>

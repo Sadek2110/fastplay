@@ -60,9 +60,10 @@ class Usuario
             return [null, $errors];
         }
 
+        $token = bin2hex(random_bytes(32));
         Database::run(
-            "INSERT INTO users (name,email,phone,age,city,position,password_hash,role) VALUES (?,?,?,?,?,?,?,?)",
-            [$name, $email, $phone ?: null, $age ?: null, $city ?: null, $position ?: null, password_hash($pass, PASSWORD_DEFAULT), 'player']
+            "INSERT INTO users (name,email,phone,age,city,position,password_hash,role,verification_token,email_verified) VALUES (?,?,?,?,?,?,?,?,?,?)",
+            [$name, $email, $phone ?: null, $age ?: null, $city ?: null, $position ?: null, password_hash($pass, PASSWORD_DEFAULT), 'player', $token, 0]
         );
         $user = Database::one('SELECT * FROM users WHERE id = ?', [Database::insertId()]);
         unset($user['password_hash']);
@@ -72,7 +73,7 @@ class Usuario
     public function find(int $id): ?array
     {
         $u = Database::one(
-            'SELECT id,name,email,phone,age,city,position,role,avatar,dorsal,height_cm,goals,assists,is_premium,current_team_id,created_at
+            'SELECT id,name,email,phone,age,city,position,role,avatar,dorsal,height_cm,goals,assists,is_premium,current_team_id,email_verified,verification_token,created_at
              FROM users WHERE id = ?',
             [$id]
         );
@@ -328,7 +329,7 @@ class Usuario
 
         $user = Database::one('SELECT * FROM users WHERE email = ?', [$email]);
         if ($user) {
-            Database::run('UPDATE users SET google_id = ?, avatar = COALESCE(avatar, ?) WHERE id = ?', [$googleId, $avatar, $user['id']]);
+            Database::run('UPDATE users SET google_id = ?, avatar = COALESCE(avatar, ?), email_verified = 1, verification_token = NULL WHERE id = ?', [$googleId, $avatar, $user['id']]);
             $user = Database::one('SELECT * FROM users WHERE id = ?', [$user['id']]);
             unset($user['password_hash']);
             return [$user, []];
@@ -337,8 +338,8 @@ class Usuario
         $randomPass = bin2hex(random_bytes(16));
         try {
             Database::run(
-                "INSERT INTO users (name,email,password_hash,role,google_id,avatar) VALUES (?,?,?,?,?,?)",
-                [$name, $email, password_hash($randomPass, PASSWORD_DEFAULT), 'player', $googleId, $avatar]
+                "INSERT INTO users (name,email,password_hash,role,google_id,avatar,email_verified,verification_token) VALUES (?,?,?,?,?,?,?,?)",
+                [$name, $email, password_hash($randomPass, PASSWORD_DEFAULT), 'player', $googleId, $avatar, 1, null]
             );
         } catch (\Exception $e) {
             error_log('Google login error: ' . $e->getMessage());

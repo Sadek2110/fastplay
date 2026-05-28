@@ -25,6 +25,56 @@ $isCaptain = !empty($team) && (int) ($team['captain_id'] ?? 0) === (int) $user['
         <a href="<?= url('profile/edit') ?>" class="fp-btn fp-btn-ghost"><i class="bi bi-person-gear"></i><span>Editar perfil</span></a>
     </div>
 
+    <?php if ((int) ($user['email_verified'] ?? 0) === 0): ?>
+        <div class="fp-glass fp-notif-banner fp-warning-banner" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.35); padding: 1.2rem; border-radius: var(--fp-radius, 12px); margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <i class="bi bi-exclamation-triangle-fill" style="color: #f59e0b; font-size: 1.6rem; text-shadow: 0 0 10px rgba(245, 158, 11, 0.3);"></i>
+                <div>
+                    <strong style="color: #f59e0b; display: block; font-size: 1.05rem; margin-bottom: 0.2rem;">Por favor, verifica tu correo electrónico</strong>
+                    <span style="font-size: 0.9rem; color: var(--fp-fg-muted, #94a3b8);">Hemos enviado un enlace de verificación a <strong><?= e($user['email']) ?></strong>. Por favor, revisa tu bandeja de entrada o solicita un nuevo envío.</span>
+                </div>
+            </div>
+            <div>
+                <form action="<?= url('auth/resend-verification') ?>" method="POST" style="margin: 0;">
+                    <?= csrf_field() ?>
+                    <button type="submit" class="fp-btn fp-btn-ghost fp-btn-sm" style="white-space: nowrap; border: 1px solid rgba(245, 158, 11, 0.4); color: #f59e0b; background: rgba(245, 158, 11, 0.05); padding: 0.5rem 1rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">
+                        <i class="bi bi-envelope-arrow-up" style="margin-right: 0.4rem;"></i>Reenviar correo
+                    </button>
+                </form>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <section class="fp-glass fp-panel fp-ctx-panel"
+             data-dwec-context
+             data-dwec-endpoint="<?= url('dashboard/context') ?>"
+             aria-busy="false"
+             aria-live="polite">
+        <div class="fp-panel-head">
+            <h2 class="fp-h2">
+                <i class="bi bi-broadcast" data-dwec-role-icon></i>
+                <span>Contexto en tiempo real</span>
+                <span class="fp-ctx-role-pill" data-dwec-role>...</span>
+            </h2>
+            <button type="button" class="fp-btn fp-btn-ghost fp-btn-sm" data-dwec-refresh>
+                <i class="bi bi-arrow-clockwise"></i>
+                <span>Actualizar contexto</span>
+            </button>
+        </div>
+        <p class="fp-ctx-line">
+            <strong data-dwec-name><?= e($user['name']) ?></strong>
+            <span class="fp-ctx-sep">·</span>
+            <span data-dwec-team>—</span>
+            <span class="fp-ctx-premium" data-dwec-premium hidden aria-hidden="true">
+                <i class="bi bi-star-fill"></i> Premium
+            </span>
+        </p>
+        <p class="fp-ctx-notif" data-dwec-notif>Cargando notificaciones...</p>
+        <p class="fp-ctx-message" data-dwec-message>Pulsa actualizar para refrescar el contexto.</p>
+        <div class="fp-ctx-actions" data-dwec-actions aria-label="Acciones permitidas"></div>
+        <small class="fp-ctx-status" data-dwec-status role="status">Cargando contexto...</small>
+    </section>
+
     <section class="fp-hero-card">
         <div class="fp-card-fifa-wrap">
             <a href="<?= url('profile/edit') ?>" class="fp-card-fifa-link" title="Editar perfil">

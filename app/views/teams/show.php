@@ -75,7 +75,7 @@ $getAreaPlayers = static function(array $posGroups, $key): array {
 
     <!-- Plantilla + Campo -->
     <?php if (!empty($members)): ?>
-    <section class="fp-team-pitch-layout">
+    <section class="fp-team-pitch-layout" data-team-detail>
 
         <!-- Lista de jugadores -->
         <div class="fp-team-roster">
@@ -84,8 +84,7 @@ $getAreaPlayers = static function(array $posGroups, $key): array {
                 <?php foreach ($members as $idx => $m): ?>
                     <button type="button"
                             class="fp-roster-item <?= (int) $m['is_captain'] === 1 ? 'is-captain' : '' ?>"
-                            data-player-idx="<?= $idx ?>"
-                            onclick="fpSelectPlayer(<?= $idx ?>)">
+                            data-player-idx="<?= $idx ?>">
                         <?php if (!empty($m['avatar'])): ?>
                             <img src="<?= asset($m['avatar']) ?>" alt="<?= e($m['name']) ?>" class="fp-roster-avatar">
                         <?php else: ?>
@@ -137,8 +136,7 @@ $getAreaPlayers = static function(array $posGroups, $key): array {
                                 <button type="button"
                                         class="fp-pitch-player <?= $isCapt ? 'is-captain' : '' ?>"
                                         data-player-idx="<?= $pmIdx !== false ? $pmIdx : 0 ?>"
-                                        title="<?= e($pm['name']) ?>"
-                                        onclick="fpSelectPlayer(<?= $pmIdx !== false ? $pmIdx : 0 ?>)">
+                                        title="<?= e($pm['name']) ?>">
                                     <?php if (!empty($pm['avatar'])): ?>
                                         <img src="<?= asset($pm['avatar']) ?>" alt="<?= e($pm['name']) ?>">
                                     <?php else: ?>
@@ -154,14 +152,14 @@ $getAreaPlayers = static function(array $posGroups, $key): array {
             </div>
 
             <!-- Carta del jugador seleccionado -->
-            <div class="fp-player-detail" id="fpPlayerDetail" hidden>
-                <button class="fp-player-detail-close" onclick="fpClosePlayer()" title="Cerrar"><i class="bi bi-x-lg"></i></button>
-                <div class="fp-player-detail-inner" id="fpPlayerDetailInner"></div>
+            <div class="fp-player-detail" id="fpPlayerDetail" data-player-detail hidden>
+                <button type="button" class="fp-player-detail-close" data-player-detail-close title="Cerrar"><i class="bi bi-x-lg"></i></button>
+                <div class="fp-player-detail-inner" id="fpPlayerDetailInner" data-player-detail-inner></div>
             </div>
         </div>
     </section>
 
-    <!-- Datos JSON para el JS -->
+    <!-- Datos JSON consumidos por public/js/team-detail.js -->
     <script>
     window.fpTeamMembers = <?= json_encode(array_values($members), JSON_UNESCAPED_UNICODE) ?>;
     </script>
@@ -206,49 +204,3 @@ $getAreaPlayers = static function(array $posGroups, $key): array {
     </section>
     <?php endif; ?>
 </main>
-
-<script>
-function fpSelectPlayer(idx) {
-    const members = window.fpTeamMembers || [];
-    const m = members[idx];
-    if (!m) return;
-
-    // Highlight en roster y pitch
-    document.querySelectorAll('.fp-roster-item, .fp-pitch-player').forEach(el => {
-        el.classList.toggle('selected', parseInt(el.dataset.playerIdx, 10) === idx);
-    });
-
-    // Render card
-    const avatarSrc = m.avatar ? (window.FP_BASE_URL + '/' + m.avatar) : '';
-    const initial = (m.name || '?').charAt(0).toUpperCase();
-    const pos = m.position || 'N/D';
-    const city = m.city || 'N/D';
-    const dorsal = m.dorsal !== null && m.dorsal !== undefined ? String(m.dorsal).padStart(2, '0') : 'N/D';
-    const isCapt = parseInt(m.is_captain, 10) === 1;
-
-    document.getElementById('fpPlayerDetailInner').innerHTML = `
-        <div class="fp-player-card-mini">
-            <div class="fp-player-card-avatar">
-                ${avatarSrc
-                    ? `<img src="${avatarSrc}" alt="${m.name}">`
-                    : `<span class="fp-player-card-initial">${initial}</span>`}
-            </div>
-            <div class="fp-player-card-info">
-                <h3>${m.name}${isCapt ? ' <span class="fp-gold-text">⭐ Capitán</span>' : ''}</h3>
-                <div class="fp-player-card-stats">
-                    <span><i class="bi bi-person-badge"></i> ${pos}</span>
-                    <span><i class="bi bi-hash"></i> ${dorsal}</span>
-                    <span><i class="bi bi-geo-alt"></i> ${city}</span>
-                </div>
-            </div>
-        </div>`;
-
-    const panel = document.getElementById('fpPlayerDetail');
-    panel.hidden = false;
-    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-function fpClosePlayer() {
-    document.getElementById('fpPlayerDetail').hidden = true;
-    document.querySelectorAll('.fp-roster-item, .fp-pitch-player').forEach(el => el.classList.remove('selected'));
-}
-</script>

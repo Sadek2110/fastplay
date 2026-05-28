@@ -1,4 +1,19 @@
+/**
+ * FastPlay · Calendario mensual de partidos
+ * -----------------------------------------
+ * Construye un calendario navegable a partir de un JSON inyectado por
+ * PHP. Usa Map para indexar los partidos por dia y try/catch a la hora
+ * de parsear las fechas devueltas por el servidor.
+ */
 (function () {
+  'use strict';
+
+  /**
+   * Rellena a la izquierda con ceros para formatear partes de fecha.
+   *
+   * @param {number} value
+   * @returns {string}
+   */
   function pad(value) {
     return String(value).padStart(2, '0');
   }

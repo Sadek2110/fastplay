@@ -9,7 +9,12 @@
         <?php $this->partial('empty-state', ['icon' => 'bi-person-lock', 'title' => 'Solo capitanes', 'description' => 'Solo el capitán del equipo puede solicitar partidos contra otros equipos.']); ?>
     <?php else: ?>
         <section class="fp-glass fp-panel">
-            <form method="post" action="<?= url('match-request/create') ?>" class="fp-form">
+            <form method="post"
+                  action="<?= url('match-request/create') ?>"
+                  class="fp-form"
+                  data-match-request-form
+                  data-fp-validate
+                  novalidate>
                 <?= csrf_field() ?>
                 <label>
                     <span class="fp-label">Tu equipo</span>
@@ -23,6 +28,7 @@
                     <span class="fp-label">Equipo rival</span>
                     <input class="fp-input" data-team-search placeholder="Buscar equipo rival">
                 </label>
+                <small class="fp-ctx-status" data-team-count></small>
                 <div class="fp-grid-2">
                     <?php foreach ($teams as $t): ?>
                         <label class="fp-glass fp-select-team" data-team-card="<?= e(mb_strtolower($t['name'] . ' ' . $t['city'] . ' ' . $t['captain_name'])) ?>">
@@ -37,12 +43,3 @@
         </section>
     <?php endif; ?>
 </main>
-<script>
-document.addEventListener('input', function (event) {
-    if (!event.target.matches('[data-team-search]')) return;
-    var query = event.target.value.toLowerCase();
-    document.querySelectorAll('[data-team-card]').forEach(function (card) {
-        card.hidden = card.getAttribute('data-team-card').indexOf(query) === -1;
-    });
-});
-</script>

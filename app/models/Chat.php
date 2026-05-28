@@ -51,6 +51,18 @@ class Chat
         return ['ok' => true, 'id' => Database::insertId()];
     }
 
+    public function deleteMessage(int $messageId): bool
+    {
+        if ($messageId <= 0) return false;
+        Database::run('DELETE FROM chat_messages WHERE id = ?', [$messageId]);
+        return true;
+    }
+
+    public function findMessage(int $messageId): ?array
+    {
+        return Database::one('SELECT * FROM chat_messages WHERE id = ?', [$messageId]);
+    }
+
     public function createRoom(string $name, string $type = 'group', ?int $teamId = null, ?int $matchRequestId = null): int
     {
         $name = trim($name) ?: 'Sala';

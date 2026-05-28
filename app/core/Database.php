@@ -15,6 +15,23 @@ class Database
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_EMULATE_PREPARES   => false,
         ]);
+
+        // Auto-migración segura para verificar y añadir columnas de verificación
+        try {
+            self::$pdo->query('SELECT email_verified, verification_token FROM users LIMIT 1');
+        } catch (\PDOException $e) {
+            try {
+                self::$pdo->exec('ALTER TABLE users ADD COLUMN email_verified INT DEFAULT 0');
+            } catch (\PDOException $ex) {
+                // Silenciar si la columna ya existe o la tabla no está creada
+            }
+            try {
+                self::$pdo->exec('ALTER TABLE users ADD COLUMN verification_token VARCHAR(255) NULL');
+            } catch (\PDOException $ex) {
+                // Silenciar si la columna ya existe o la tabla no está creada
+            }
+        }
+
         return self::$pdo;
     }
 

@@ -1,4 +1,10 @@
+/**
+ * FastPlay · Efecto tilt para la carta FIFA del jugador.
+ * Sigue el cursor en escritorio y se desactiva en movil para evitar
+ * gestos accidentales.
+ */
 (function () {
+  'use strict';
   document.addEventListener('pointermove', function (event) {
     var card = event.target.closest('.fp-card-fifa');
     if (!card || window.matchMedia('(max-width: 768px)').matches) return;

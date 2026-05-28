@@ -26,10 +26,14 @@
     <?php $this->partial('footer'); ?>
 </div>
 
+<?php $this->partial('cookie-banner'); ?>
+
+<script>window.FP_BASE_URL = "<?= e(BASE_URL) ?>";</script>
 <script src="<?= asset('js/theme.js') ?>" defer></script>
 <script src="<?= asset('js/nav.js') ?>" defer></script>
 <script src="<?= asset('js/fifa-card.js') ?>" defer></script>
-<script>window.FP_BASE_URL = "<?= e(BASE_URL) ?>";</script>
+<script src="<?= asset('js/form-validation.js') ?>" defer></script>
+<script src="<?= asset('js/cookie-consent.js') ?>" defer></script>
 <?= $scripts ?? '' ?>
 </body>
 </html>

@@ -41,4 +41,14 @@ class Notification
     {
         Database::run('UPDATE notifications SET is_read=1 WHERE user_id=?', [$userId]);
     }
+
+    public function clearRead(int $userId): int
+    {
+        return Database::run('DELETE FROM notifications WHERE user_id=? AND is_read=1', [$userId])->rowCount();
+    }
+
+    public function delete(int $id, int $userId): bool
+    {
+        return Database::run('DELETE FROM notifications WHERE id=? AND user_id=?', [$id, $userId])->rowCount() > 0;
+    }
 }

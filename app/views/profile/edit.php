@@ -4,9 +4,9 @@
     <h1 class="fp-h1">Mi perfil</h1>
 
     <div class="fp-glass fp-panel">
-        <form method="post" action="<?= url('profile/edit') ?>" enctype="multipart/form-data" class="fp-profile-form">
+        <form method="post" action="<?= url('profile/edit') ?>" enctype="multipart/form-data" class="fp-profile-form" data-fp-validate novalidate>
             <?= csrf_field() ?>
-            
+
             <div class="fp-avatar-upload-group">
                 <div class="fp-avatar-upload-preview">
                     <img src="<?= asset(!empty($profile['avatar']) ? $profile['avatar'] : 'images/default-avatar.svg') ?>" alt="Foto de perfil">
@@ -21,7 +21,8 @@
 
             <label>
                 <span class="fp-label">Nombre</span>
-                <input name="name" class="fp-input" value="<?= old('name', $profile['name']) ?>" required minlength="2">
+                <input name="name" class="fp-input" value="<?= old('name', $profile['name']) ?>" required minlength="2"
+                       data-fp-validate-field data-fp-rule="name">
                 <?php if (!empty($errors['name'])): ?><small class="fp-err"><?= e($errors['name']) ?></small><?php endif; ?>
             </label>
 
@@ -41,11 +42,13 @@
             <div class="fp-grid-2">
                 <label>
                     <span class="fp-label">Ciudad</span>
-                    <input name="city" class="fp-input" value="<?= old('city', $profile['city'] ?? '') ?>">
+                    <input name="city" class="fp-input" value="<?= old('city', $profile['city'] ?? '') ?>"
+                           data-fp-validate-field data-fp-rule="city">
                 </label>
                 <label>
                     <span class="fp-label">Posición</span>
-                    <select name="position" class="fp-input">
+                    <select name="position" class="fp-input"
+                            data-fp-validate-field data-fp-rule="position">
                         <?php $cur = old('position', $profile['position'] ?? ''); foreach (['','Portero','Portera','Defensa','Mediocampo','Delantero'] as $p): ?>
                             <option value="<?= e($p) ?>" <?= $cur === $p ? 'selected' : '' ?>><?= e($p === '' ? '— sin definir —' : $p) ?></option>
                         <?php endforeach; ?>
@@ -57,7 +60,8 @@
             <div class="fp-grid-2">
                 <label>
                     <span class="fp-label">Dorsal</span>
-                    <input type="number" name="dorsal" class="fp-input" min="1" max="99" value="<?= old('dorsal', $profile['dorsal'] ?? '') ?>" placeholder="1-99">
+                    <input type="number" name="dorsal" class="fp-input" min="1" max="99" value="<?= old('dorsal', $profile['dorsal'] ?? '') ?>" placeholder="1-99"
+                           data-fp-validate-field data-fp-rule="dorsal">
                     <?php if (!empty($errors['dorsal'])): ?><small class="fp-err"><?= e($errors['dorsal']) ?></small><?php endif; ?>
                 </label>
                 <label>

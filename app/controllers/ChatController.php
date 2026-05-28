@@ -57,6 +57,9 @@ class ChatController extends Controller
             'room' => $room,
             'messages' => $msgs,
             'title' => $room['name'] . ' - Chat - FastPlay',
+            'scripts' =>
+                '<script src="' . asset('js/form-validation.js') . '" defer></script>' .
+                '<script src="' . asset('js/chat-room.js') . '" defer></script>',
         ]);
     }
 
@@ -70,6 +73,32 @@ class ChatController extends Controller
             flash('warn', $res['error']);
         }
         redirect('chat/room/' . $id);
+    }
+
+    public function deleteMessage(string $messageId = ''): void
+    {
+        $this->requireAuth();
+        $this->requirePost();
+        $messageId = (int) $messageId;
+        $chat = $this->model('Chat');
+        $message = $chat->findMessage($messageId);
+        if (!$message) {
+            flash('warn', 'Mensaje no encontrado.');
+            $this->back('chat');
+            return;
+        }
+        $roomId = (int) $message['room_id'];
+        $room = $chat->room($roomId);
+        $userId = (int) current_user()['id'];
+        $isOwner = (int) $message['user_id'] === $userId;
+        if (!is_admin() && !$isOwner) {
+            flash('warn', 'Solo el autor o un administrador pueden borrar este mensaje.');
+            redirect('chat/room/' . $roomId);
+            return;
+        }
+        $chat->deleteMessage($messageId);
+        flash('ok', 'Mensaje eliminado.');
+        redirect('chat/room/' . $roomId);
     }
 
     public function messages(string $id = ''): void
@@ -86,13 +115,17 @@ class ChatController extends Controller
         }
         header('Content-Type: application/json');
         $msgs = array_reverse($chat->messages($id));
-        echo json_encode(array_map(static function ($m) {
+        $userId = (int) current_user()['id'];
+        $admin = is_admin();
+        echo json_encode(array_map(static function ($m) use ($userId, $admin) {
+            $isOwn = (int) $m['user_id'] === $userId;
             return [
                 'id' => (int) $m['id'],
                 'user_name' => $m['user_name'],
                 'body' => $m['body'],
                 'created_at' => date('d/m H:i', strtotime($m['created_at'])),
-                'own' => (int) $m['user_id'] === (int) current_user()['id'],
+                'own' => $isOwn,
+                'canDelete' => $admin || $isOwn,
             ];
         }, $msgs));
     }

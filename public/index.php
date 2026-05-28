@@ -1,6 +1,12 @@
 <?php
 // FastPlay · front controller
 
+// Autoloader de Composer (Stripe, PHPMailer, League OAuth2…)
+$autoload = __DIR__ . '/../vendor/autoload.php';
+if (is_file($autoload)) {
+    require_once $autoload;
+}
+
 require_once __DIR__ . '/../config/config.php';
 require_once APP_PATH . '/core/Database.php';
 require_once APP_PATH . '/core/Router.php';

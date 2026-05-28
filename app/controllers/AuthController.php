@@ -1,5 +1,6 @@
 <?php
 // FastPlay · login / registro / logout
+require_once APP_PATH . '/services/MailService.php';
 
 class AuthController extends Controller
 {
@@ -39,8 +40,16 @@ class AuthController extends Controller
             $usuario = $this->model('Usuario');
             [$user, $errors] = $usuario->register($_POST);
             if ($user) {
+                // Enviar correo de bienvenida y verificación
+                $token = $user['verification_token'] ?? '';
+                $verificationUrl = ($_SERVER['REQUEST_SCHEME'] ?? 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . url('auth/verify?token=' . $token);
+                MailService::send($user['email'], '¡Bienvenido a FastPlay! Verifica tu correo', 'bienvenida_verificacion', [
+                    'name' => $user['name'],
+                    'url'  => $verificationUrl
+                ]);
+
                 login_user($user);
-                flash('ok', '¡Cuenta creada! Empieza a jugar.');
+                flash('ok', '¡Cuenta creada! Hemos enviado un correo de bienvenida y verificación a ' . $user['email']);
                 redirect('dashboard');
             }
             flash_old($_POST);
@@ -116,5 +125,76 @@ class AuthController extends Controller
             flash('warn', 'Error de autenticación con Google.');
             redirect('login');
         }
+    }
+
+    public function verify(): void
+    {
+        $token = trim((string) ($_GET['token'] ?? ''));
+        if ($token === '') {
+            flash('warn', 'Token de verificación no proporcionado.');
+            redirect(is_auth() ? 'dashboard' : 'auth/login');
+        }
+
+        // Buscar el usuario por el token
+        $user = Database::one('SELECT * FROM users WHERE verification_token = ?', [$token]);
+        if (!$user) {
+            flash('warn', 'El enlace de verificación no es válido o ya ha expirado.');
+            redirect(is_auth() ? 'dashboard' : 'auth/login');
+        }
+
+        // Marcar al usuario como verificado
+        Database::run('UPDATE users SET email_verified = 1, verification_token = NULL WHERE id = ?', [$user['id']]);
+
+        // Si el usuario actual está logueado en la sesión y coincide, actualizamos su sesión
+        $currentUser = current_user();
+        if ($currentUser && (int) $currentUser['id'] === (int) $user['id']) {
+            $user['email_verified'] = 1;
+            $user['verification_token'] = null;
+            unset($user['password_hash']);
+            login_user($user);
+        }
+
+        if (!is_auth()) {
+            flash_old(['email' => $user['email']]);
+        }
+
+        flash('ok', '¡Correo verificado con éxito! Tu cuenta está completamente activa.');
+        redirect(is_auth() ? 'dashboard' : 'auth/login');
+    }
+
+    public function resendVerification(): void
+    {
+        $this->requireAuth();
+        $this->requirePost();
+
+        $user = current_user();
+        // Cargar datos actualizados de la base de datos
+        $dbUser = Database::one('SELECT * FROM users WHERE id = ?', [$user['id']]);
+        if (!$dbUser) {
+            flash('warn', 'Usuario no encontrado.');
+            redirect('dashboard');
+        }
+
+        if ((int) ($dbUser['email_verified'] ?? 0) === 1) {
+            flash('ok', 'Tu correo ya está verificado.');
+            redirect('dashboard');
+        }
+
+        // Si no tiene token, generar uno nuevo
+        $token = $dbUser['verification_token'] ?? '';
+        if ($token === '') {
+            $token = bin2hex(random_bytes(32));
+            Database::run('UPDATE users SET verification_token = ? WHERE id = ?', [$token, $dbUser['id']]);
+        }
+
+        // Enviar el correo
+        $verificationUrl = ($_SERVER['REQUEST_SCHEME'] ?? 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . url('auth/verify?token=' . $token);
+        MailService::send($dbUser['email'], '¡Bienvenido a FastPlay! Verifica tu correo', 'bienvenida_verificacion', [
+            'name' => $dbUser['name'],
+            'url'  => $verificationUrl
+        ]);
+
+        flash('ok', 'Hemos reenviado el correo de verificación a ' . $dbUser['email']);
+        redirect('dashboard');
     }
 }
