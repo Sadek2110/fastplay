@@ -32,14 +32,13 @@ Plataforma web para la gestion de ligas, equipos y partidos de futbol amateur.
 7. [Roles y Permisos](#roles-y-permisos)
 8. [Mapa de Rutas](#mapa-de-rutas)
 9. [Instalacion y Configuracion](#instalacion-y-configuracion)
-10. [Credenciales Demo](#credenciales-demo)
-11. [Seguridad](#seguridad)
-12. [Identidad Visual y Diseno](#identidad-visual-y-diseno)
-13. [Convenciones de Codigo](#convenciones-de-codigo)
-14. [Tests](#tests)
-15. [Roadmap](#roadmap)
-16. [Notas de Version](#notas-de-version-v3)
-17. [Licencia y Creditos](#licencia-y-creditos)
+10. [Seguridad](#seguridad)
+11. [Identidad Visual y Diseno](#identidad-visual-y-diseno)
+12. [Convenciones de Codigo](#convenciones-de-codigo)
+13. [Tests](#tests)
+14. [Roadmap](#roadmap)
+15. [Notas de Version](#notas-de-version-v3)
+16. [Licencia y Creditos](#licencia-y-creditos)
 
 ---
 
@@ -306,17 +305,6 @@ Para resetear la base de datos basta con borrar el archivo `storage/fastplay.sql
 La aplicacion funciona por defecto con SQLite. El archivo `database/fastplay_postgres.sql` es un script auxiliar para portar el esquema y los datos demo a PostgreSQL si se decide migrar mas adelante; no se carga automaticamente por la app actual.
 
 El script mantiene las mismas reglas de dominio que el codigo PHP: roles `player/admin`, estados de partido `pending/confirmed/cancelled/finished`, superficies admitidas y equipos inscritos de forma coherente con sus partidos de liga.
-
----
-
-## Credenciales Demo
-
-| Rol | Email | Contrasena |
-|---|---|---|
-| **Admin** | `admin@fastplay.es` | `Admin1234!` |
-| **Jugador** | `demo@fastplay.es` | `Demo1234!` |
-
-> El seeder solo siembra datos demo si `APP_ENV` es distinto de `production`. En produccion, define `SetEnv APP_ENV production` (o variable de entorno equivalente) para garantizar que estas cuentas no se creen.
 
 ---
 
