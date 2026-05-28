@@ -14,8 +14,9 @@ COPY . .
 
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/uploads \
-    && chmod -R 775 /var/www/html/storage /var/www/html/uploads
+RUN mkdir -p /var/www/html/public/uploads/avatars \
+    && chown -R www-data:www-data /var/www/html/storage /var/www/html/uploads /var/www/html/public/uploads \
+    && chmod -R 775 /var/www/html/storage /var/www/html/uploads /var/www/html/public/uploads
 
 ENV APP_ENV=production
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public

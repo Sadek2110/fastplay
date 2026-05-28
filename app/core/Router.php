@@ -12,6 +12,11 @@ class Router
         $action = $segments[1] ?? 'index';
         $params = array_slice($segments, 2);
 
+        if ($controllerSlug === 'auth' && $action === 'google' && ($params[0] ?? '') === 'callback') {
+            $action = 'googleCallback';
+            $params = array_slice($params, 1);
+        }
+
         if (!preg_match('/^[a-zA-Z0-9_-]+$/', $controllerSlug) || !preg_match('/^[a-zA-Z0-9_]+$/', $action)) {
             self::notFound();
             return;

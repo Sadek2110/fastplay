@@ -73,11 +73,12 @@ class AuthController extends Controller
     public function google(): void
     {
         $this->requireGuest();
-        $provider = new \League\OAuth2\Client\Provider\Google([
-            'clientId'     => getenv('GOOGLE_CLIENT_ID') ?: 'DUMMY_ID',
-            'clientSecret' => getenv('GOOGLE_CLIENT_SECRET') ?: 'DUMMY_SECRET',
-            'redirectUri'  => url('auth/google/callback'),
-        ]);
+        $provider = $this->googleProvider();
+        if (!$provider) {
+            flash('warn', 'El acceso con Google no está configurado todavía.');
+            $this->back('auth/login');
+        }
+
         $authUrl = $provider->getAuthorizationUrl();
         $_SESSION['oauth2state'] = $provider->getState();
         redirect($authUrl);
@@ -86,16 +87,16 @@ class AuthController extends Controller
     public function googleCallback(): void
     {
         $this->requireGuest();
-        $provider = new \League\OAuth2\Client\Provider\Google([
-            'clientId'     => getenv('GOOGLE_CLIENT_ID') ?: 'DUMMY_ID',
-            'clientSecret' => getenv('GOOGLE_CLIENT_SECRET') ?: 'DUMMY_SECRET',
-            'redirectUri'  => url('auth/google/callback'),
-        ]);
+        $provider = $this->googleProvider();
+        if (!$provider) {
+            flash('warn', 'El acceso con Google no está configurado todavía.');
+            redirect('auth/login');
+        }
 
         if (empty($_GET['state']) || ($_GET['state'] !== ($_SESSION['oauth2state'] ?? ''))) {
             unset($_SESSION['oauth2state']);
             flash('warn', 'Estado de sesión inválido.');
-            redirect('login');
+            redirect('auth/login');
         }
 
         try {
@@ -119,12 +120,28 @@ class AuthController extends Controller
                 redirect('dashboard');
             } else {
                 flash('warn', $errors['email'] ?? 'Error al procesar el inicio de sesión con Google.');
-                redirect('login');
+                redirect('auth/login');
             }
         } catch (\Exception $e) {
             flash('warn', 'Error de autenticación con Google.');
-            redirect('login');
+            redirect('auth/login');
         }
+    }
+
+    private function googleProvider(): ?\League\OAuth2\Client\Provider\Google
+    {
+        $clientId = trim((string) (getenv('GOOGLE_CLIENT_ID') ?: ''));
+        $clientSecret = trim((string) (getenv('GOOGLE_CLIENT_SECRET') ?: ''));
+
+        if ($clientId === '' || $clientSecret === '') {
+            return null;
+        }
+
+        return new \League\OAuth2\Client\Provider\Google([
+            'clientId'     => $clientId,
+            'clientSecret' => $clientSecret,
+            'redirectUri'  => absolute_url('auth/google/callback'),
+        ]);
     }
 
     public function verify(): void

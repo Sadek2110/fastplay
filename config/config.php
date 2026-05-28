@@ -138,6 +138,20 @@ function url(string $path = ''): string
     return BASE_URL . '/' . ltrim($path, '/');
 }
 
+function absolute_url(string $path = ''): string
+{
+    if (preg_match('#^https?://#i', $path)) {
+        return $path;
+    }
+
+    $forwardedProto = strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? ''));
+    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $forwardedProto === 'https';
+    $scheme = $isHttps ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+
+    return $scheme . '://' . $host . url($path);
+}
+
 function asset(string $path): string
 {
     $filePath = APP_ROOT . '/public/' . ltrim($path, '/');
@@ -147,7 +161,7 @@ function asset(string $path): string
 
 function redirect(string $path): void
 {
-    header('Location: ' . url($path));
+    header('Location: ' . (preg_match('#^https?://#i', $path) ? $path : url($path)));
     exit;
 }
 

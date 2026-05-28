@@ -61,7 +61,10 @@
       "Bash(node -c public/js/match-request-form.js)",
       "Bash(node -c public/js/team-detail.js)",
       "Bash(node -c public/js/nav.js)",
-      "Bash(php vendor/bin/phpunit --no-coverage)"
+      "Bash(php vendor/bin/phpunit --no-coverage)",
+      "Bash(ls -la public/)",
+      "Bash(ls -la public/uploads)",
+      "Bash(ls -la uploads)"
     ]
   }
 }
