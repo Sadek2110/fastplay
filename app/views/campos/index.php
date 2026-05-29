@@ -27,9 +27,11 @@
                     ?>
                     <article class="fp-glass fp-field-card" data-field-card="<?= (int) $f['id'] ?>">
                         <?php
-                            $imgUrl = asset('images/hero-pitch.png');
+                            $imgUrl = BASE_URL . '/images/hero-pitch.png';
                             if (!empty($f['image'])) {
-                                $imgUrl = preg_match('#^https?://#i', $f['image']) ? $f['image'] : asset($f['image']);
+                                $imgUrl = preg_match('#^https?://#i', $f['image']) 
+                                    ? $f['image'] 
+                                    : BASE_URL . '/' . ltrim($f['image'], '/');
                             }
                         ?>
                         <div class="fp-field-img" style="background-image:url('<?= e($imgUrl) ?>')"></div>
