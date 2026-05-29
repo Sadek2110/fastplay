@@ -159,4 +159,36 @@ class AdminController extends Controller
         flash('ok', 'Campo eliminado.');
         redirect('admin/fields');
     }
+
+    public function createAdmin(): void
+    {
+        $this->requireAdmin();
+        $this->view('admin/create-admin', [
+            'active' => 'admin',
+            'title'  => 'Admin · Nuevo Administrador — FastPlay',
+            'errors' => [],
+        ]);
+    }
+
+    public function storeAdmin(): void
+    {
+        $this->requireAdmin();
+        $this->requirePost();
+
+        $usuario = $this->model('Usuario');
+        [$user, $errors] = $usuario->registerAdmin($_POST);
+
+        if ($errors) {
+            flash_old($_POST);
+            $this->view('admin/create-admin', [
+                'active' => 'admin',
+                'title'  => 'Admin · Nuevo Administrador — FastPlay',
+                'errors' => $errors,
+            ]);
+            return;
+        }
+
+        flash('ok', 'Administrador "' . e($user['name']) . '" creado correctamente.');
+        redirect('admin/users');
+    }
 }

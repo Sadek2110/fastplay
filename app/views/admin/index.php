@@ -22,6 +22,17 @@
     </div>
 
     <section style="margin-top:32px;">
+        <h2 class="fp-h2">Acciones rápidas</h2>
+        <div class="fp-grid-4">
+            <a href="<?= url('admin/createAdmin') ?>" class="fp-glass fp-card-link" style="border-radius:18px;padding:22px;text-decoration:none;color:var(--fp-fg);display:block;">
+                <i class="bi bi-shield-plus" style="font-size:30px;color:var(--fp-green-400);"></i>
+                <div style="font-size:14px;font-weight:700;margin-top:12px;">Añadir Administrador</div>
+                <div style="font-size:11px;color:var(--fp-fg-muted);margin-top:6px;">Crear una nueva cuenta con permisos de admin</div>
+            </a>
+        </div>
+    </section>
+
+    <section style="margin-top:32px;">
         <h2 class="fp-h2">Últimos intentos de login</h2>
         <div class="fp-glass" style="border-radius:18px;overflow:hidden;">
             <table class="fp-table">
