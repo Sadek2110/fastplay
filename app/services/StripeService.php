@@ -7,7 +7,17 @@ class StripeService
         if (!class_exists(\Stripe\Stripe::class)) {
             throw new RuntimeException('Stripe SDK no instalado. Ejecuta: composer install');
         }
-        \Stripe\Stripe::setApiKey(getenv('STRIPE_SECRET_KEY') ?: 'sk_test_123');
+
+        $secretKey = trim((string) (getenv('STRIPE_SECRET_KEY') ?: ''));
+        if ($secretKey === '' || $secretKey === 'sk_test_123') {
+            throw new RuntimeException('Stripe no esta configurado: falta STRIPE_SECRET_KEY valida.');
+        }
+
+        if (!preg_match('/^sk_(test|live)_[A-Za-z0-9_]+$/', $secretKey)) {
+            throw new RuntimeException('Stripe no esta configurado: STRIPE_SECRET_KEY no parece valida.');
+        }
+
+        \Stripe\Stripe::setApiKey($secretKey);
     }
 
     public function createCheckoutSession(int $userId): array

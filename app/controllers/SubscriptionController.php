@@ -21,8 +21,15 @@ class SubscriptionController extends Controller
     {
         $this->requireAuth();
         $this->requirePost();
-        $session = (new StripeService())->createCheckoutSession((int) current_user()['id']);
-        redirect($session['checkout_url']);
+
+        try {
+            $session = (new StripeService())->createCheckoutSession((int) current_user()['id']);
+            redirect($session['checkout_url']);
+        } catch (Throwable $e) {
+            error_log('[FastPlay] Stripe checkout error: ' . $e->getMessage());
+            flash('warn', 'El pago premium no esta disponible ahora mismo. Revisa la configuracion de Stripe.');
+            redirect('subscription');
+        }
     }
 
     public function success(): void

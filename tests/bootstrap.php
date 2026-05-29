@@ -7,6 +7,7 @@ define('FASTPLAY_TESTING', true);
 $_SERVER['REQUEST_METHOD'] = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_HOST'] ?? 'localhost';
 $_SERVER['REMOTE_ADDR'] = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+$_SERVER['SCRIPT_NAME'] = '/index.php';
 define('APP_NAME', 'FastPlay');
 define('APP_ROOT', dirname(__DIR__));
 define('APP_PATH', APP_ROOT . DIRECTORY_SEPARATOR . 'app');
@@ -18,7 +19,11 @@ define('DB_DSN', 'sqlite:' . STORAGE_PATH . DIRECTORY_SEPARATOR . 'fastplay_test
 define('DB_USER', '');
 define('DB_PASS', '');
 
-$_SERVER['SCRIPT_NAME'] = $_SERVER['SCRIPT_NAME'] ?? '/index.php';
+$autoload = APP_ROOT . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
+if (is_file($autoload)) {
+    require_once $autoload;
+}
+
 $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
 define('BASE_URL', rtrim($scriptDir, '/'));
 define('ASSETS_URL', BASE_URL);
@@ -57,6 +62,18 @@ function e(?string $value): string {
 }
 function url(string $path = ''): string {
     return BASE_URL . '/' . ltrim($path, '/');
+}
+function absolute_url(string $path = ''): string {
+    if (preg_match('#^https?://#i', $path)) {
+        return $path;
+    }
+
+    $forwardedProto = strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? ''));
+    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $forwardedProto === 'https';
+    $scheme = $isHttps ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+
+    return $scheme . '://' . $host . url($path);
 }
 function asset(string $path): string {
     $filePath = APP_ROOT . '/public/' . ltrim($path, '/');
