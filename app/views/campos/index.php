@@ -26,7 +26,15 @@
                         $isPublic = $desc !== '' && (str_contains($desc, 'Barriada') || str_contains($desc, 'Pública'));
                     ?>
                     <article class="fp-glass fp-field-card" data-field-card="<?= (int) $f['id'] ?>">
-                        <div class="fp-field-img" style="background-image:url('<?= e(!empty($f['image']) ? asset($f['image']) : asset('images/hero-pitch.png')) ?>')"></div>
+                        <?php
+                            $imgUrl = BASE_URL . '/images/hero-pitch.png';
+                            if (!empty($f['image'])) {
+                                $imgUrl = preg_match('#^https?://#i', $f['image']) 
+                                    ? $f['image'] 
+                                    : BASE_URL . '/' . ltrim($f['image'], '/');
+                            }
+                        ?>
+                        <div class="fp-field-img" style="background-image:url('<?= e($imgUrl) ?>')"></div>
                         <div class="fp-field-card-body">
                             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                                 <?php if ($desc !== ''): ?>

@@ -283,6 +283,43 @@ class Usuario
         return Database::all('SELECT id,name,email,role,city,position,created_at FROM users ORDER BY created_at DESC');
     }
 
+    /**
+     * Crea un nuevo administrador desde el panel de admin.
+     * Devuelve [user, errors].
+     */
+    public function registerAdmin(array $data): array
+    {
+        $errors = [];
+        $name  = trim((string) ($data['name'] ?? ''));
+        $email = mb_strtolower(trim((string) ($data['email'] ?? '')));
+        $pass  = (string) ($data['password'] ?? '');
+        $conf  = (string) ($data['password_confirm'] ?? '');
+
+        if (!v_required($name) || mb_strlen($name) < 2)  $errors['name']  = 'Indica el nombre completo.';
+        if (!v_email($email))                            $errors['email'] = 'Email no válido.';
+        if (!v_min_len($pass, 8))                        $errors['password'] = 'Contraseña mínima de 8 caracteres.';
+        if ($pass !== $conf)                             $errors['password_confirm'] = 'Las contraseñas no coinciden.';
+
+        if (!$errors) {
+            $exists = Database::value('SELECT 1 FROM users WHERE email = ?', [$email]);
+            if ($exists) {
+                $errors['email'] = 'Ese email ya está registrado.';
+            }
+        }
+
+        if ($errors) {
+            return [null, $errors];
+        }
+
+        Database::run(
+            "INSERT INTO users (name, email, password_hash, role, email_verified) VALUES (?, ?, ?, 'admin', 1)",
+            [$name, $email, password_hash($pass, PASSWORD_DEFAULT)]
+        );
+        $user = Database::one('SELECT * FROM users WHERE id = ?', [Database::insertId()]);
+        unset($user['password_hash']);
+        return [$user, []];
+    }
+
     public function setRole(int $id, string $role): void
     {
         if (!in_array($role, ['player','admin'], true)) return;
