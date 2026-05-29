@@ -26,18 +26,31 @@ class MailService
             return false;
         }
 
+        $config = require APP_ROOT . '/config/mail.php';
+
+        $user = (string) $config['user'];
+        $pass = (string) $config['pass'];
+        if ($user === '' || $pass === '') {
+            error_log('[FastPlay] Configuración SMTP incompleta (MAIL_USER / MAIL_PASS) — email no enviado a ' . $to);
+            return false;
+        }
+
+        $fromAddress = (string) $config['from'] !== '' ? (string) $config['from'] : $user;
+
         $mail = new PHPMailer(true);
         try {
             $mail->isSMTP();
-            $mail->Host       = 'smtp.ionos.es';
+            $mail->Host       = (string) $config['host'];
             $mail->SMTPAuth   = true;
-            $mail->Username   = 'sadek@dksaa.com';
-            $mail->Password   = getenv('SMTP_PASSWORD');
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port       = 587;
+            $mail->Username   = $user;
+            $mail->Password   = $pass;
+            $mail->SMTPSecure = $config['encryption'] === 'ssl'
+                ? PHPMailer::ENCRYPTION_SMTPS
+                : PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = (int) $config['port'];
             $mail->CharSet    = 'UTF-8';
 
-            $mail->setFrom('sadek@dksaa.com', 'FastPlay');
+            $mail->setFrom($fromAddress, (string) $config['from_name']);
             $mail->addAddress($to);
 
             $mail->isHTML(true);

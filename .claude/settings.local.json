@@ -64,7 +64,9 @@
       "Bash(php vendor/bin/phpunit --no-coverage)",
       "Bash(ls -la public/)",
       "Bash(ls -la public/uploads)",
-      "Bash(ls -la uploads)"
+      "Bash(ls -la uploads)",
+      "PowerShell(.\\\\vendor\\\\bin\\\\phpunit tests/ProductionConfigurationTest.php tests/ConfigTest.php tests/EmailVerificationTest.php --no-coverage 2>&1)",
+      "PowerShell(php -l scripts/diagnose-easypanel.php)"
     ]
   }
 }

@@ -30,7 +30,21 @@ envCheck('APP_ENV', false, static fn (string $value): bool => $value !== '');
 envCheck('STRIPE_SECRET_KEY', true, static fn (string $value): bool => preg_match('/^sk_(test|live)_[A-Za-z0-9_]+$/', $value) === 1 && $value !== 'sk_test_123');
 envCheck('GOOGLE_CLIENT_ID', false, static fn (string $value): bool => str_ends_with($value, '.apps.googleusercontent.com'));
 envCheck('GOOGLE_CLIENT_SECRET', false, static fn (string $value): bool => str_starts_with($value, 'GOCSPX-'));
-envCheck('SMTP_PASSWORD', true, static fn (string $value): bool => $value !== '');
+
+section('Correo (SMTP)');
+envCheck('MAIL_USER', false, static fn (string $value): bool => str_contains($value, '@'));
+// MAIL_PASS es la variable preferida; SMTP_PASSWORD se acepta como alias retrocompatible.
+$mailPass = getenv('MAIL_PASS');
+if ($mailPass === false || trim((string) $mailPass) === '') {
+    $mailPass = getenv('SMTP_PASSWORD');
+    if ($mailPass !== false && trim((string) $mailPass) !== '') {
+        check('MAIL_PASS', true, 'usando SMTP_PASSWORD (alias) ' . maskSecret(trim((string) $mailPass)));
+    } else {
+        check('MAIL_PASS', false, 'NO EXISTE (ni MAIL_PASS ni SMTP_PASSWORD)');
+    }
+} else {
+    check('MAIL_PASS', true, maskSecret(trim((string) $mailPass)));
+}
 
 section('Base de datos');
 try {
