@@ -1,42 +1,13 @@
-# Tabla de localización de código JavaScript - Proyecto Final DWEC
+# Dónde encontrar cada cosa en mi código — Proyecto Final DWEC
 
-> Esta tabla indica al profesor en qué archivos se encuentra cada conocimiento evaluable según la rúbrica del proyecto final de DWEC.
+> Profe, aquí te dejo un mapa rápido de dónde está cada conocimiento que evalúas. Así no tienes que buscar a ciegas.
 
-| Conocimiento a evaluar | Archivo/s donde lo puedo localizar |
+| Qué evaluar | Dónde mirarlo |
 |---|---|
-| **Validación de datos de formulario. Expresiones regulares.** | `public/js/form-validation.js` — Catálogo de reglas regex (email, password, name, city, team-name, badge, dorsal, position, chat-message). Validación en blur/input/submit con mensajes accesibles (ARIA). |
-| | `public/js/match-request-form.js` — Validación previa al envío del formulario de solicitud de partido. |
-| **Cookies en frontEnd** | `public/js/cookie-consent.js` — Gestión de cookies del lado cliente con prefijo `fp_client_`, banner de consentimiento (aceptar/rechazar), API pública `window.FastplayCookies`. |
-| **DOM** | `public/js/team-detail.js` — createElement, replaceChildren, delegación de eventos, dataset, desestructuración. |
-| | `public/js/dwec-context-panel.js` — Manipulación extensiva de DOM: clases CSS, ARIA, dataset, Map para diccionarios de roles, Set para acciones. |
-| | `public/js/chat-room.js` — createElement/textContent sin innerHTML, DocumentFragment, replaceChildren. |
-| | `public/js/matches-calendar.js` — createElement, insertAdjacentHTML, manipulación de grid de calendario. |
-| | `public/js/nav.js` — Sidebar móvil: toggle de clases, ARIA, cierre fuera del panel. |
-| | `public/js/theme.js` — Atributo data-theme, toggle de iconos, localStorage. |
-| | `public/js/fifa-card.js` — Transform CSS vía style en tiempo real según cursor. |
-| | `public/js/scroll-anim.js` — IntersectionObserver, clases CSS, control de video por scroll. |
-| | `public/js/home-init.js` — Navbar scrolled, animación de números con requestAnimationFrame. |
-| | `public/js/campos-map.js` — Integración con Leaflet/Google Maps, marcadores SVG personalizados. |
-| **Eventos** | `public/js/form-validation.js` — blur, input, submit, DOMContentLoaded. |
-| | `public/js/match-request-form.js` — input, submit, DOMContentLoaded. |
-| | `public/js/team-detail.js` — click con delegación (event.target.closest), DOMContentLoaded. |
-| | `public/js/dwec-context-panel.js` — click en botón de refresco, DOMContentLoaded. |
-| | `public/js/chat-room.js` — submit (formulario de chat), click (borrar mensaje), setInterval para polling. |
-| | `public/js/nav.js` — click (toggle sidebar, cierre fuera), DOMContentLoaded, setInterval para notificaciones. |
-| | `public/js/theme.js` — click con delegación en [data-theme-toggle]. |
-| | `public/js/cookie-consent.js` — click (aceptar/rechazar banner), change (preferencias). |
-| | `public/js/matches-calendar.js` — click (navegación de meses, selección de día). |
-| | `public/js/fifa-card.js` — pointermove, pointerleave. |
-| | `public/js/scroll-anim.js` — scroll (passive), loadedmetadata, loadeddata. |
-| | `public/js/campos-map.js` — click en tarjetas de campos, eventos de marcador Leaflet/Google. |
-| **AJAX** | `public/js/dwec-context-panel.js` — fetch GET a `/dashboard/context` (JSON). Pieza principal: evento → AJAX → transformación del DOM según rol. |
-| | `public/js/chat-room.js` — fetch POST a `/chat/send/{id}` y fetch GET a `/chat/messages/{id}` (JSON). Polling cada 8s. |
-| | `public/js/nav.js` — fetch GET a `/notification/unreadCount` (JSON). Polling cada 60s. |
-| **Control de Excepciones try..catch (sin contar las de AJAX)** | `public/js/form-validation.js` — try/catch en `validateField()` al parsear reglas. |
-| | `public/js/cookie-consent.js` — try/catch en `readCookie()` y `writeCookieRaw()`. |
-| | `public/js/matches-calendar.js` — try/catch en `JSON.parse()` de datos del calendario. |
-| | `public/js/campos-map.js` — try/catch en `JSON.parse()` de datos de campos. |
-| | `public/js/theme.js` — try/catch en acceso a `localStorage`. |
-| **Otros archivos no mencionados con código JavaScript vuestro** | `public/js/scroll-anim.js` — Motor de animación por scroll con IntersectionObserver y requestAnimationFrame. |
-| | `public/js/home-init.js` — Inicialización de landing page: navbar con scroll y animación de estadísticas numéricas. |
-| | `public/js/fifa-card.js` — Efecto tilt 3D en cartas FIFA siguiendo el cursor. |
+| **Validación de formularios y regex** | `form-validation.js` — Aquí está el gordo: regex para email, password, nombre, ciudad, dorsal, etc. Valida en blur, input y submit con mensajes ARIA. También `match-request-form.js` para el formulario de solicitar partido. |
+| **Cookies** | `cookie-consent.js` — Banner de aceptar/rechazar, cookies con prefijo `fp_client_`, y la API `window.FastplayCookies` para usar desde cualquier lado. |
+| **DOM** | Los más potentes: `team-detail.js` (createElement, delegación, dataset), `dwec-context-panel.js` (Map, Set, ARIA, clases), `chat-room.js` (sin innerHTML, todo con textContent y DocumentFragment). También toco DOM en `matches-calendar.js`, `nav.js`, `theme.js`, `fifa-card.js`, `scroll-anim.js`, `home-init.js` y `campos-map.js`. |
+| **Eventos** | Está repartido por casi todos los archivos: delegación de click en `team-detail.js` y `theme.js`, blur/input/submit en los formularios, pointermove en `fifa-card.js`, scroll en `scroll-anim.js`, setInterval para polling en `chat-room.js` y `nav.js`. |
+| **AJAX (fetch)** | `dwec-context-panel.js` — fetch GET al contexto del dashboard, luego transformo el DOM según el rol. `chat-room.js` — POST para enviar y GET para leer mensajes, polling cada 8s. `nav.js` — GET del contador de notificaciones, polling cada 60s. |
+| **try/catch** | Los tengo en `form-validation.js` (al parsear reglas), `cookie-consent.js` (al leer/escribir cookies), `matches-calendar.js` y `campos-map.js` (al parsear JSON), y `theme.js` (al tocar localStorage). |
+| **Extras con JS propio** | `scroll-anim.js` — animaciones con IntersectionObserver. `home-init.js` — contador animado en landing. `fifa-card.js` — efecto tilt 3D que sigue al cursor. |
