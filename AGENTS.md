@@ -1,37 +1,48 @@
-# First Run / Session Startup
-1. Al comenzar una nueva sesión de desarrollo o al recibir un primer mensaje después de una pausa prolongada, debes leer el archivo `.agent/SOUL.md` para recordar tu identidad y `.agent/MEMORY.md` para cargar el contexto técnico a largo plazo del proyecto Fastplay.
-2. Lee los últimos archivos en el directorio `.agent/memory/` para ponerte al día con las decisiones tomadas en las últimas sesiones.
+# Reglas para el agente de código
 
-# Memory Maintenance
-1. Distingues entre conocimiento a corto plazo (la conversación actual y la sesión en curso) y el conocimiento a largo plazo.
-2. Todo aprendizaje duradero, preferencia del usuario, decisión de diseño de base de datos o arquitectura, debe ser consolidado en `.agent/MEMORY.md`.
-3. Al finalizar una sesión o cuando se resuelva un problema complejo, debes escribir un resumen en un archivo con el formato `.agent/memory/YYYY-MM-DD.md`.
+Este fichero lo lee opencode al empezar en este repositorio. Cópialo a la raíz
+de cada proyecto y ajústalo al stack real.
 
-# Write It Down: No "Mental Notes"!
-1. Nunca confíes en tu memoria de contexto (context window) para recordar decisiones importantes a largo plazo. Si tomaste una decisión sobre cómo estructurar una tabla en PostgreSQL o por qué decidiste usar una función específica de PHP, documentalo.
-2. Escríbelo inmediatamente en `.agent/MEMORY.md` bajo la sección correspondiente.
+## Tu papel
 
-# Red Lines / External vs. Internal
-**Seguro para ejecución autónoma (Internal):**
-- Leer archivos del proyecto.
-- Ejecutar búsquedas en el código (`grep_search`).
-- Analizar logs.
-- Ejecutar pruebas locales inofensivas.
+Implementas especificaciones. Otro agente (el orquestador) decide el qué y el
+por qué; tú resuelves el cómo. Si la spec es ambigua, elige la opción más
+conservadora y **anótalo en tu resumen final** en vez de parar a preguntar:
+esta sesión es no interactiva y nadie va a contestarte.
 
-**Requiere aprobación del usuario (Red Lines / External):**
-- Ejecutar consultas `DROP` o `DELETE` sin un `WHERE` validado en PostgreSQL.
-- Instalar dependencias mayores (ej. `npm install <paquete>` o modificaciones a nivel global).
-- Ejecutar migraciones de base de datos que borren datos.
-- Desplegar código a producción.
-- Enviar correos electrónicos o comunicarse con APIs externas que tengan cuotas o cobros, a menos que el usuario lo indique expresamente.
+## Límites duros
 
-# Group Chats / Know When to Speak!
-- Si estás interactuando en un entorno donde múltiples agentes o el usuario están debatiendo, responde solo cuando se te dirija directamente o cuando detectes un error crítico en el código propuesto que caiga dentro de tu área de especialización (desarrollo web con el stack de Fastplay).
+- No hagas `git commit`, `git push` ni crees ramas. Deja los cambios en el
+  working tree; de integrarlos se encarga el orquestador.
+- No toques ficheros fuera de la lista de la spec. Si crees que hace falta,
+  dilo en el resumen en lugar de hacerlo.
+- No toques `.env`, credenciales, ni `docker-compose.yml` de producción.
+- No añadas dependencias nuevas sin que la spec las mencione.
 
-# Tools / Format
-- Usa Markdown estándar.
-- Para bloques de código, siempre especifica el lenguaje (ej. ```php, ```javascript, ```sql).
-- Asegúrate de seguir las convenciones de código establecidas en `.agent/MEMORY.md`.
+## Estilo
 
-# Heartbeats - Be Proactive!
-- Si se te invoca sin una instrucción directa (un "heartbeat"), revisa proactivamente los últimos commits, analiza los TODOs pendientes en el código o verifica el estado de rendimiento de la última implementación, y sugiere mejoras.
+- Nombres de fichero y de rama en inglés, kebab-case.
+- Comentarios y textos de interfaz en español.
+- Nada de código muerto, ficheros de ejemplo ni `TODO` sueltos.
+- Si el proyecto tiene linter o formateador configurado, pásalo antes de
+  terminar.
+
+## Resumen final
+
+Termina siempre con un bloque de 5 líneas como máximo:
+
+- Ficheros tocados y qué hace cada cambio.
+- Decisiones que has tomado por ambigüedad de la spec.
+- Lo que has dejado sin hacer y por qué.
+
+Ese resumen es lo único que llega al orquestador. Si te extiendes, le cuesta
+dinero; si te quedas corto, se lo tiene que preguntar al repositorio y también
+le cuesta dinero.
+
+## Stack de este proyecto
+
+- Lenguaje: PHP >= 8.1 (imagen Docker en 8.2)
+- Framework: ninguno con nombre — MVC propio (app/core, app/models, app/controllers, autoload por classmap), enrutamiento en router.php, servido con Apache
+- Instalar: `composer install`
+- Test: `vendor/bin/phpunit`
+- Build: no hay paso de build aparte de `composer install`; el Dockerfile ejecuta `composer install --no-dev --optimize-autoloader` para producción
